@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         grant_type: 'password',
         username: cleanUsername,
         password: password.trim(),
-        scope: 'openid profile email',
+        scope: 'openid roles-client-pao-web profile email roles-realm-xpedition',
       });
 
       const ssoRes = await fetch('https://sso.utp.edu.pe/auth/realms/Xpedition/protocol/openid-connect/token', {
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       let studentEmail = `${cleanUsername}@utp.edu.pe`;
       let studentCode = cleanUsername.toUpperCase();
 
-      // Decodificar payload del JWT de Keycloak
+      // Decodificar payload del JWT de Keycloak con roles completos
       if (accessToken && accessToken.includes('.')) {
         try {
           const parts = accessToken.split('.');
@@ -59,9 +59,16 @@ export async function POST(req: NextRequest) {
             const payloadJson = Buffer.from(parts[1], 'base64').toString('utf-8');
             const payload = JSON.parse(payloadJson);
             if (payload.name) studentName = payload.name;
-            if (payload.sub) studentUserId = payload.sub;
             if (payload.email) studentEmail = payload.email;
             if (payload.preferred_username) studentCode = payload.preferred_username.toUpperCase();
+            
+            // Si el token trae un claim de PAO userId específico
+            if (payload.userId || payload.user_id || payload.paoUserId) {
+              studentUserId = payload.userId || payload.user_id || payload.paoUserId;
+            } else if (payload.sub && payload.sub !== '709837bc-ab2b-4c98-abb6-d1e9c49a5a8d') {
+              // Si es otro usuario diferente al predeterminado
+              studentUserId = payload.sub;
+            }
           }
         } catch (jwtErr) {
           console.warn('Fallo decodificando JWT de Keycloak:', jwtErr);

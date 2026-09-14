@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dumps and sensitive traces
+fetch_tarea.js
+peticiones.txt
+hall*.json
+resume_response.json
+*.har
+silabo_web.pdf
+/scratch/
+/test/
+SECURITY_AUDIT_REPORT.md

@@ -88,20 +88,30 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
         {/* Right CTA Action: Lime pill matching "Sign Up" from reference */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenAi}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#bbf451] hover:bg-[#a3e635] px-4 py-1.5 text-xs font-extrabold text-[#0a0a0c] shadow-md transition-all active:scale-95"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#0a0a0c] animate-pulse" />
-            <span>Semana {currentWeek}</span>
-          </button>
+          {student.token ? (
+            <button
+              onClick={onOpenSettings}
+              title="Cuenta UTP activa. Clic para ver perfil o cambiar cuenta."
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 text-xs font-bold text-emerald-400 transition"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>{student.username}</span>
+            </button>
+          ) : (
+            <button
+              onClick={onOpenSettings}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#ff5722] hover:bg-[#ff7043] px-3.5 py-1.5 text-xs font-black text-[#0a0a0c] shadow-md transition active:scale-95"
+            >
+              <span>Conectar UTP</span>
+            </button>
+          )}
 
           <button
-            onClick={onOpenSettings}
-            title="Ajustes de cuenta y token"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 text-neutral-400 hover:text-white transition"
+            onClick={onOpenAi}
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#bbf451] hover:bg-[#a3e635] px-3.5 py-1.5 text-xs font-extrabold text-[#0a0a0c] shadow-md transition-all active:scale-95"
           >
-            <KeyRound className="h-3.5 w-3.5" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#0a0a0c] animate-pulse" />
+            <span>Sem. {currentWeek}</span>
           </button>
         </div>
 

@@ -1,6 +1,37 @@
 import defaultCalendarData from '@/data/calendario.json';
 import { StudentProfile, UTPCalendarResponse } from '@/types/utp';
 
+export const GUEST_STUDENT_PROFILE: StudentProfile = {
+  name: 'Estudiante Invitado',
+  username: 'INVITADO',
+  email: 'estudiante@utp.edu.pe',
+  userId: '',
+  tenantId: 'a5f469d2-3c0e-5c68-8d32-5265923a8e40',
+  role: 'STUDENT',
+  career: 'UTP Pregrado',
+  campus: 'Campus Digital',
+};
+
+export const EMPTY_CALENDAR_RESPONSE: UTPCalendarResponse = {
+  success: true,
+  code: 200,
+  message: 'Sin sesión activa. Inicia sesión para cargar tu horario.',
+  idTransaction: 'guest-session-empty',
+  data: {
+    current_interval: {
+      period_name: '2026 - Ciclo 2 Agosto',
+      week_number: 5,
+      total_weeks: 18,
+      current_date: '2026-09-14 00:00:00',
+      start_of_interval: '2026-09-14 00:00:00',
+      end_of_interval: '2026-09-20 23:59:59',
+      start_of_period: '2026-08-18 00:00:00',
+      end_of_period: '2026-12-20 23:59:59',
+      events: [],
+    },
+  },
+};
+
 export const DEFAULT_STUDENT_PROFILE: StudentProfile = {
   name: 'JOAN JOAQUIN CALLAÑAUPA LAURENTE',
   username: 'u23307609',

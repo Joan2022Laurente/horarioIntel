@@ -18,7 +18,7 @@ import {
   ChevronUp,
   LogOut
 } from 'lucide-react';
-import { DEFAULT_STUDENT_PROFILE } from '@/lib/mock-data';
+import { DEFAULT_STUDENT_PROFILE, GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
 
 interface SessionSettingsModalProps {
   isOpen: boolean;
@@ -137,13 +137,7 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
 
   // Cerrar sesión
   const handleLogout = () => {
-    onSaveProfile({
-      ...DEFAULT_STUDENT_PROFILE,
-      token: undefined,
-      name: 'Estudiante UTP',
-      username: 'INVITADO',
-      email: 'estudiante@utp.edu.pe',
-    });
+    onSaveProfile(GUEST_STUDENT_PROFILE);
     setUsernameInput('');
     setPasswordInput('');
     setToken('');

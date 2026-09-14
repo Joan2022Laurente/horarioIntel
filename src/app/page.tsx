@@ -9,14 +9,19 @@ import { CoursesList } from '@/components/CoursesList';
 import { AiAssistantModal } from '@/components/AiAssistantModal';
 import { SessionSettingsModal } from '@/components/SessionSettingsModal';
 import { SyllabusModal } from '@/components/SyllabusModal';
-import { DEFAULT_STUDENT_PROFILE, INITIAL_CALENDAR_RESPONSE } from '@/lib/mock-data';
+import { 
+  DEFAULT_STUDENT_PROFILE, 
+  GUEST_STUDENT_PROFILE,
+  EMPTY_CALENDAR_RESPONSE,
+  INITIAL_CALENDAR_RESPONSE 
+} from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
 import { StudentProfile, UTPCalendarResponse } from '@/types/utp';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, KeyRound, Sparkles } from 'lucide-react';
 
 export default function HomePage() {
-  const [student, setStudent] = useState<StudentProfile>(DEFAULT_STUDENT_PROFILE);
-  const [calendarResponse, setCalendarResponse] = useState<UTPCalendarResponse>(INITIAL_CALENDAR_RESPONSE);
+  const [student, setStudent] = useState<StudentProfile>(GUEST_STUDENT_PROFILE);
+  const [calendarResponse, setCalendarResponse] = useState<UTPCalendarResponse>(EMPTY_CALENDAR_RESPONSE);
   const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'courses' | 'ai'>('weekly');
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState<string>('');
@@ -25,13 +30,21 @@ export default function HomePage() {
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Cargar perfil de localStorage si existe (preservando avatar y datos oficiales)
+  // Cargar perfil de localStorage solo si existe sesión guardada
   useEffect(() => {
     try {
       const saved = localStorage.getItem('utp_student_profile');
       if (saved) {
-        setStudent({ ...DEFAULT_STUDENT_PROFILE, ...JSON.parse(saved) });
+        const parsed = JSON.parse(saved);
+        if (parsed.token) {
+          setStudent(parsed);
+          refreshCalendar(parsed);
+          return;
+        }
       }
+      // Si no hay sesión, iniciar en estado de invitado
+      setStudent(GUEST_STUDENT_PROFILE);
+      setCalendarResponse(EMPTY_CALENDAR_RESPONSE);
     } catch (e) {
       console.warn('Error leyendo localStorage:', e);
     }
@@ -39,13 +52,19 @@ export default function HomePage() {
 
   const handleSaveProfile = (newProfile: StudentProfile) => {
     setStudent(newProfile);
-    try {
-      localStorage.setItem('utp_student_profile', JSON.stringify(newProfile));
-    } catch (e) {
-      console.warn('Error guardando en localStorage:', e);
-    }
     if (newProfile.token) {
+      try {
+        localStorage.setItem('utp_student_profile', JSON.stringify(newProfile));
+      } catch (e) {
+        console.warn('Error guardando en localStorage:', e);
+      }
       refreshCalendar(newProfile);
+    } else {
+      // Logout o modo invitado
+      try {
+        localStorage.removeItem('utp_student_profile');
+      } catch (e) {}
+      setCalendarResponse(EMPTY_CALENDAR_RESPONSE);
     }
   };
 
@@ -108,6 +127,39 @@ export default function HomePage() {
           <div className="mb-6 rounded-2xl bg-[#141417] px-4 py-3 text-xs text-[#bbf451] flex items-center gap-2 shadow-lg">
             <RefreshCw className="h-4 w-4 animate-spin text-[#bbf451]" />
             <span>Sincronizando clases y horarios en vivo con los servidores de UTP Class...</span>
+          </div>
+        )}
+
+        {/* Banner de Invitado / Conectar Cuenta */}
+        {!student.token && (
+          <div className="mb-6 rounded-3xl bg-[#141417] p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff5722] text-[#0a0a0c] font-black text-xl shadow-lg shrink-0">
+                U
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-white">Conecta tu cuenta institucional UTP</h3>
+                <p className="text-xs text-neutral-400">Inicia sesión con tu código para sincronizar automáticamente tu horario, cursos y enlaces de Zoom en vivo.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+              <button
+                onClick={() => {
+                  setStudent(DEFAULT_STUDENT_PROFILE);
+                  setCalendarResponse(INITIAL_CALENDAR_RESPONSE);
+                }}
+                className="flex-1 sm:flex-none rounded-full bg-white/10 hover:bg-white/15 px-4 py-2 text-xs font-bold text-neutral-300 hover:text-white transition"
+              >
+                Ver Demo
+              </button>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="flex-1 sm:flex-none rounded-full bg-[#bbf451] hover:bg-[#a3e635] px-5 py-2 text-xs font-black text-[#0a0a0c] shadow-lg transition active:scale-95"
+              >
+                Iniciar Sesión UTP
+              </button>
+            </div>
           </div>
         )}
 

@@ -169,31 +169,28 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
       </div>
 
       {/* Grid de 6 Días */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
         {daysToDisplay.map((dayNum) => {
           const dayName = DAYS_OF_WEEK[dayNum];
           const dayEvents = eventsByDay[dayNum] || [];
           const isToday = new Date().getDay() === dayNum && selectedWeek === currentWeek;
+          const now = new Date();
 
           return (
             <div
               key={dayNum}
-              className={`flex flex-col rounded-2xl transition-all ${
-                isToday
-                  ? 'bg-[var(--surface-card)] p-2 -m-2 rounded-2xl border border-[var(--badge-lime-border)]'
-                  : ''
-              }`}
+              className="flex flex-col space-y-2.5"
             >
-              {/* Header Plano del Día */}
-              <div className="pb-2 mb-2 flex items-center justify-between">
+              {/* Header Minimalista del Día */}
+              <div className="pb-2 flex items-center justify-between border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[11px] font-black uppercase tracking-wider ${
-                    isToday ? 'text-[var(--accent-lime)]' : 'text-neutral-300'
+                  <span className={`text-xs font-black uppercase tracking-wider ${
+                    isToday ? 'text-white' : 'text-neutral-400'
                   }`}>
                     {dayName}
                   </span>
                   {isToday && (
-                    <span className="rounded-full bg-[var(--accent-lime)] px-1.5 py-0.5 text-[9px] font-black uppercase text-black leading-none">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase bg-white text-black leading-none">
                       Hoy
                     </span>
                   )}
@@ -205,7 +202,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
               </div>
 
               {/* Lista de Sesiones */}
-              <div className="space-y-3 flex-1">
+              <div className="space-y-2.5 flex-1">
                 {dayEvents.length === 0 ? (
                   <div className="h-28 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] flex items-center justify-center text-center text-xs text-neutral-600 font-medium select-none">
                     Sin clases
@@ -216,31 +213,48 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                     const isRemoteZoom = evt.modality === 'R';
                     const isPresencial = evt.modality === 'P';
                     const location = getClassroomLocation(parsed.cleanTitle, parsed.sectionCode);
+                    
+                    const startDate = parseDate(evt.startAt);
+                    const finishDate = parseDate(evt.finishAt);
+                    const isLiveNow = isToday && now >= startDate && now <= finishDate;
 
                     return (
                       <div
                         key={evt.id}
                         onClick={() => setSelectedEventForModal(evt)}
-                        className="group relative rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-3.5 transition-all duration-200 space-y-2.5 shadow-none cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
+                        className={`group relative rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border p-3.5 transition-all duration-200 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
+                          isLiveNow
+                            ? 'border-[var(--accent-emerald)]'
+                            : 'border-[var(--border-subtle)] hover:border-neutral-500'
+                        }`}
                       >
-                        {/* Top: Modalidad */}
+                        {/* Top: Modalidad & Estado */}
                         <div className="flex items-center justify-between gap-1">
-                          {isPresencial ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
-                              <MapPin className="h-2.5 w-2.5" />
-                              Presencial
-                            </span>
-                          ) : isRemoteZoom ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
-                              <Video className="h-2.5 w-2.5" />
-                              Zoom
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
-                              <Radio className="h-2.5 w-2.5" />
-                              Virtual
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {isPresencial ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
+                                <MapPin className="h-2.5 w-2.5" />
+                                Presencial
+                              </span>
+                            ) : isRemoteZoom ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
+                                <Video className="h-2.5 w-2.5" />
+                                Zoom
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
+                                <Radio className="h-2.5 w-2.5" />
+                                Virtual
+                              </span>
+                            )}
+
+                            {isLiveNow && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-black bg-[var(--accent-lime)] px-1.5 py-0.5 rounded-md">
+                                <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse" />
+                                En vivo
+                              </span>
+                            )}
+                          </div>
 
                           {isRemoteZoom && evt.metadata?.zoomLink ? (
                             <button
@@ -255,14 +269,14 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                               <Video className="h-3.5 w-3.5" />
                             </button>
                           ) : (
-                            <span className="text-[10px] font-mono text-neutral-500 group-hover:text-neutral-300 transition-colors">
+                            <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors">
                               {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
                             </span>
                           )}
                         </div>
 
                         {/* Nombre del Curso */}
-                        <h4 className="text-xs font-black text-white group-hover:text-[var(--accent-lime)] leading-snug line-clamp-2 transition-colors">
+                        <h4 className="text-xs font-bold text-white group-hover:text-neutral-100 leading-snug line-clamp-2 transition-colors">
                           {parsed.cleanTitle}
                         </h4>
 

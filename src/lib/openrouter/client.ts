@@ -48,6 +48,8 @@ export function getAvailableApiKeys(): string[] {
   return keys.filter((k) => k.startsWith('sk-or-v1-') || k.length > 20);
 }
 
+import { getCurrentAndNextClass, parseEventTitle, formatTime } from '@/lib/schedule-parser';
+
 /**
  * Construye el prompt de sistema del Copiloto Académico UTP con contexto en vivo
  */
@@ -58,6 +60,18 @@ export function buildAcademicSystemPrompt(context?: {
   const weekNumber = context?.interval?.week_number || 5;
   const totalWeeks = context?.interval?.total_weeks || 18;
   const periodName = context?.interval?.period_name || 'Ciclo 2026';
+  const events = context?.interval?.events || [];
+
+  // Calcular clase en curso y próxima clase
+  const classStatus = events.length > 0 ? getCurrentAndNextClass(events) : null;
+  let nextClassText = 'No hay clases programadas inmediatamente.';
+  if (classStatus?.nextClass) {
+    const parsed = parseEventTitle(classStatus.nextClass.title);
+    const timeStr = `${formatTime(classStatus.nextClass.startAt)} - ${formatTime(classStatus.nextClass.finishAt)}`;
+    const zoom = classStatus.nextClass.metadata?.zoomLink ? ` • Link Zoom: ${classStatus.nextClass.metadata.zoomLink}` : '';
+    const minStr = classStatus.minutesToNext !== null ? ` (en ${classStatus.minutesToNext} minutos)` : '';
+    nextClassText = `**${parsed.cleanTitle}** (${parsed.sectionCode || 'Sección'}) • ${classStatus.nextClass.startAt.split('T')[0]} de ${timeStr}${minStr} [Modalidad: ${classStatus.nextClass.modality}]${zoom}`;
+  }
 
   let coursesSummary = '';
   if (context?.courses && context.courses.length > 0) {
@@ -65,28 +79,27 @@ export function buildAcademicSystemPrompt(context?: {
       .map((c) => {
         const official = getSyllabusForCourse(c.name);
         const formula = official?.formula || 'Evaluación continua';
-        const rules = official?.rules ? ` • Reglas clave: ${official.rules.slice(0, 2).join('; ')}` : '';
-        const zoom = c.zoomLink ? ` • Enlace Zoom: ${c.zoomLink}` : '';
-        const modalities = c.modalities?.join(', ') || 'Presencial/Virtual';
-        return `- **${c.name}** (Sección: ${c.sectionCode} | Modalidad: ${modalities})${zoom}\n  Fórmula oficial: \`${formula}\`${rules}`;
+        const zoom = c.zoomLink ? ` • Zoom: ${c.zoomLink}` : '';
+        return `- **${c.name}** (${c.sectionCode})${zoom} | Fórmula: \`${formula}\``;
       })
       .join('\n');
   }
 
-  return `Eres el "Copiloto Académico UTP", un asistente inteligente de élite especializado en ayudar a estudiantes de la Universidad Tecnológica del Perú (UTP).
+  return `Eres el "Copiloto Académico UTP", un asistente inteligente de élite para estudiantes de la Universidad Tecnológica del Perú (UTP).
 
-CONTEXTO ACADÉMICO DEL ESTUDIANTE:
-- Ciclo / Periodo: ${periodName}
-- Semana Actual: Semana ${weekNumber} de ${totalWeeks}
-${coursesSummary ? `\nCURSOS MATRICULADOS DEL ESTUDIANTE:\n${coursesSummary}` : ''}
+CONTEXTO EN TIEMPO REAL:
+- Ciclo: ${periodName} • Semana Actual: Semana ${weekNumber} de ${totalWeeks}
+- PRÓXIMA CLASE PROGRAMADA: ${nextClassText}
+${coursesSummary ? `\nCURSOS MATRICULADOS:\n${coursesSummary}` : ''}
 
-DIRECTIVAS DE RESPUESTA:
-1. Responde de manera concisa, estructurada y en español.
-2. Utiliza formato Markdown profesional: negritas, listas con viñetas, tablas limpias y bloques de alerta cuando sea relevante.
-3. Al hablar de evaluaciones o tareas, menciona los pesos exactos (ej. 20% PC1, 20% APF1, 40% PROY) y la semana programada.
-4. Si el estudiante pregunta por links de Zoom, aulas o docentes, proporciónalos directamente si están en el contexto.
-5. Da consejos prácticos y de alta calidad para obtener 20 en las entregas y exámenes.
-6. Mantén un tono motivador, profesional y directo al grano (cero saludos excesivos o rodeos innecesarios).`;
+REGLAS DE RESPUESTA (CRÍTICO: SÉ CONCISO Y DIRECTO):
+1. PROPORCIONALIDAD: Responde exactamente a lo que se pregunta, sin rodeos ni "testamentos".
+   - Si preguntan "¿qué me toca en la próxima clase?" o "¿cuándo es mi clase?", responde en 3 o 4 líneas directas:
+     • Nombre del curso y horario exacto (con link de Zoom si es virtual).
+     • Tema principal que se verá en esa sesión (1 o 2 puntos clave).
+   - NO incluyas tablas gigantescas, notas mínimas, advertencias ni planes de estudio a menos que el usuario lo pida expresamente.
+2. FORMATO: Markdown limpio y legible (negritas, viñetas simples). NUNCA uses etiquetas HTML como <br>.
+3. TONO: Directo, ágil y útil, como un copiloto de alta precisión.`;
 }
 
 /**

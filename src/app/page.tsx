@@ -137,7 +137,7 @@ export default function HomePage() {
         )}
 
         {/* Active View Container */}
-        <div className="pt-2">
+        <div className="pt-4 sm:pt-6">
           {activeTab === 'today' && (
             <TodayView
               interval={currentInterval}

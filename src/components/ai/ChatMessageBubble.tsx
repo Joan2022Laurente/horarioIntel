@@ -17,6 +17,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
   onRetry,
 }) => {
   const isAssistant = msg.role === 'assistant';
+  const isWelcome = msg.id === 'welcome' || msg.id === 'init-class-ai' || msg.id.startsWith('init-');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -130,7 +131,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
     );
   }
 
-  // Mensaje de la IA: Abierto y directo en el canvas (Cero Card-ception)
+  // Mensaje del Asistente: Abierto en el canvas (Zero Card-ception)
   return (
     <div className="flex flex-col gap-2 my-4 text-neutral-200 animate-in fade-in duration-150">
       
@@ -154,7 +155,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
         </div>
       )}
 
-      {/* Chips sugeridos tipo píldora */}
+      {/* Chips sugeridos de inicio o acción rápida */}
       {msg.suggestedActions && msg.suggestedActions.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2">
           {msg.suggestedActions.map((action, aIdx) => (
@@ -170,41 +171,43 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
         </div>
       )}
 
-      {/* Barra de herramientas: Copiar, Reintentar */}
-      <div className="flex items-center gap-3 pt-1 text-neutral-500 text-xs">
-        <button
-          onClick={handleCopy}
-          title="Copiar respuesta"
-          className="hover:text-white transition flex items-center gap-1 text-[11px]"
-        >
-          {copied ? (
-            <>
-              <Check className="h-3.5 w-3.5 text-[#bbf451]" />
-              <span className="text-[#bbf451]">Copiado</span>
-            </>
-          ) : (
-            <>
-              <Copy className="h-3.5 w-3.5" />
-              <span>Copiar</span>
-            </>
-          )}
-        </button>
-
-        {onRetry && (
+      {/* Barra de herramientas: Copiar, Reintentar (Solo para respuestas reales generadas, NO para el aviso/bienvenida inicial) */}
+      {!isWelcome && (
+        <div className="flex items-center gap-3 pt-1 text-neutral-500 text-xs">
           <button
-            onClick={onRetry}
-            title="Reintentar respuesta"
+            onClick={handleCopy}
+            title="Copiar respuesta"
             className="hover:text-white transition flex items-center gap-1 text-[11px]"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
-            <span>Reintentar</span>
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-[#bbf451]" />
+                <span className="text-[#bbf451]">Copiado</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                <span>Copiar</span>
+              </>
+            )}
           </button>
-        )}
 
-        <span className="text-[10px] text-neutral-600 font-mono ml-auto">
-          {msg.timestamp}
-        </span>
-      </div>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              title="Reintentar respuesta"
+              className="hover:text-white transition flex items-center gap-1 text-[11px]"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Reintentar</span>
+            </button>
+          )}
+
+          <span className="text-[10px] text-neutral-600 font-mono ml-auto">
+            {msg.timestamp}
+          </span>
+        </div>
+      )}
 
     </div>
   );

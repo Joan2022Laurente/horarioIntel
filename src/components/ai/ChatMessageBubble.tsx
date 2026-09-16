@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChatMessage } from '@/types/utp';
 import { MarkdownRenderer } from '@/components/ai/MarkdownRenderer';
+import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { Copy, Check, RotateCcw, ChevronRight, Video } from 'lucide-react';
 
 interface ChatMessageBubbleProps {
@@ -52,10 +53,16 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
     );
   }
 
-  // Mensaje del Asistente: Abierto en el canvas con MarkdownRenderer completo
+  // Mensaje del Asistente: Abierto en el canvas con MarkdownRenderer completo y avatar orbital
   return (
-    <div className="flex flex-col gap-2 my-4 text-neutral-200 animate-in fade-in duration-150">
+    <div className="flex flex-col gap-2.5 my-4 text-neutral-200 animate-in fade-in duration-150">
       
+      {/* Cabecera sutil del Asistente */}
+      <div className="flex items-center gap-2 select-none">
+        <AsciiMatrixOrb size={22} state="idle" colorMode="lime" />
+        <span className="text-[11px] font-bold text-neutral-400">Copiloto UTP</span>
+      </div>
+
       {/* Contenido sin card envolvente */}
       <MarkdownRenderer content={msg.content} />
 

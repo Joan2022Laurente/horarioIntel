@@ -9,6 +9,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { ChatMessageBubble } from '@/components/ai/ChatMessageBubble';
+import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 
 interface AiAssistantModalProps {
   isOpen: boolean;
@@ -129,11 +130,9 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
       <div className="relative flex flex-col w-full max-w-2xl h-[90vh] sm:h-[85vh] rounded-3xl bg-[#111114] shadow-2xl overflow-hidden text-white border border-white/5">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#16161a] border-b border-white/5">
+        <div className="flex items-center justify-between px-6 py-3.5 bg-[#16161a] border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff5722] text-white font-bold">
-              <Sparkles className="h-4 w-4" />
-            </div>
+            <AsciiMatrixOrb size={32} state={isLoading ? 'thinking' : 'idle'} colorMode="lime" />
             <div>
               <h3 className="text-sm font-bold text-white">Copiloto Académico UTP</h3>
               <p className="text-[11px] text-neutral-400">
@@ -171,9 +170,12 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
           ))}
 
           {isLoading && (
-            <div className="flex items-center gap-2 text-xs text-neutral-400 py-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-[#bbf451] animate-ping" />
-              <span>Analizando calendario y sílabos oficiales UTP...</span>
+            <div className="flex items-center gap-3 text-xs text-neutral-300 py-3 animate-in fade-in select-none">
+              <AsciiMatrixOrb size={26} state="thinking" colorMode="lime" />
+              <div className="flex flex-col">
+                <span className="font-semibold text-white">Razonando respuesta académica...</span>
+                <span className="text-[10px] text-neutral-400">Consultando sílabo oficial, rúbricas y cronograma UTP</span>
+              </div>
             </div>
           )}
 

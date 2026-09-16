@@ -6,6 +6,7 @@ import { parseEventTitle, formatTime, parseDate, DAYS_OF_WEEK } from '@/lib/sche
 import { getSyllabusForCourse } from '@/lib/syllabus/official-registry';
 import { getClassroomLocation } from '@/lib/classroom-helper';
 import { ChatMessageBubble } from '@/components/ai/ChatMessageBubble';
+import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { 
   X, 
   Video, 
@@ -403,9 +404,12 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
                 ))}
 
                 {isLoading && (
-                  <div className="flex items-center gap-2 text-xs text-neutral-400 py-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-[#bbf451] animate-ping" />
-                    <span>Consultando sílabo oficial y respondiendo...</span>
+                  <div className="flex items-center gap-3 text-xs text-neutral-300 py-3 animate-in fade-in select-none">
+                    <AsciiMatrixOrb size={26} state="thinking" colorMode="lime" />
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-white">Consultando sílabo oficial y razonando...</span>
+                      <span className="text-[10px] text-neutral-400">Analizando rúbricas, fórmulas y temario de clase</span>
+                    </div>
                   </div>
                 )}
 

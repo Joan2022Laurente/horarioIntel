@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
   Star, 
@@ -9,117 +9,64 @@ import {
   Plus, 
   ArrowUpRight, 
   Lock, 
-  CreditCard 
+  CreditCard,
+  Loader2
 } from 'lucide-react';
 import { AcademicServiceRow } from '@/types/economy';
 import { ProcessedCourse } from '@/types/utp';
 import { useAgent } from '@/context/AgentContext';
+import { 
+  fetchAcademicServices, 
+  createEscrowOrderInDb, 
+  createServiceInDb 
+} from '@/lib/supabase/marketplace-service';
 
 interface AcademicMarketplaceProps {
   courses: ProcessedCourse[];
   onAskAi?: (prompt: string) => void;
 }
 
-const INITIAL_SERVICES: AcademicServiceRow[] = [
-  {
-    id: 'srv-1',
-    mentor_id: 'usr-10',
-    mentor: {
-      id: 'usr-10',
-      student_code: 'U18204910',
-      full_name: 'David Zevallos',
-      email: 'dzevallos@utp.edu.pe',
-      career: 'Ing. de Software (10mo Ciclo)',
-      campus: 'Campus Digital',
-      cycle: 10,
-      reputation_score: 210,
-      created_at: '',
-      updated_at: '',
-    },
-    course_id: '100000ST61',
-    title: 'Simulacro de Sustentación APF1 y Auditoría de Código React',
-    description: 'Revisión exhaustiva de tu arquitectura de componentes, cumplimiento de rúbrica y simulación de preguntas típicas del docente.',
-    service_type: 'MOCK_DEFENSE',
-    price_cents: 2000, // S/ 20.00
-    duration_minutes: 45,
-    is_active: true,
-    rating_avg: 4.95,
-    total_reviews: 18,
-    created_at: '',
-  },
-  {
-    id: 'srv-2',
-    mentor_id: 'usr-11',
-    mentor: {
-      id: 'usr-11',
-      student_code: 'U19304812',
-      full_name: 'Camila Salazar',
-      email: 'csalazar@utp.edu.pe',
-      career: 'Ing. de Sistemas (9no Ciclo)',
-      campus: 'Torre Arequipa',
-      cycle: 9,
-      reputation_score: 195,
-      created_at: '',
-      updated_at: '',
-    },
-    course_id: '100000SI12',
-    title: 'Asesoría 1 a 1 para PC1 de Gestión del Servicio TI (ITIL 4)',
-    description: 'Resolución de casos de estudio, formulación de SLAs, métricas de incidentes y problemas con garantía de comprensión.',
-    service_type: 'TUTORING_1ON1',
-    price_cents: 1500, // S/ 15.00
-    duration_minutes: 40,
-    is_active: true,
-    rating_avg: 5.0,
-    total_reviews: 24,
-    created_at: '',
-  },
-  {
-    id: 'srv-3',
-    mentor_id: 'usr-12',
-    mentor: {
-      id: 'usr-12',
-      student_code: 'U20104822',
-      full_name: 'Jorge Huamán',
-      email: 'jhuaman@utp.edu.pe',
-      career: 'Ciencias de la Computación',
-      campus: 'Campus Digital',
-      cycle: 8,
-      reputation_score: 170,
-      created_at: '',
-      updated_at: '',
-    },
-    course_id: '100000ST62',
-    title: 'Configuración de Laboratorios Cloud AWS & Docker',
-    description: 'Te ayudo a levantar y configurar tu VPC, EC2, contenedores y pipelines sin errores para tus entregables de Servicios Cloud.',
-    service_type: 'CODE_REVIEW',
-    price_cents: 2500, // S/ 25.00
-    duration_minutes: 50,
-    is_active: true,
-    rating_avg: 4.9,
-    total_reviews: 12,
-    created_at: '',
-  }
-];
-
 export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
-  courses: _courses,
+  courses,
   onAskAi,
 }) => {
   const { executeIntent, askAgent } = useAgent();
   const handleAsk = onAskAi || askAgent;
-  const [services] = useState<AcademicServiceRow[]>(INITIAL_SERVICES);
+  const [services, setServices] = useState<AcademicServiceRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('ALL');
-  const [walletBalance] = useState<number>(0); // En centavos
-  const [lockedEscrow] = useState<number>(0);
+  const [walletBalance] = useState<number>(4500); // S/ 45.00 en centavos
+  const [lockedEscrow] = useState<number>(2000);  // S/ 20.00 en centavos
   const [selectedServiceForOrder, setSelectedServiceForOrder] = useState<AcademicServiceRow | null>(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [isOrdering, setIsOrdering] = useState(false);
+
+  useEffect(() => {
+    async function loadServices() {
+      setIsLoading(true);
+      const data = await fetchAcademicServices();
+      setServices(data);
+      setIsLoading(false);
+    }
+    loadServices();
+  }, []);
 
   const handleOrderService = (srv: AcademicServiceRow) => {
     setSelectedServiceForOrder(srv);
     setOrderSuccess(false);
   };
 
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
+    if (!selectedServiceForOrder) return;
+    setIsOrdering(true);
+
+    await createEscrowOrderInDb({
+      serviceId: selectedServiceForOrder.id,
+      amountCents: selectedServiceForOrder.price_cents,
+      paymentMethod: 'YAPE',
+    });
+
+    setIsOrdering(false);
     setOrderSuccess(true);
     setTimeout(() => {
       setSelectedServiceForOrder(null);
@@ -257,57 +204,64 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
       </div>
 
       {/* Grid de Servicios */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {filteredServices.map((srv) => (
-          <div
-            key={srv.id}
-            className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-yellow-text)] bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] px-2.5 py-0.5 rounded-full">
-                  <Star className="h-3 w-3 fill-current" />
-                  {srv.rating_avg} ({srv.total_reviews} reviews)
-                </span>
+      {isLoading ? (
+        <div className="py-12 flex flex-col items-center justify-center text-neutral-400 space-y-2">
+          <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-yellow)]" />
+          <p className="text-xs">Cargando mentores y servicios activos desde Supabase...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {filteredServices.map((srv) => (
+            <div
+              key={srv.id}
+              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-yellow-text)] bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] px-2.5 py-0.5 rounded-full">
+                    <Star className="h-3 w-3 fill-current" />
+                    {srv.rating_avg} ({srv.total_reviews} reviews)
+                  </span>
 
-                <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {srv.duration_minutes} min
-                </span>
-              </div>
+                  <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {srv.duration_minutes} min
+                  </span>
+                </div>
 
-              <div>
-                <h3 className="text-base font-bold text-white group-hover:text-[var(--accent-yellow)] transition-colors leading-snug">
-                  {srv.title}
-                </h3>
-                <p className="text-xs text-neutral-400 mt-2 line-clamp-2">
-                  {srv.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-3 border-t border-[var(--border-subtle)]">
-              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-white leading-tight">{srv.mentor?.full_name}</p>
-                  <p className="text-[10px] text-neutral-400">{srv.mentor?.career}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-black text-[var(--accent-lime)]">S/ {(srv.price_cents / 100).toFixed(2)}</p>
+                  <h3 className="text-base font-bold text-white group-hover:text-[var(--accent-yellow)] transition-colors leading-snug">
+                    {srv.title}
+                  </h3>
+                  <p className="text-xs text-neutral-400 mt-2 line-clamp-2">
+                    {srv.description}
+                  </p>
                 </div>
               </div>
 
-              <button
-                onClick={() => handleOrderService(srv)}
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2.5 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-white transition active:scale-95 shadow-none"
-              >
-                <span>Solicitar Asesoría</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </button>
+              <div className="space-y-3 pt-3 border-t border-[var(--border-subtle)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-white leading-tight">{srv.mentor?.full_name}</p>
+                    <p className="text-[10px] text-neutral-400">{srv.mentor?.career}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-black text-[var(--accent-lime)]">S/ {(srv.price_cents / 100).toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleOrderService(srv)}
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2.5 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-white transition active:scale-95 shadow-none"
+                >
+                  <span>Solicitar Asesoría</span>
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal de Confirmación Escrow */}
       {selectedServiceForOrder && (
@@ -331,7 +285,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                 <CheckCircle2 className="h-12 w-12 text-[var(--accent-emerald)] mx-auto" />
                 <h3 className="text-base font-bold text-white">¡Sesión Solicitada con Éxito!</h3>
                 <p className="text-xs text-neutral-400">
-                  Los fondos están protegidos en Escrow. Se liberarán una vez finalices la sesión con tu mentor.
+                  Los fondos están protegidos en Escrow (registrado en Supabase). Se liberarán una vez finalices la sesión con tu mentor.
                 </p>
               </div>
             ) : (
@@ -359,15 +313,18 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => setSelectedServiceForOrder(null)}
+                    disabled={isOrdering}
                     className="flex-1 py-2.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleConfirmOrder}
-                    className="flex-1 py-2.5 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] text-xs font-black text-black transition active:scale-95 shadow-none"
+                    disabled={isOrdering}
+                    className="flex-1 py-2.5 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] text-xs font-black text-black transition active:scale-95 shadow-none flex items-center justify-center gap-1.5"
                   >
-                    Confirmar con Yape
+                    {isOrdering && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    <span>{isOrdering ? 'Procesando...' : 'Confirmar con Yape'}</span>
                   </button>
                 </div>
               </>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   MapPin, 
@@ -9,81 +9,48 @@ import {
   Plus, 
   ChevronRight, 
   Check, 
-  Send 
+  Send,
+  Loader2
 } from 'lucide-react';
 import { StudyBeaconRow } from '@/types/matching';
 import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
 import { useAgent } from '@/context/AgentContext';
+import { 
+  fetchActiveBeacons, 
+  createBeaconInDb, 
+  joinBeaconInDb 
+} from '@/lib/supabase/networking-service';
 
 interface CampusNetworkingViewProps {
   courses: ProcessedCourse[];
   interval: UTPCurrentInterval;
 }
 
-const INITIAL_BEACONS: StudyBeaconRow[] = [
-  {
-    id: 'bcn-1',
-    host_id: 'usr-1',
-    host: {
-      id: 'usr-1',
-      student_code: 'U21204891',
-      full_name: 'Mateo Quispe',
-      email: 'mquispe@utp.edu.pe',
-      career: 'Ing. de Software',
-      campus: 'Torre Arequipa - Piso 4',
-      cycle: 7,
-      reputation_score: 120,
-      created_at: '',
-      updated_at: '',
-    },
-    course_id: '100000ST61',
-    location_name: 'Biblioteca Central Piso 4 - Mesa 12',
-    objective: 'Repaso y armado de arquitectura para entregable APF1 (React + Tailwind)',
-    max_collaborators: 4,
-    current_collaborators: 2,
-    status: 'ACTIVE',
-    expires_at: new Date(Date.now() + 50 * 60000).toISOString(),
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'bcn-2',
-    host_id: 'usr-2',
-    host: {
-      id: 'usr-2',
-      student_code: 'U20309912',
-      full_name: 'Valeria Mendoza',
-      email: 'vmendoza@utp.edu.pe',
-      career: 'Ing. de Sistemas',
-      campus: 'Campus Digital',
-      cycle: 8,
-      reputation_score: 140,
-      created_at: '',
-      updated_at: '',
-    },
-    course_id: '100000SI12',
-    location_name: 'Sala Discord UTP Voice #3',
-    objective: 'Simulacro de preguntas teóricas para la PC1 de Gestión del Servicio TI',
-    max_collaborators: 5,
-    current_collaborators: 3,
-    status: 'ACTIVE',
-    expires_at: new Date(Date.now() + 85 * 60000).toISOString(),
-    created_at: new Date().toISOString(),
-  }
-];
-
 export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
   courses,
   interval: _interval,
 }) => {
   const { executeIntent } = useAgent();
-  const [beacons, setBeacons] = useState<StudyBeaconRow[]>(INITIAL_BEACONS);
+  const [beacons, setBeacons] = useState<StudyBeaconRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreatingBeacon, setIsCreatingBeacon] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [locationName, setLocationName] = useState('');
   const [objective, setObjective] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(courses[0]?.name || 'General');
   const [joinedBeaconIds, setJoinedBeaconIds] = useState<string[]>([]);
 
-  const handleJoinBeacon = (beaconId: string) => {
+  useEffect(() => {
+    async function loadBeacons() {
+      setIsLoading(true);
+      const data = await fetchActiveBeacons();
+      setBeacons(data);
+      setIsLoading(false);
+    }
+    loadBeacons();
+  }, []);
+
+  const handleJoinBeacon = async (beaconId: string) => {
     if (joinedBeaconIds.includes(beaconId)) return;
     setJoinedBeaconIds(prev => [...prev, beaconId]);
     setBeacons(prev => prev.map(b => {
@@ -92,38 +59,58 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
       }
       return b;
     }));
+
+    await joinBeaconInDb(beaconId);
   };
 
-  const handleCreateBeacon = (e: React.FormEvent) => {
+  const handleCreateBeacon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!locationName.trim() || !objective.trim()) return;
 
-    const newBeacon: StudyBeaconRow = {
-      id: `bcn-${Date.now()}`,
-      host_id: 'me',
-      host: {
-        id: 'me',
-        student_code: 'MI_CODIGO',
-        full_name: 'Tú (Host)',
-        email: 'yo@utp.edu.pe',
-        career: 'Ingeniería',
-        campus: 'Campus Digital',
-        cycle: 7,
-        reputation_score: 100,
-        created_at: '',
-        updated_at: '',
-      },
-      course_id: selectedCourse,
-      location_name: locationName,
-      objective: objective,
-      max_collaborators: 4,
-      current_collaborators: 1,
-      status: 'ACTIVE',
-      expires_at: new Date(Date.now() + 60 * 60000).toISOString(),
-      created_at: new Date().toISOString(),
-    };
+    setIsSubmitting(true);
+    const created = await createBeaconInDb({
+      hostName: 'Joan Laurente',
+      hostCode: 'U20202020',
+      hostCareer: 'Ingeniería de Software',
+      courseId: selectedCourse,
+      courseName: selectedCourse,
+      locationName: locationName.trim(),
+      objective: objective.trim(),
+      maxCollaborators: 4,
+    });
 
-    setBeacons(prev => [newBeacon, ...prev]);
+    if (created) {
+      setBeacons(prev => [created, ...prev]);
+    } else {
+      // Fallback local
+      const localBeacon: StudyBeaconRow = {
+        id: `bcn-${Date.now()}`,
+        host_id: 'me',
+        host: {
+          id: 'me',
+          student_code: 'U20202020',
+          full_name: 'Joan Laurente (Tú)',
+          email: 'yo@utp.edu.pe',
+          career: 'Ingeniería de Software',
+          campus: 'Campus Digital',
+          cycle: 7,
+          reputation_score: 100,
+          created_at: '',
+          updated_at: '',
+        },
+        course_id: selectedCourse,
+        location_name: locationName,
+        objective: objective,
+        max_collaborators: 4,
+        current_collaborators: 1,
+        status: 'ACTIVE',
+        expires_at: new Date(Date.now() + 60 * 60000).toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      setBeacons(prev => [localBeacon, ...prev]);
+    }
+
+    setIsSubmitting(false);
     setIsCreatingBeacon(false);
     setLocationName('');
     setObjective('');
@@ -204,10 +191,11 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
           <div className="flex justify-end pt-1">
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-emerald)] px-5 py-2 text-xs font-black text-black hover:bg-[var(--accent-emerald-hover)] transition active:scale-95 shadow-none"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-emerald)] px-5 py-2 text-xs font-black text-black hover:bg-[var(--accent-emerald-hover)] transition active:scale-95 shadow-none disabled:opacity-50"
             >
-              <Send className="h-3.5 w-3.5" />
-              <span>Publicar Faro</span>
+              {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              <span>{isSubmitting ? 'Guardando...' : 'Publicar Faro'}</span>
             </button>
           </div>
         </form>
@@ -222,7 +210,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
           <div>
             <h3 className="text-sm font-black text-white">Hueco en Común Detectado Hoy</h3>
             <p className="text-xs text-neutral-400 mt-0.5">
-              Tienes una ventana libre de 2h con 6 compañeros de tu sección antes de tu clase de las 6:30 PM.
+              Tienes una ventana libre de 2h con compañeros de tu sección antes de tu clase de las 6:30 PM.
             </p>
           </div>
         </div>
@@ -236,80 +224,88 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
         </button>
       </div>
 
-      {/* Grid de Faros Activos con Colores Sólidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {beacons.map((b) => {
-          const isJoined = joinedBeaconIds.includes(b.id);
-          const isFull = b.current_collaborators >= b.max_collaborators;
+      {/* Loading state */}
+      {isLoading ? (
+        <div className="py-12 flex flex-col items-center justify-center text-neutral-400 space-y-2">
+          <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-emerald)]" />
+          <p className="text-xs">Cargando faros activos desde Supabase...</p>
+        </div>
+      ) : (
+        /* Grid de Faros Activos con Colores Sólidos */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {beacons.map((b) => {
+            const isJoined = joinedBeaconIds.includes(b.id);
+            const isFull = b.current_collaborators >= b.max_collaborators;
 
-          return (
-            <div 
-              key={b.id}
-              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-black text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full">
-                    <span>En Vivo</span>
-                  </span>
-                  <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    Expira en 45m
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-base font-bold text-white group-hover:text-[var(--accent-emerald)] transition-colors">
-                    {b.objective}
-                  </h4>
-                  <p className="text-xs text-neutral-400 flex items-center gap-1.5 mt-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-[var(--accent-orange)] shrink-0" />
-                    <span>{b.location_name}</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)]">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-black text-white">
-                    {b.host?.full_name.charAt(0)}
+            return (
+              <div 
+                key={b.id}
+                className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-black text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full">
+                      <span>En Vivo</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Expira pronto
+                    </span>
                   </div>
-                  <div className="text-[11px]">
-                    <p className="font-bold text-white leading-tight">{b.host?.full_name}</p>
-                    <p className="text-neutral-500 font-mono">{b.current_collaborators}/{b.max_collaborators} alumnos</p>
+
+                  <div>
+                    <h4 className="text-base font-bold text-white group-hover:text-[var(--accent-emerald)] transition-colors">
+                      {b.objective}
+                    </h4>
+                    <p className="text-xs text-neutral-400 flex items-center gap-1.5 mt-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-[var(--accent-orange)] shrink-0" />
+                      <span>{b.location_name}</span>
+                    </p>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleJoinBeacon(b.id)}
-                  disabled={isJoined || isFull}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 shadow-none ${
-                    isJoined
-                      ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] cursor-default'
-                      : isFull
-                      ? 'bg-[var(--surface-muted)] text-neutral-500 cursor-not-allowed'
-                      : 'bg-white hover:bg-neutral-200 text-black'
-                  }`}
-                >
-                  {isJoined ? (
-                    <>
-                      <Check className="h-3.5 w-3.5" />
-                      <span>Unido</span>
-                    </>
-                  ) : isFull ? (
-                    <span>Lleno</span>
-                  ) : (
-                    <>
-                      <span>Unirme</span>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)]">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-black text-white">
+                      {b.host?.full_name.charAt(0)}
+                    </div>
+                    <div className="text-[11px]">
+                      <p className="font-bold text-white leading-tight">{b.host?.full_name}</p>
+                      <p className="text-neutral-500 font-mono">{b.current_collaborators}/{b.max_collaborators} alumnos</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleJoinBeacon(b.id)}
+                    disabled={isJoined || isFull}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 shadow-none ${
+                      isJoined
+                        ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] cursor-default'
+                        : isFull
+                        ? 'bg-[var(--surface-muted)] text-neutral-500 cursor-not-allowed'
+                        : 'bg-white hover:bg-neutral-200 text-black'
+                    }`}
+                  >
+                    {isJoined ? (
+                      <>
+                        <Check className="h-3.5 w-3.5" />
+                        <span>Unido</span>
+                      </>
+                    ) : isFull ? (
+                      <span>Lleno</span>
+                    ) : (
+                      <>
+                        <span>Unirme</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
     </div>
   );

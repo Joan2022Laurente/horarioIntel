@@ -42,10 +42,10 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, isHovered: false });
   const isVisibleRef = useRef<boolean>(true);
 
-  // Inicializar puntos distribuidos con Fibonacci Sphere con espaciado limpio y nítido
+  // Inicializar puntos distribuidos con Fibonacci Sphere con espaciado fino de alta resolución
   useEffect(() => {
-    // Densidad calibrada para que los números NO se solapen en tamaños pequeños
-    const count = size <= 28 ? 32 : size <= 44 ? 54 : size <= 72 ? 88 : 140;
+    // Densidad calibrada con micro-dígitos para máxima definición y fidelidad a la referencia
+    const count = size <= 28 ? 70 : size <= 44 ? 110 : size <= 72 ? 160 : 230;
     const points: SpherePoint[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -132,8 +132,8 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
 
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      const sphereRadius = (size * dpr * 0.40) * pulseScale;
-      const fov = 2.6;
+      const sphereRadius = (size * dpr * 0.44) * pulseScale;
+      const fov = 2.7;
 
       const points = pointsRef.current;
       const pointsToDraw: {
@@ -164,17 +164,17 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         const y2 = py * cosX - z1 * sinX;
         const z2 = py * sinX + z1 * cosX;
 
-        // Atenuar fuertemente los puntos traseros para que no se empaste el dibujo
-        if (z2 < -0.4) continue;
+        // Descartar polos ocultos muy profundos
+        if (z2 < -0.55) continue;
 
         // Proyección de perspectiva 3D
         const perspective = fov / (fov + z2);
         const screenX = centerX + x1 * sphereRadius * perspective;
         const screenY = centerY + y2 * sphereRadius * perspective;
 
-        // Profundidad normalizada
+        // Profundidad normalizada: 0 a 1
         const depthNorm = Math.max(0, Math.min(1, (z2 + 1) / 2));
-        const alpha = Math.max(0.15, Math.min(1.0, Math.pow(depthNorm, 2.2)));
+        const alpha = Math.max(0.12, Math.min(1.0, Math.pow(depthNorm, 1.9)));
 
         pointsToDraw.push({
           x: screenX,
@@ -193,15 +193,15 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Cálculo de tamaño de fuente proporcional y nítido
-      const minFont = Math.max(6 * dpr, size * dpr * 0.12);
-      const maxFont = Math.max(9 * dpr, size * dpr * 0.20);
+      // Micro-dígitos proporcionados estilo terminal / esfera numérica cuántica
+      const minFont = Math.max(3.2 * dpr, size * dpr * 0.055);
+      const maxFont = Math.max(5.8 * dpr, size * dpr * 0.10);
 
       for (let i = 0; i < pointsToDraw.length; i++) {
         const pt = pointsToDraw[i];
         const fontSize = Math.round(minFont + (maxFont - minFont) * pt.depth);
 
-        ctx.font = `600 ${fontSize}px "JetBrains Mono", "Courier New", monospace`;
+        ctx.font = `500 ${fontSize}px "JetBrains Mono", "Courier New", monospace`;
 
         // Colores nítidos de alto contraste estilo Matrix / Referencia
         if (colorMode === 'lime') {
@@ -225,9 +225,9 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
           if (pt.depth > 0.7) {
             ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
           } else if (pt.depth > 0.4) {
-            ctx.fillStyle = `rgba(200, 205, 215, ${pt.alpha * 0.85})`;
+            ctx.fillStyle = `rgba(210, 215, 225, ${pt.alpha * 0.85})`;
           } else {
-            ctx.fillStyle = `rgba(100, 105, 120, ${pt.alpha * 0.45})`;
+            ctx.fillStyle = `rgba(110, 115, 130, ${pt.alpha * 0.45})`;
           }
         }
 

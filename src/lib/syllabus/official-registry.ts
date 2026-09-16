@@ -467,11 +467,11 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
         id: 'lp-pc1',
         type: 'PC1',
         description: 'PRÁCTICA CALIFICADA 1',
-        week: 6,
+        week: 5,
         weightPercent: 20,
         modality: 'Individual',
         observation: 'Individual. Paradigmas de programación, funciones puras, inmutabilidad y cálculo lambda.',
-        rules: ['Semana 6', 'Ponderación 20%', 'Individual']
+        rules: ['Semana 5', 'Ponderación 20%', 'Individual']
       },
       {
         id: 'lp-pc2',
@@ -509,8 +509,8 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
       { week: 2, session: 2, unit: 'Unidad 1', topic: 'Sintaxis vs Semántica y sistemas de tipos estáticos/dinámicos' },
       { week: 3, session: 3, unit: 'Unidad 1', topic: 'Fundamentos de programación funcional y funciones de primera clase' },
       { week: 4, session: 4, unit: 'Unidad 1', topic: 'Inmutabilidad, recursión de cola y optimización' },
-      { week: 5, session: 5, unit: 'Unidad 2', topic: 'Composición de funciones y mónadas preparatorio para PC1' },
-      { week: 6, session: 6, unit: 'Unidad 2', topic: 'Evaluación PC1 (20%) y resolución guiada', evaluation: 'PC1' },
+      { week: 5, session: 5, unit: 'Unidad 2', topic: 'Evaluación PC1 (20%) - Paradigmas y funciones puras', evaluation: 'PC1' },
+      { week: 6, session: 6, unit: 'Unidad 2', topic: 'Composición de funciones, currying y mónadas aplicadas' },
       { week: 7, session: 7, unit: 'Unidad 2', topic: 'Programación reactiva y flujos de eventos observables' },
       { week: 8, session: 8, unit: 'Unidad 2', topic: 'Manejo avanzado de errores sin excepciones (Result / Option types)' },
       { week: 9, session: 9, unit: 'Unidad 3', topic: 'Modelos de memoria y recolectores de basura (Garbage Collection)' },

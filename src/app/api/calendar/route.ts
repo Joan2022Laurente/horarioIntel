@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import defaultCalendar from '@/data/calendario.json';
+import { EMPTY_CALENDAR_RESPONSE } from '@/lib/mock-data';
 import { UTPClient } from '@/lib/utp-client';
 
 export async function GET(req: NextRequest) {
@@ -18,14 +18,15 @@ export async function GET(req: NextRequest) {
         const liveData = await client.getCalendar({ userId, dateToQuery, intervalMode });
         return NextResponse.json(liveData);
       } catch (err: unknown) {
-        console.warn('API UTP Live request failed, falling back to local dataset:', err);
+        console.warn('API UTP Live request failed:', err);
       }
     }
 
-    // Fallback a los datos locales
-    return NextResponse.json(defaultCalendar);
+    // Si no hay token o falló la llamada, retornar estructura vacía
+    return NextResponse.json(EMPTY_CALENDAR_RESPONSE);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
+

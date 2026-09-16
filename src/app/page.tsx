@@ -11,14 +11,12 @@ import { SessionSettingsModal } from '@/components/SessionSettingsModal';
 import { SyllabusModal } from '@/components/SyllabusModal';
 import { ModernLoginPage } from '@/components/auth/ModernLoginPage';
 import { 
-  DEFAULT_STUDENT_PROFILE, 
   GUEST_STUDENT_PROFILE,
-  EMPTY_CALENDAR_RESPONSE,
-  INITIAL_CALENDAR_RESPONSE 
+  EMPTY_CALENDAR_RESPONSE
 } from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
 import { StudentProfile, UTPCalendarResponse } from '@/types/utp';
-import { RefreshCw, Sparkles, LogIn } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
   const [student, setStudent] = useState<StudentProfile>(GUEST_STUDENT_PROFILE);
@@ -30,7 +28,6 @@ export default function HomePage() {
   const [isSyllabusOpen, setIsSyllabusOpen] = useState(false);
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // Cargar sesión guardada de localStorage al iniciar
   useEffect(() => {
@@ -54,7 +51,6 @@ export default function HomePage() {
 
   const handleSaveProfile = (newProfile: StudentProfile) => {
     setStudent(newProfile);
-    setIsDemoMode(false);
     if (newProfile.token) {
       try {
         localStorage.setItem('utp_student_profile', JSON.stringify(newProfile));
@@ -71,21 +67,14 @@ export default function HomePage() {
     }
   };
 
-  const handleExploreDemo = () => {
-    setIsDemoMode(true);
-    setStudent(DEFAULT_STUDENT_PROFILE);
-    setCalendarResponse(INITIAL_CALENDAR_RESPONSE);
-  };
-
   const refreshCalendar = async (profileToUse = student) => {
+    if (!profileToUse.token) return;
     setIsRefreshing(true);
     try {
       const headers: Record<string, string> = {
         'x-tenant-id': profileToUse.tenantId || 'a5f469d2-3c0e-5c68-8d32-5265923a8e40',
+        'Authorization': `Bearer ${profileToUse.token}`,
       };
-      if (profileToUse.token) {
-        headers['Authorization'] = `Bearer ${profileToUse.token}`;
-      }
 
       const res = await fetch(`/api/calendar?userId=${profileToUse.userId}`, {
         headers,
@@ -109,12 +98,11 @@ export default function HomePage() {
     setIsAiOpen(true);
   };
 
-  // Si el usuario no tiene token y no está explorando en modo demo, mostrar la página de login moderna
-  if (!student.token && !isDemoMode) {
+  // Si el usuario no tiene sesión activa, redirigir directamente al Login
+  if (!student.token) {
     return (
       <ModernLoginPage
         onLoginSuccess={handleSaveProfile}
-        onExploreDemo={handleExploreDemo}
       />
     );
   }
@@ -141,23 +129,6 @@ export default function HomePage() {
       {/* Main Content Area */}
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
         
-        {/* Banner si está en modo demo */}
-        {isDemoMode && !student.token && (
-          <div className="mb-6 rounded-2xl bg-[#141417] px-4 py-3 text-xs text-neutral-300 flex items-center justify-between shadow-lg">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-amber-400" />
-              <span>Estás explorando en <strong>Modo Demostración</strong> con datos de ejemplo.</span>
-            </div>
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#bbf451] hover:bg-[#a3e635] px-3.5 py-1 text-[11px] font-black text-[#0a0a0c] transition active:scale-95"
-            >
-              <LogIn className="h-3 w-3" />
-              <span>Iniciar Sesión Real</span>
-            </button>
-          </div>
-        )}
-
         {/* Banner de Sincronización en vivo */}
         {isRefreshing && (
           <div className="mb-6 rounded-2xl bg-[#141417] px-4 py-3 text-xs text-[#bbf451] flex items-center gap-2 shadow-lg">

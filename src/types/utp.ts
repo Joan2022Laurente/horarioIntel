@@ -60,7 +60,7 @@ export interface UTPSyllabusResponse {
 
 export interface StudentProfile {
   name: string;
-  username: string; // ej. u23307609
+  username: string; // ej. uXXXXXXX
   email: string;
   userId: string;
   tenantId: string;

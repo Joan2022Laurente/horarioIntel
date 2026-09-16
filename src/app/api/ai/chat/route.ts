@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryAssistant } from '@/lib/ai-assistant';
-import defaultCalendar from '@/data/calendario.json';
+import { EMPTY_CALENDAR_RESPONSE } from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
 import { UTPCalendarResponse } from '@/types/utp';
 
@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const message: string = body.message || '';
-    const rawData = (body.calendarData || defaultCalendar) as unknown as UTPCalendarResponse;
+    const rawData = (body.calendarData || EMPTY_CALENDAR_RESPONSE) as unknown as UTPCalendarResponse;
     const interval = rawData.data?.current_interval;
 
     if (!interval) {

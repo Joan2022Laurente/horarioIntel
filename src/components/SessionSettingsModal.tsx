@@ -18,7 +18,7 @@ import {
   ChevronUp,
   LogOut
 } from 'lucide-react';
-import { DEFAULT_STUDENT_PROFILE, GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
+import { GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
 
 interface SessionSettingsModalProps {
   isOpen: boolean;
@@ -249,7 +249,7 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
                   type="text"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder="Ej: u23307609 o tu correo @utp.edu.pe"
+                  placeholder="Ej: uXXXXXXX o tu correo @utp.edu.pe"
                   disabled={isLoading}
                   required
                   className="w-full rounded-xl bg-[#1b1b22] pl-9 pr-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:ring-2 focus:ring-[#bbf451] focus:outline-none transition"
@@ -303,7 +303,7 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
               onClick={() => setShowAdvanced(!showAdvanced)}
               className="flex items-center justify-between w-full text-[11px] text-neutral-400 hover:text-white transition py-1"
             >
-              <span className="flex items-center gap-1.5 font-medium">
+              <span className="flex items-center gap-1.5 font-semibold">
                 <KeyRound className="h-3.5 w-3.5" />
                 Opciones avanzadas (Token manual)
               </span>
@@ -325,24 +325,11 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
                   />
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSaveProfile(DEFAULT_STUDENT_PROFILE);
-                      setName(DEFAULT_STUDENT_PROFILE.name);
-                      setToken('');
-                    }}
-                    className="inline-flex items-center gap-1 text-[10px] text-neutral-400 hover:text-white"
-                  >
-                    <RotateCcw className="h-3 w-3" />
-                    Restaurar demo
-                  </button>
-
+                <div className="flex items-center justify-end pt-1">
                   <button
                     type="button"
                     onClick={handleSaveAdvanced}
-                    className="rounded-full bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-[11px] font-bold text-white transition"
+                    className="rounded-full bg-white/10 hover:bg-white/20 px-4 py-1.5 text-[11px] font-bold text-white transition"
                   >
                     {savedSuccess ? '¡Guardado!' : 'Guardar Token'}
                   </button>
@@ -350,6 +337,7 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
               </div>
             )}
           </div>
+
 
         </div>
 

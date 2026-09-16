@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { StudentProfile } from '@/types/utp';
-import { DEFAULT_STUDENT_PROFILE, INITIAL_CALENDAR_RESPONSE } from '@/lib/mock-data';
+import { GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
 import { 
   Lock, 
   User, 
@@ -12,7 +12,6 @@ import {
   KeyRound, 
   ChevronDown, 
   ChevronUp, 
-  Radio,
   Calendar,
   Layers,
   Sparkles,
@@ -22,12 +21,10 @@ import {
 
 interface ModernLoginPageProps {
   onLoginSuccess: (profile: StudentProfile) => void;
-  onExploreDemo: () => void;
 }
 
 export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
   onLoginSuccess,
-  onExploreDemo,
 }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -68,7 +65,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
 
       setTimeout(() => {
         onLoginSuccess({
-          ...DEFAULT_STUDENT_PROFILE,
+          ...GUEST_STUDENT_PROFILE,
           ...data.user,
         });
       }, 900);
@@ -91,11 +88,11 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
       if (parts.length === 3) {
         const payload = JSON.parse(atob(parts[1]));
         const studentProfile: StudentProfile = {
-          ...DEFAULT_STUDENT_PROFILE,
+          ...GUEST_STUDENT_PROFILE,
           name: payload.name || payload.given_name || 'Estudiante UTP',
           username: (payload.preferred_username || 'uEstudiante').toUpperCase(),
           email: payload.email || 'alumno@utp.edu.pe',
-          userId: payload.userId || payload.user_id || payload.sub || '4e535263-79a0-5890-ae33-72a7aa0629ab',
+          userId: payload.userId || payload.user_id || payload.sub || '',
           token: manualToken.trim(),
         };
 
@@ -121,19 +118,16 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff5722] text-[#0a0a0c] font-black text-xl shadow-lg select-none">
             U
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col text-left">
             <span className="text-sm font-black tracking-wide text-white">UTP Class Assistant</span>
             <span className="text-[10px] font-mono text-neutral-400">Plataforma Académica Estudiantil</span>
           </div>
         </div>
 
-        <button
-          onClick={onExploreDemo}
-          className="inline-flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 px-4 py-2 text-xs font-bold text-neutral-300 hover:text-white transition active:scale-95"
-        >
-          <span>Explorar Demo</span>
-          <ArrowRight className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[#bbf451] animate-pulse" />
+          <span className="text-xs text-neutral-400 font-medium">Ciclo 2026</span>
+        </div>
       </header>
 
       {/* Main Container */}
@@ -145,7 +139,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#141417] px-3.5 py-1.5 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-[#bbf451] animate-pulse" />
-                <span className="text-xs font-bold text-neutral-300">Sincronización Oficial 2026</span>
+                <span className="text-xs font-bold text-neutral-300">Sincronización Oficial en Vivo</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.15]">
@@ -157,7 +151,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
               </p>
             </div>
 
-            {/* Feature Highlights (Chunky Pop Pills) */}
+            {/* Feature Highlights (Chunky Pop Cards) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className="rounded-2xl bg-[#141417] p-4 space-y-2 shadow-md">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff5722]/15 text-[#ff5722]">
@@ -229,7 +223,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Ej: u23307609 o uXXXX@utp.edu.pe"
+                      placeholder="Ej: uXXXXXXX o uXXXX@utp.edu.pe"
                       disabled={isLoading}
                       required
                       className="w-full rounded-2xl bg-[#1b1b22] pl-10 pr-4 py-3 text-xs text-white placeholder-neutral-500 focus:ring-2 focus:ring-[#bbf451] focus:outline-none transition"
@@ -297,7 +291,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                 </button>
 
                 {showAdvanced && (
-                  <div className="mt-3 p-3.5 rounded-2xl bg-[#1b1b22] space-y-2.5 animate-in fade-in duration-150">
+                  <div className="mt-3 p-3.5 rounded-2xl bg-[#1b1b22] space-y-2.5 animate-in fade-in duration-150 text-left">
                     <textarea
                       value={manualToken}
                       onChange={(e) => setManualToken(e.target.value)}
@@ -326,9 +320,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
       <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 text-center text-xs text-neutral-400 flex flex-col sm:flex-row items-center justify-between gap-2">
         <p>Plataforma para la comunidad estudiantil UTP</p>
         <div className="flex items-center gap-4 text-neutral-400">
-          <button onClick={onExploreDemo} className="hover:text-white transition">
-            Modo Demostración
-          </button>
+          <span>UTP Class Intelligence</span>
         </div>
       </footer>
 

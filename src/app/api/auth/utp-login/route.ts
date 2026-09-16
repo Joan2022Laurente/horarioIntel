@@ -118,20 +118,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Fallback / Modo prueba
-    return NextResponse.json({
-      success: true,
-      message: 'Sesión predeterminada configurada',
-      user: {
-        name: body.name || 'Joan Joaquin Callañaupa Laurente',
-        username: (username || 'u23307609').toUpperCase(),
-        email: body.email || `${username || 'u23307609'}@utp.edu.pe`,
-        userId: '4e535263-79a0-5890-ae33-72a7aa0629ab',
-        tenantId: 'a5f469d2-3c0e-5c68-8d32-5265923a8e40',
-        role: 'STUDENT',
-        token: token || undefined,
-      },
-    });
+    // 3. Si no se enviaron credenciales válidas ni token
+    return NextResponse.json(
+      { success: false, error: 'Credenciales institucionales requeridas.' },
+      { status: 400 }
+    );
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Error en autenticación';
     return NextResponse.json({ success: false, error: msg }, { status: 500 });

@@ -1,4 +1,3 @@
-import defaultCalendarData from '@/data/calendario.json';
 import { StudentProfile, UTPCalendarResponse } from '@/types/utp';
 
 export const GUEST_STUDENT_PROFILE: StudentProfile = {
@@ -33,19 +32,17 @@ export const EMPTY_CALENDAR_RESPONSE: UTPCalendarResponse = {
 };
 
 export const DEFAULT_STUDENT_PROFILE: StudentProfile = {
-  name: 'JOAN JOAQUIN CALLAÑAUPA LAURENTE',
-  username: 'u23307609',
-  email: 'u23307609@utp.edu.pe',
-  userId: '4e535263-79a0-5890-ae33-72a7aa0629ab',
+  name: 'Estudiante UTP',
+  username: 'INVITADO',
+  email: 'estudiante@utp.edu.pe',
+  userId: '',
   tenantId: 'a5f469d2-3c0e-5c68-8d32-5265923a8e40',
   role: 'STUDENT',
-  dni: '71490466',
-  career: 'ING. DE SISTEMAS E INFORMÁTICA',
-  campus: 'Lima Centro',
-  peopleCode: '00001640119',
+  career: 'UTP Pregrado',
+  campus: 'Campus Digital',
 };
 
-export const INITIAL_CALENDAR_RESPONSE = defaultCalendarData as unknown as UTPCalendarResponse;
+export const INITIAL_CALENDAR_RESPONSE = EMPTY_CALENDAR_RESPONSE;
 
 export const KNOWN_SYLLABUS_MAP: Record<string, { syllabusUrl: string; name: string }> = {
   // Desarrollo Web Integrado

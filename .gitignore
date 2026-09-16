@@ -42,7 +42,7 @@ next-env.d.ts
 
 # local dumps and sensitive traces
 fetch_tarea.js
-peticiones.txt
+peticiones*
 hall*.json
 resume_response.json
 *.har

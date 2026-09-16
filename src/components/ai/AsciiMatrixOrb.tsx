@@ -157,6 +157,29 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         let py = p.baseY;
         let pz = p.baseZ;
 
+        // Ondas / olas 3D orgánicas en estado de pensamiento
+        let waveFactor = 1.0;
+        if (state === 'thinking') {
+          // Olas armónicas viajeras en 3D (ondulación transversal y radial)
+          const lat = Math.asin(Math.max(-1, Math.min(1, py))); // latitud (-PI/2 a PI/2)
+          const lon = Math.atan2(pz, px); // longitud (-PI a PI)
+          
+          const wave1 = Math.sin(lat * 5.5 - time * 0.008) * 0.20;
+          const wave2 = Math.cos(lon * 3.0 + time * 0.010) * 0.14;
+          const wave3 = Math.sin((px * 2.5 + pz * 2.5) - time * 0.014) * 0.10;
+          
+          waveFactor = 1.0 + wave1 + wave2 + wave3;
+          px *= waveFactor;
+          py *= waveFactor;
+          pz *= waveFactor;
+        } else if (state === 'streaming') {
+          const wave = Math.sin(py * 4.5 + time * 0.012) * 0.10;
+          waveFactor = 1.0 + wave;
+          px *= waveFactor;
+          py *= waveFactor;
+          pz *= waveFactor;
+        }
+
         // Rotación 3D (Y axis, then X axis)
         const x1 = px * cosY + pz * sinY;
         const z1 = -px * sinY + pz * cosY;
@@ -172,9 +195,13 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         const screenX = centerX + x1 * sphereRadius * perspective;
         const screenY = centerY + y2 * sphereRadius * perspective;
 
-        // Profundidad normalizada: 0 a 1
+        // Profundidad normalizada: 0 a 1 con realce en crestas de olas
         const depthNorm = Math.max(0, Math.min(1, (z2 + 1) / 2));
-        const alpha = Math.max(0.12, Math.min(1.0, Math.pow(depthNorm, 1.9)));
+        let alpha = Math.max(0.12, Math.min(1.0, Math.pow(depthNorm, 1.9)));
+        
+        if (state === 'thinking' && waveFactor > 1.06) {
+          alpha = Math.min(1.0, alpha * 1.3);
+        }
 
         pointsToDraw.push({
           x: screenX,

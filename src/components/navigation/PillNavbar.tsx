@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { StudentProfile, UTPCurrentInterval } from '@/types/utp';
-import { Sparkles, KeyRound } from 'lucide-react';
+import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
+import { KeyRound } from 'lucide-react';
 
 interface PillNavbarProps {
   student: StudentProfile;
@@ -79,9 +80,9 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={onOpenAi}
-            className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full text-[#ff5722] hover:text-[#ff7043] font-bold transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white/90 hover:text-white font-bold hover:bg-white/10 transition group"
           >
-            <Sparkles className="h-3 w-3" />
+            <AsciiMatrixOrb size={18} state="idle" colorMode="monochrome" />
             <span>Copiloto</span>
           </button>
         </nav>

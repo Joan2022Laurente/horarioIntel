@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { StudentProfile, UTPCurrentInterval } from '@/types/utp';
+import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { 
-  Sparkles, 
   Calendar as CalendarIcon, 
   Clock, 
   BookOpen, 
@@ -78,9 +78,9 @@ export const Header: React.FC<HeaderProps> = ({
             {/* AI Assistant Quick Button */}
             <button
               onClick={onOpenAi}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#e89005] hover:bg-[#c97b04] px-3.5 py-2 text-xs font-bold text-[#140e0b] shadow-md transition-all active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 px-3.5 py-2 text-xs font-bold text-white shadow-md transition-all active:scale-[0.98]"
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <AsciiMatrixOrb size={18} state="idle" colorMode="monochrome" />
               <span className="hidden sm:inline">Preguntar a la IA</span>
               <span className="sm:hidden">IA</span>
             </button>

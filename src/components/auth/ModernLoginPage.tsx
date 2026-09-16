@@ -188,16 +188,9 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
           <div className="lg:col-span-5 w-full">
             <div className="rounded-3xl bg-[#141417] p-6 sm:p-8 shadow-2xl space-y-6">
               
-              <div className="flex flex-col items-center text-center space-y-3 pb-1">
-                <AsciiMatrixOrb 
-                  size={56} 
-                  state={isLoading ? 'thinking' : 'idle'} 
-                  colorMode="monochrome" 
-                />
-                <div className="space-y-0.5">
-                  <h3 className="text-lg font-black text-white">Iniciar Sesión</h3>
-                  <p className="text-xs text-neutral-400">Ingresa tus credenciales oficiales de UTP Class</p>
-                </div>
+              <div className="space-y-1 text-left">
+                <h3 className="text-lg font-black text-white">Iniciar Sesión</h3>
+                <p className="text-xs text-neutral-400">Ingresa tus credenciales oficiales de UTP Class</p>
               </div>
 
               {/* Feedback Alerts */}

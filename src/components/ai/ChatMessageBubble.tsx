@@ -1,25 +1,47 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChatMessage } from '@/types/utp';
-import { Bot, User, Video, ArrowRight } from 'lucide-react';
+import { Copy, Check, RotateCcw, ChevronRight, Video } from 'lucide-react';
 
 interface ChatMessageBubbleProps {
   msg: ChatMessage;
   onSendAction: (text: string) => void;
+  onRetry?: () => void;
+  isLastAssistant?: boolean;
 }
 
 export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
   msg,
   onSendAction,
+  onRetry,
 }) => {
   const isAssistant = msg.role === 'assistant';
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(msg.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      console.warn('Error al copiar:', e);
+    }
+  };
 
   const parseInlineMarkdown = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
+    // Matches **bold**, `code`, [link](url)
+    const parts = text.split(/(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g);
     return parts.map((part, idx) => {
       if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={idx} className="font-bold text-[#f2e9e4]">{part.slice(2, -2)}</strong>;
+        return <strong key={idx} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return (
+          <code key={idx} className="rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-xs text-[#bbf451]">
+            {part.slice(1, -1)}
+          </code>
+        );
       }
       const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
       if (linkMatch) {
@@ -29,7 +51,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
             href={linkMatch[2]}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#e89005] hover:underline font-semibold"
+            className="text-[#3a86ff] hover:underline font-semibold"
           >
             {linkMatch[1]}
           </a>
@@ -42,104 +64,148 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
   const renderMarkdown = (content: string) => {
     const lines = content.split('\n');
     return lines.map((line, i) => {
-      if (line.startsWith('### ')) {
-        return <h3 key={i} className="text-sm sm:text-base font-bold text-[#f2e9e4] mt-3 mb-1">{line.replace('### ', '')}</h3>;
-      }
-      if (line.startsWith('#### ')) {
-        return <h4 key={i} className="text-xs sm:text-sm font-bold text-[#e89005] mt-2 mb-1">{line.replace('#### ', '')}</h4>;
-      }
-      if (line.startsWith('> [!IMPORTANT]') || line.startsWith('> [!TIP]')) {
-        const isTip = line.includes('TIP');
+      const trimmed = line.trim();
+      if (trimmed.startsWith('### ')) {
         return (
-          <div key={i} className={`my-2 p-2.5 rounded-lg text-xs leading-relaxed ${
-            isTip ? 'bg-[#e89005]/15 text-[#e89005]' : 'bg-[#9b2915]/25 text-[#f5a278]'
-          }`}>
-            <span className="font-bold block mb-0.5">{isTip ? '💡 Consejo del Copiloto:' : '⚠️ Importante:'}</span>
+          <h4 key={i} className="text-sm sm:text-base font-bold text-white mt-3 mb-1.5 tracking-tight">
+            {trimmed.replace('### ', '')}
+          </h4>
+        );
+      }
+      if (trimmed.startsWith('## ')) {
+        return (
+          <h3 key={i} className="text-base font-extrabold text-white mt-4 mb-2 tracking-tight">
+            {trimmed.replace('## ', '')}
+          </h3>
+        );
+      }
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        return (
+          <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-neutral-300 my-1 leading-relaxed pl-2">
+            <span className="text-[#bbf451] font-bold mt-0.5">•</span>
+            <span className="flex-1">{parseInlineMarkdown(trimmed.substring(2))}</span>
           </div>
         );
       }
-      if (line.startsWith('> ')) {
-        return <p key={i} className="text-xs italic text-[#c7b8b0] pl-2.5 py-0.5 bg-white/5 rounded-lg my-1">{line.replace('> ', '')}</p>;
-      }
-      if (line.startsWith('- ') || line.startsWith('* ')) {
+      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+      if (numMatch) {
         return (
-          <li key={i} className="text-xs text-[#c7b8b0] ml-4 list-disc my-0.5 leading-relaxed">
-            {parseInlineMarkdown(line.substring(2))}
-          </li>
-        );
-      }
-      if (line.match(/^\d+\.\s/)) {
-        return (
-          <div key={i} className="text-xs text-[#f2e9e4] my-1 font-medium leading-relaxed">
-            {parseInlineMarkdown(line)}
+          <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-300 my-1.5 leading-relaxed pl-1">
+            <span className="font-mono font-bold text-neutral-400 shrink-0 text-xs mt-0.5">
+              {numMatch[1]}.
+            </span>
+            <span className="flex-1">{parseInlineMarkdown(numMatch[2])}</span>
           </div>
         );
       }
-      if (line.trim() === '') {
-        return <div key={i} className="h-1" />;
+      if (trimmed === '') {
+        return <div key={i} className="h-2" />;
       }
-      return <p key={i} className="text-xs text-[#c7b8b0] leading-relaxed my-0.5">{parseInlineMarkdown(line)}</p>;
+      return (
+        <p key={i} className="text-xs sm:text-sm text-neutral-200 leading-relaxed my-1">
+          {parseInlineMarkdown(line)}
+        </p>
+      );
     });
   };
 
-  return (
-    <div className={`flex gap-3 ${isAssistant ? 'justify-start' : 'justify-end'}`}>
-      {isAssistant && (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#e89005]/20 text-[#e89005] mt-0.5">
-          <Bot className="h-3.5 w-3.5" />
+  // Mensaje del Usuario: Burbuja en el lado derecho estilo Claude/Gemini
+  if (!isAssistant) {
+    return (
+      <div className="flex flex-col items-end gap-1.5 my-3">
+        <div className="rounded-3xl bg-[#22222a] text-white px-4 py-2.5 max-w-[85%] text-xs sm:text-sm font-medium shadow-sm">
+          {msg.content}
         </div>
-      )}
-
-      <div className={`max-w-[85%] rounded-xl p-4 transition-all ${
-        isAssistant
-          ? 'bg-[#1c1511] text-[#f2e9e4] shadow-sm'
-          : 'bg-[#9b2915] text-[#f2e9e4] shadow-md'
-      }`}>
-        <div className="space-y-1">
-          {renderMarkdown(msg.content)}
-        </div>
-
-        {msg.contextInfo?.zoomLink && (
-          <div className="mt-3 pt-2">
-            <a
-              href={msg.contextInfo.zoomLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#9b2915] hover:bg-[#852312] px-3 py-1.5 text-xs font-bold text-white transition"
-            >
-              <Video className="h-3.5 w-3.5" />
-              <span>Abrir Sala Zoom</span>
-            </a>
-          </div>
-        )}
-
-        {msg.suggestedActions && msg.suggestedActions.length > 0 && (
-          <div className="mt-3 pt-2 flex flex-wrap gap-1.5">
-            {msg.suggestedActions.map((action, aIdx) => (
-              <button
-                key={aIdx}
-                onClick={() => onSendAction(action)}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#140e0b] hover:bg-[#201511] px-2.5 py-1 text-[11px] font-medium text-[#c7b8b0] hover:text-[#e89005] transition active:scale-95"
-              >
-                <span>{action}</span>
-                <ArrowRight className="h-2.5 w-2.5 opacity-60" />
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className={`text-[10px] mt-1.5 font-mono ${
-          isAssistant ? 'text-[#8e7c74]' : 'text-white/70 text-right'
-        }`}>
-          {msg.timestamp}
+        <div className="flex items-center gap-2 pr-2 text-neutral-500 text-[10px]">
+          <button
+            onClick={handleCopy}
+            title="Copiar texto"
+            className="hover:text-white transition flex items-center gap-1"
+          >
+            {copied ? <Check className="h-3 w-3 text-[#bbf451]" /> : <Copy className="h-3 w-3" />}
+          </button>
+          <span>{msg.timestamp}</span>
         </div>
       </div>
+    );
+  }
 
-      {!isAssistant && (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1c1511] text-[#c7b8b0] mt-0.5">
-          <User className="h-3.5 w-3.5" />
+  // Mensaje de la IA: Abierto y directo en el canvas (Cero Card-ception)
+  return (
+    <div className="flex flex-col gap-2 my-4 text-neutral-200 animate-in fade-in duration-150">
+      
+      {/* Contenido sin card envolvente */}
+      <div className="space-y-1">
+        {renderMarkdown(msg.content)}
+      </div>
+
+      {/* Enlace a Zoom si aplica */}
+      {msg.contextInfo?.zoomLink && (
+        <div className="mt-2">
+          <a
+            href={msg.contextInfo.zoomLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-neutral-200 text-black px-4 py-2 text-xs font-bold transition shadow"
+          >
+            <Video className="h-4 w-4" />
+            <span>Unirse a Zoom</span>
+          </a>
         </div>
       )}
+
+      {/* Chips sugeridos tipo píldora */}
+      {msg.suggestedActions && msg.suggestedActions.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-2">
+          {msg.suggestedActions.map((action, aIdx) => (
+            <button
+              key={aIdx}
+              onClick={() => onSendAction(action)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#18181f] hover:bg-white hover:text-black px-3.5 py-1.5 text-xs font-medium text-neutral-300 transition-all shadow-sm active:scale-95"
+            >
+              <span>{action}</span>
+              <ChevronRight className="h-3 w-3 opacity-60" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Barra de herramientas: Copiar, Reintentar */}
+      <div className="flex items-center gap-3 pt-1 text-neutral-500 text-xs">
+        <button
+          onClick={handleCopy}
+          title="Copiar respuesta"
+          className="hover:text-white transition flex items-center gap-1 text-[11px]"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-[#bbf451]" />
+              <span className="text-[#bbf451]">Copiado</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" />
+              <span>Copiar</span>
+            </>
+          )}
+        </button>
+
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            title="Reintentar respuesta"
+            className="hover:text-white transition flex items-center gap-1 text-[11px]"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Reintentar</span>
+          </button>
+        )}
+
+        <span className="text-[10px] text-neutral-600 font-mono ml-auto">
+          {msg.timestamp}
+        </span>
+      </div>
+
     </div>
   );
 };

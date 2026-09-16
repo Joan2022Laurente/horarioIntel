@@ -5,23 +5,18 @@ import { UTPEvent, UTPCurrentInterval, ChatMessage } from '@/types/utp';
 import { parseEventTitle, formatTime, parseDate, DAYS_OF_WEEK } from '@/lib/schedule-parser';
 import { getSyllabusForCourse } from '@/lib/syllabus/official-registry';
 import { getClassroomLocation } from '@/lib/classroom-helper';
+import { ChatMessageBubble } from '@/components/ai/ChatMessageBubble';
 import { 
   X, 
   Video, 
   MapPin, 
   Radio, 
   Clock, 
-  Calendar, 
-  Building2, 
-  Layers, 
   BookOpen, 
   Sparkles, 
   Send, 
-  Bot, 
-  User, 
   Award,
-  ExternalLink,
-  ChevronRight
+  ExternalLink
 } from 'lucide-react';
 
 interface ClassDetailModalProps {
@@ -44,28 +39,24 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [lastUserPrompt, setLastUserPrompt] = useState<string>('');
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const parsed = event ? parseEventTitle(event.title) : { cleanTitle: '', sectionCode: '', weekInTitle: weekNumber };
   const effectiveWeek = parsed.weekInTitle || weekNumber;
   const courseSyllabus = event ? getSyllabusForCourse(parsed.cleanTitle) : null;
   
-  // Buscar la sesión del sílabo para la semana actual
   const syllabusWeekSession = courseSyllabus?.weeklySchedule.find(s => s.week === effectiveWeek) || null;
   const evaluationInWeek = courseSyllabus?.evaluations.find(e => e.week === effectiveWeek) || null;
 
   const isRemoteZoom = event?.modality === 'R';
   const isPresencial = event?.modality === 'P';
-  const isVirtual = event?.modality === 'VT';
 
-  // Ubicación física determinista
   const location = getClassroomLocation(parsed.cleanTitle, parsed.sectionCode);
-
-  // Fecha y día
   const eventDate = event ? parseDate(event.startAt) : new Date();
   const dayName = DAYS_OF_WEEK[eventDate.getDay()] || 'Lunes';
 
-  // Inicializar chat context cuando cambia el evento
   useEffect(() => {
     if (!event) return;
 
@@ -91,7 +82,6 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     setMessages([initialAiMessage]);
   }, [event?.id, effectiveWeek]);
 
-  // Auto-scroll del chat
   useEffect(() => {
     if (chatScrollRef.current) {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
@@ -103,6 +93,8 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputMessage).trim();
     if (!text || isLoading) return;
+
+    setLastUserPrompt(text);
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -139,7 +131,6 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
         throw new Error('Sin respuesta');
       }
     } catch {
-      // Fallback local con conocimiento del sílabo
       const topic = syllabusWeekSession?.topic || 'los temas oficiales del sílabo';
       const fallbackReply: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -153,45 +144,51 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     }
   };
 
+  const handleRetry = () => {
+    if (lastUserPrompt) {
+      handleSendMessage(lastUserPrompt);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-150">
       <div 
-        className="relative w-full max-w-3xl max-h-[92vh] flex flex-col rounded-3xl bg-[#121216] text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl max-h-[92vh] flex flex-col rounded-3xl bg-[#111114] text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 p-5 sm:p-6 bg-[#16161c] shrink-0">
+        {/* Clean Minimal Header */}
+        <div className="flex items-start justify-between gap-4 px-6 py-5 bg-[#16161a] border-b border-white/5 shrink-0">
           <div className="space-y-1.5 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               {isPresencial ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#00e676] bg-[#00c853]/15 px-3 py-1 rounded-full">
-                  <MapPin className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00e676] bg-[#00c853]/15 px-3 py-0.5 rounded-full">
+                  <MapPin className="h-3 w-3" />
                   Presencial
                 </span>
               ) : isRemoteZoom ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#ff7043] bg-[#ff5722]/15 px-3 py-1 rounded-full">
-                  <Video className="h-3.5 w-3.5" />
-                  Remoto Zoom
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ff7043] bg-[#ff5722]/15 px-3 py-0.5 rounded-full">
+                  <Video className="h-3 w-3" />
+                  Zoom
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#9195ff] bg-[#7075ff]/15 px-3 py-1 rounded-full">
-                  <Radio className="h-3.5 w-3.5" />
-                  Virtual Asíncrono
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#9195ff] bg-[#7075ff]/15 px-3 py-0.5 rounded-full">
+                  <Radio className="h-3 w-3" />
+                  Virtual
                 </span>
               )}
 
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-extrabold text-neutral-300">
+              <span className="text-xs font-medium text-neutral-400">
                 Semana {effectiveWeek}
               </span>
 
               {parsed.sectionCode && (
-                <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-mono text-neutral-400">
-                  Sec. {parsed.sectionCode}
+                <span className="text-xs font-mono text-neutral-500">
+                  • Sec. {parsed.sectionCode}
                 </span>
               )}
             </div>
 
-            <h2 className="text-base sm:text-lg md:text-xl font-black text-white leading-tight">
+            <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
               {parsed.cleanTitle}
             </h2>
           </div>
@@ -199,236 +196,142 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
           <button
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-neutral-400 hover:bg-white/15 hover:text-white transition shrink-0"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white transition shrink-0"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Scrollable Modal Content */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar">
           
-          {/* Card 1: Horario y Ubicación Detallada (Aula, Piso, Pabellón, Campus) */}
-          <div className="rounded-2xl bg-[#18181f] p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-[#ff5722]" />
-                Horario & Espacio Académico
-              </span>
-
-              {isRemoteZoom && event.metadata?.zoomLink && (
-                <a
-                  href={event.metadata.zoomLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-neutral-200 px-3.5 py-1.5 text-xs font-black text-black shadow-md transition active:scale-95"
-                >
-                  <Video className="h-3.5 w-3.5 text-black" />
-                  <span>Unirse a Zoom</span>
-                  <ExternalLink className="h-3 w-3 text-black/60" />
-                </a>
-              )}
+          {/* Ficha de Ubicación y Horario */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+            <div className="p-3 rounded-2xl bg-[#16161b] space-y-0.5">
+              <span className="text-[10px] text-neutral-500 uppercase font-semibold">Horario</span>
+              <p className="font-bold text-white">{dayName}</p>
+              <p className="font-mono text-[11px] text-neutral-400">
+                {formatTime(event.startAt)} – {formatTime(event.finishAt)}
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              {/* Dia y Hora */}
-              <div className="p-3 rounded-xl bg-[#121216] space-y-1">
-                <span className="text-[10px] font-bold text-neutral-500 uppercase">Horario</span>
-                <p className="font-extrabold text-white">{dayName}</p>
-                <p className="font-mono text-[11px] text-neutral-300">
-                  {formatTime(event.startAt)} – {formatTime(event.finishAt)}
-                </p>
-              </div>
+            <div className="p-3 rounded-2xl bg-[#16161b] space-y-0.5">
+              <span className="text-[10px] text-neutral-500 uppercase font-semibold">
+                {isPresencial ? 'Aula y Piso' : 'Plataforma'}
+              </span>
+              <p className="font-bold text-white">
+                {isPresencial ? location.aula : isRemoteZoom ? 'Zoom UTP' : 'Canvas LMS'}
+              </p>
+              <p className="text-[11px] text-neutral-400">
+                {isPresencial ? `Piso ${location.piso}` : 'Sesión Virtual'}
+              </p>
+            </div>
 
-              {/* Aula y Piso */}
-              <div className="p-3 rounded-xl bg-[#121216] space-y-1">
-                <span className="text-[10px] font-bold text-neutral-500 uppercase">
-                  {isPresencial ? 'Aula y Piso' : 'Plataforma'}
-                </span>
-                <p className="font-extrabold text-white">
-                  {isPresencial ? location.aula : isRemoteZoom ? 'Zoom UTP' : 'Canvas LMS'}
-                </p>
-                <p className="text-[11px] text-neutral-400">
-                  {isPresencial ? `Piso ${location.piso}` : 'Sesión Virtual'}
-                </p>
-              </div>
+            <div className="p-3 rounded-2xl bg-[#16161b] space-y-0.5">
+              <span className="text-[10px] text-neutral-500 uppercase font-semibold">
+                {isPresencial ? 'Pabellón' : 'Modalidad'}
+              </span>
+              <p className="font-bold text-white">
+                {isPresencial ? location.pabellon : isRemoteZoom ? 'Remota en Vivo' : 'Asíncrono'}
+              </p>
+              <p className="text-[11px] text-neutral-400 truncate" title={location.tipo}>
+                {isPresencial ? location.tipo : 'Digital'}
+              </p>
+            </div>
 
-              {/* Pabellón y Tipo */}
-              <div className="p-3 rounded-xl bg-[#121216] space-y-1">
-                <span className="text-[10px] font-bold text-neutral-500 uppercase">
-                  {isPresencial ? 'Pabellón' : 'Modalidad'}
-                </span>
-                <p className="font-extrabold text-white">
-                  {isPresencial ? location.pabellon : isRemoteZoom ? 'Remota en Vivo' : 'Asíncrono'}
-                </p>
-                <p className="text-[11px] text-neutral-400 truncate" title={location.tipo}>
-                  {isPresencial ? location.tipo : '100% Digital'}
-                </p>
-              </div>
-
-              {/* Campus */}
-              <div className="p-3 rounded-xl bg-[#121216] space-y-1">
-                <span className="text-[10px] font-bold text-neutral-500 uppercase">Campus</span>
-                <p className="font-extrabold text-white">{location.campus}</p>
-                <p className="text-[11px] text-neutral-400">
-                  {courseSyllabus?.generalInfo.courseCode || 'UTP Oficial'}
-                </p>
-              </div>
+            <div className="p-3 rounded-2xl bg-[#16161b] space-y-0.5">
+              <span className="text-[10px] text-neutral-500 uppercase font-semibold">Campus</span>
+              <p className="font-bold text-white">{location.campus}</p>
+              <p className="text-[11px] text-neutral-400 font-mono">
+                {courseSyllabus?.generalInfo.courseCode || 'UTP'}
+              </p>
             </div>
           </div>
 
-          {/* Card 2: Contenido Oficial del Sílabo para la Semana */}
-          <div className="rounded-2xl bg-[#18181f] p-4 sm:p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-                <BookOpen className="h-3.5 w-3.5 text-[#3a86ff]" />
-                Sílabo Oficial — Semana {effectiveWeek}
-              </span>
-
-              {courseSyllabus?.generalInfo.credits && (
-                <span className="text-[11px] font-extrabold text-neutral-400">
-                  {courseSyllabus.generalInfo.credits} Créditos • {courseSyllabus.generalInfo.weeklyHours}h semanales
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="p-3 rounded-xl bg-[#121216] space-y-1">
-                <span className="text-[10px] font-bold text-[#3a86ff] uppercase tracking-wide">
-                  {syllabusWeekSession?.unit || 'Unidad de Aprendizaje'}
-                </span>
-                <p className="text-sm font-black text-white">
-                  {syllabusWeekSession?.topic || syllabusWeekSession?.topics?.join(' • ') || 'Temario programado para la semana según sílabo oficial.'}
-                </p>
+          {/* Botón directo a Zoom si es remoto */}
+          {isRemoteZoom && event.metadata?.zoomLink && (
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#16161b]">
+              <div className="flex items-center gap-2 text-xs">
+                <Video className="h-4 w-4 text-[#ff7043]" />
+                <span className="text-neutral-300 font-medium">Clase remota en vivo programada por Zoom</span>
               </div>
-
-              {evaluationInWeek && (
-                <div className="p-3 rounded-xl bg-[#ff5722]/10 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-[#ff5722] shrink-0" />
-                    <div>
-                      <span className="font-black text-[#ff7043]">{evaluationInWeek.type} ({evaluationInWeek.weightPercent}%)</span>
-                      <p className="text-[11px] text-neutral-300">{evaluationInWeek.description}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-black uppercase text-[#ff5722] bg-[#ff5722]/20 px-2 py-0.5 rounded-full shrink-0">
-                    {evaluationInWeek.modality}
-                  </span>
-                </div>
-              )}
+              <a
+                href={event.metadata.zoomLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-neutral-200 px-4 py-2 text-xs font-bold text-black shadow transition active:scale-95"
+              >
+                <span>Entrar a Zoom</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
             </div>
-          </div>
+          )}
 
-          {/* Card 3: Interactive Class Syllabus AI Copilot */}
-          <div className="rounded-2xl bg-[#18181f] p-4 sm:p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-[#bbf451] flex items-center gap-1.5">
+          {/* Divisor sutil hacia la conversación */}
+          <div className="pt-2 border-t border-white/5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-neutral-400 flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-[#bbf451]" />
-                Copiloto de Clase & Sílabo IA
+                Copiloto de Clase & Sílabo
               </span>
-              <span className="text-[10px] text-neutral-500 font-medium">
-                Conoce el sílabo, temas y rúbricas
+              <span className="text-[11px] text-neutral-500">
+                Semana {effectiveWeek} • {syllabusWeekSession?.unit || 'Sílabo Oficial'}
               </span>
             </div>
 
-            {/* Chat Messages Area */}
+            {/* Chat Area: Open Canvas Style (Zero Card-ception!) */}
             <div 
               ref={chatScrollRef}
-              className="max-h-60 overflow-y-auto space-y-3 p-3 rounded-xl bg-[#121216] text-xs custom-scrollbar"
+              className="space-y-4 pt-1 max-h-72 overflow-y-auto custom-scrollbar pr-1"
             >
               {messages.map((m) => (
-                <div 
+                <ChatMessageBubble
                   key={m.id}
-                  className={`flex gap-2.5 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  {m.role === 'assistant' && (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#ff5722] text-white shrink-0">
-                      <Bot className="h-4 w-4" />
-                    </div>
-                  )}
-
-                  <div className={`space-y-2 max-w-[85%] ${
-                    m.role === 'user'
-                      ? 'bg-[#ff5722] text-white rounded-2xl rounded-tr-sm p-3 font-medium'
-                      : 'bg-[#1e1e24] text-neutral-200 rounded-2xl rounded-tl-sm p-3 leading-relaxed'
-                  }`}>
-                    <div className="whitespace-pre-line text-xs font-normal">
-                      {m.content}
-                    </div>
-
-                    {/* Quick suggested action chips */}
-                    {m.suggestedActions && m.suggestedActions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {m.suggestedActions.map((action, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleSendMessage(action)}
-                            className="inline-flex items-center gap-1 rounded-lg bg-white/10 hover:bg-[#bbf451] hover:text-black px-2.5 py-1 text-[10px] font-bold text-neutral-300 transition"
-                          >
-                            <span>{action}</span>
-                            <ChevronRight className="h-2.5 w-2.5" />
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {m.role === 'user' && (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/10 text-white shrink-0">
-                      <User className="h-4 w-4" />
-                    </div>
-                  )}
-                </div>
+                  msg={m}
+                  onSendAction={handleSendMessage}
+                  onRetry={handleRetry}
+                />
               ))}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-xs text-neutral-400 py-1 pl-9">
-                  <div className="h-2 w-2 rounded-full bg-[#bbf451] animate-ping" />
-                  <span>Consultando sílabo y generando respuesta...</span>
+                <div className="flex items-center gap-2 text-xs text-neutral-400 py-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-[#bbf451] animate-ping" />
+                  <span>Consultando sílabo oficial...</span>
                 </div>
               )}
             </div>
-
-            {/* Chat Input */}
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="flex items-center gap-2 pt-1"
-            >
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder={`Pregunta sobre la clase de ${parsed.cleanTitle}...`}
-                className="flex-1 rounded-xl bg-[#121216] px-3.5 py-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#ff5722]"
-              />
-              <button
-                type="submit"
-                disabled={!inputMessage.trim() || isLoading}
-                aria-label="Enviar mensaje"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ff5722] hover:bg-[#ff7043] text-white transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0 shadow"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </form>
           </div>
 
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-4 bg-[#16161c] shrink-0 text-xs">
-          <span className="text-neutral-500">
-            UTP Horario Inteligente
-          </span>
-          <button
-            onClick={onClose}
-            className="rounded-xl bg-white/10 hover:bg-white/20 px-4 py-1.5 font-extrabold text-white transition"
+        {/* Floating Input Area */}
+        <div className="p-4 bg-[#141418] border-t border-white/5 shrink-0">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="flex items-center gap-2 bg-[#1b1b22] rounded-2xl px-4 py-1.5 focus-within:ring-1 focus-within:ring-[#ff5722]"
           >
-            Entendido
-          </button>
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder={`Pregunta sobre la clase de ${parsed.cleanTitle}...`}
+              className="flex-1 bg-transparent py-2 text-xs sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!inputMessage.trim() || isLoading}
+              aria-label="Enviar mensaje"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff5722] hover:bg-[#ff7043] text-white transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </form>
         </div>
+
       </div>
     </div>
   );

@@ -41,6 +41,7 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
   const rotationRef = useRef({ x: 0.25, y: 0.35, z: 0.1 });
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, isHovered: false });
   const isVisibleRef = useRef<boolean>(true);
+  const currentIntensityRef = useRef<number>(state === 'thinking' ? 1.0 : state === 'streaming' ? 0.5 : 0.0);
 
   // Inicializar puntos distribuidos con Fibonacci Sphere con espaciado fino de alta resolución
   useEffect(() => {
@@ -101,20 +102,22 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
       const dt = Math.min((time - lastTime) / 1000, 0.1);
       lastTime = time;
 
-      // Velocidad según el estado reactivo
-      let rotSpeedY = 0.45 * speedMultiplier;
-      let rotSpeedX = 0.28 * speedMultiplier;
-      let pulseScale = 1.0;
+      // Interpolación suave y orgánica de intensidad (LERP continua sin saltos)
+      const targetIntensity = state === 'thinking' ? 1.0 : state === 'streaming' ? 0.5 : 0.0;
+      const easeSpeed = 3.2; // Transición fluida (~350ms)
+      currentIntensityRef.current += (targetIntensity - currentIntensityRef.current) * Math.min(1, dt * easeSpeed);
+      const intensity = currentIntensityRef.current;
 
-      if (state === 'thinking') {
-        rotSpeedY = 1.8 * speedMultiplier;
-        rotSpeedX = 1.1 * speedMultiplier;
-        pulseScale = 1.0 + Math.sin(time * 0.007) * 0.06;
-      } else if (state === 'streaming') {
-        rotSpeedY = 0.9 * speedMultiplier;
-        rotSpeedX = 0.5 * speedMultiplier;
-        pulseScale = 1.0 + Math.sin(time * 0.012) * 0.03;
-      }
+      // Velocidad y pulsación según intensidad suavemente interpolada
+      const idleRotY = 0.45 * speedMultiplier;
+      const thinkRotY = 1.75 * speedMultiplier;
+      const rotSpeedY = idleRotY + (thinkRotY - idleRotY) * intensity;
+
+      const idleRotX = 0.28 * speedMultiplier;
+      const thinkRotX = 1.05 * speedMultiplier;
+      const rotSpeedX = idleRotX + (thinkRotX - idleRotX) * intensity;
+
+      const pulseScale = 1.0 + Math.sin(time * 0.007) * (0.06 * intensity);
 
       // Suavizado de mouse interactivo
       mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.06;
@@ -148,8 +151,9 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // Mutación procedural de números
-        if (Math.random() < p.mutationSpeed * (state === 'thinking' ? 3 : 0.6)) {
+        // Mutación procedural de números proporcional a la intensidad de pensamiento
+        const mutationChance = p.mutationSpeed * (0.6 + 2.4 * intensity);
+        if (Math.random() < mutationChance) {
           p.char = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
         }
 
@@ -157,10 +161,9 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         let py = p.baseY;
         let pz = p.baseZ;
 
-        // Ondas / olas 3D orgánicas en estado de pensamiento
+        // Ondas / olas 3D orgánicas con interpolación suave de amplitud
         let waveFactor = 1.0;
-        if (state === 'thinking') {
-          // Olas armónicas viajeras en 3D (ondulación transversal y radial)
+        if (intensity > 0.005) {
           const lat = Math.asin(Math.max(-1, Math.min(1, py))); // latitud (-PI/2 a PI/2)
           const lon = Math.atan2(pz, px); // longitud (-PI a PI)
           
@@ -168,13 +171,8 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
           const wave2 = Math.cos(lon * 3.0 + time * 0.010) * 0.14;
           const wave3 = Math.sin((px * 2.5 + pz * 2.5) - time * 0.014) * 0.10;
           
-          waveFactor = 1.0 + wave1 + wave2 + wave3;
-          px *= waveFactor;
-          py *= waveFactor;
-          pz *= waveFactor;
-        } else if (state === 'streaming') {
-          const wave = Math.sin(py * 4.5 + time * 0.012) * 0.10;
-          waveFactor = 1.0 + wave;
+          const combinedWave = (wave1 + wave2 + wave3) * intensity;
+          waveFactor = 1.0 + combinedWave;
           px *= waveFactor;
           py *= waveFactor;
           pz *= waveFactor;
@@ -199,8 +197,8 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         const depthNorm = Math.max(0, Math.min(1, (z2 + 1) / 2));
         let alpha = Math.max(0.12, Math.min(1.0, Math.pow(depthNorm, 1.9)));
         
-        if (state === 'thinking' && waveFactor > 1.06) {
-          alpha = Math.min(1.0, alpha * 1.3);
+        if (intensity > 0.1 && waveFactor > 1.04) {
+          alpha = Math.min(1.0, alpha * (1.0 + 0.3 * intensity));
         }
 
         pointsToDraw.push({

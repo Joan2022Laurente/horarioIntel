@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, 
   MapPin, 
@@ -10,9 +10,14 @@ import {
   ChevronRight, 
   Check, 
   Send,
-  Loader2
+  Loader2,
+  UserCheck,
+  Filter,
+  Search,
+  Radio,
+  BookOpen
 } from 'lucide-react';
-import { StudyBeaconRow } from '@/types/matching';
+import { StudyBeaconRow, StudyBuddyMatch } from '@/types/matching';
 import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
 import { useAgent } from '@/context/AgentContext';
 import { 
@@ -20,6 +25,11 @@ import {
   createBeaconInDb, 
   joinBeaconInDb 
 } from '@/lib/supabase/networking-service';
+import { INITIAL_STUDY_BUDDY_MATCHES } from '@/lib/networking/study-buddy-data';
+import { StudyBuddyCard } from './StudyBuddyCard';
+import { DirectConnectModal } from './DirectConnectModal';
+import { PersonalBeaconCard } from './PersonalBeaconCard';
+import { formatCourseName } from '@/lib/schedule-parser';
 
 interface CampusNetworkingViewProps {
   courses: ProcessedCourse[];
@@ -30,59 +40,79 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
   courses,
   interval: _interval,
 }) => {
-  const { executeIntent } = useAgent();
+  const { executeIntent, askAgent } = useAgent();
+  const [activeTab, setActiveTab] = useState<'buddies' | 'beacons'>('buddies');
+  
+  // State for 1-on-1 Matches
+  const [buddies] = useState<StudyBuddyMatch[]>(INITIAL_STUDY_BUDDY_MATCHES);
+  
+  // State for Group Beacons
   const [beacons, setBeacons] = useState<StudyBeaconRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingBeacons, setIsLoadingBeacons] = useState(true);
   const [isCreatingBeacon, setIsCreatingBeacon] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [locationName, setLocationName] = useState('');
-  const [objective, setObjective] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState(courses[0]?.name || 'General');
+  const [isSubmittingBeacon, setIsSubmittingBeacon] = useState(false);
+  
+  // Beacon Form State
+  const [beaconLocation, setBeaconLocation] = useState('');
+  const [beaconObjective, setBeaconObjective] = useState('');
+  const [beaconCourse, setBeaconCourse] = useState(courses[0]?.name || 'Desarrollo Web Integrado');
   const [joinedBeaconIds, setJoinedBeaconIds] = useState<string[]>([]);
+
+  // Filter States
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState<string>('ALL');
+  const [selectedModalityFilter, setSelectedModalityFilter] = useState<'ALL' | 'Presencial' | 'Virtual'>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Direct Handshake Modal State
+  const [connectTarget, setConnectTarget] = useState<StudyBuddyMatch | StudyBeaconRow | null>(null);
 
   useEffect(() => {
     async function loadBeacons() {
-      setIsLoading(true);
+      setIsLoadingBeacons(true);
       const data = await fetchActiveBeacons();
       setBeacons(data);
-      setIsLoading(false);
+      setIsLoadingBeacons(false);
     }
     loadBeacons();
   }, []);
 
-  const handleJoinBeacon = async (beaconId: string) => {
-    if (joinedBeaconIds.includes(beaconId)) return;
-    setJoinedBeaconIds(prev => [...prev, beaconId]);
+  const handleJoinBeacon = async (beacon: StudyBeaconRow) => {
+    if (joinedBeaconIds.includes(beacon.id)) {
+      setConnectTarget(beacon);
+      return;
+    }
+
+    setJoinedBeaconIds(prev => [...prev, beacon.id]);
     setBeacons(prev => prev.map(b => {
-      if (b.id === beaconId && b.current_collaborators < b.max_collaborators) {
+      if (b.id === beacon.id && b.current_collaborators < b.max_collaborators) {
         return { ...b, current_collaborators: b.current_collaborators + 1 };
       }
       return b;
     }));
 
-    await joinBeaconInDb(beaconId);
+    setConnectTarget(beacon);
+    await joinBeaconInDb(beacon.id);
   };
 
   const handleCreateBeacon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!locationName.trim() || !objective.trim()) return;
+    if (!beaconLocation.trim() || !beaconObjective.trim()) return;
 
-    setIsSubmitting(true);
+    setIsSubmittingBeacon(true);
     const created = await createBeaconInDb({
       hostName: 'Joan Laurente',
       hostCode: 'U20202020',
       hostCareer: 'Ingeniería de Software',
-      courseId: selectedCourse,
-      courseName: selectedCourse,
-      locationName: locationName.trim(),
-      objective: objective.trim(),
+      courseId: beaconCourse,
+      courseName: beaconCourse,
+      locationName: beaconLocation.trim(),
+      objective: beaconObjective.trim(),
       maxCollaborators: 4,
     });
 
     if (created) {
       setBeacons(prev => [created, ...prev]);
     } else {
-      // Fallback local
       const localBeacon: StudyBeaconRow = {
         id: `bcn-${Date.now()}`,
         host_id: 'me',
@@ -92,15 +122,15 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
           full_name: 'Joan Laurente (Tú)',
           email: 'yo@utp.edu.pe',
           career: 'Ingeniería de Software',
-          campus: 'Campus Digital',
+          campus: 'Campus San Juan',
           cycle: 7,
           reputation_score: 100,
           created_at: '',
           updated_at: '',
         },
-        course_id: selectedCourse,
-        location_name: locationName,
-        objective: objective,
+        course_id: beaconCourse,
+        location_name: beaconLocation,
+        objective: beaconObjective,
         max_collaborators: 4,
         current_collaborators: 1,
         status: 'ACTIVE',
@@ -110,11 +140,41 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
       setBeacons(prev => [localBeacon, ...prev]);
     }
 
-    setIsSubmitting(false);
+    setIsSubmittingBeacon(false);
     setIsCreatingBeacon(false);
-    setLocationName('');
-    setObjective('');
+    setBeaconLocation('');
+    setBeaconObjective('');
+    setActiveTab('beacons');
   };
+
+  // Filter 1-on-1 Matches
+  const filteredBuddies = useMemo(() => {
+    return buddies.filter(b => {
+      const matchesCourse = selectedCourseFilter === 'ALL' || b.courseName.toLowerCase().includes(selectedCourseFilter.toLowerCase());
+      const matchesModality = selectedModalityFilter === 'ALL' || b.modality === selectedModalityFilter;
+      const matchesSearch = !searchQuery.trim() || 
+        b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.currentGoal.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        b.locationPreference.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesCourse && matchesModality && matchesSearch;
+    });
+  }, [buddies, selectedCourseFilter, selectedModalityFilter, searchQuery]);
+
+  // Filter Group Beacons
+  const filteredBeacons = useMemo(() => {
+    return beacons.filter(b => {
+      const course = b.course_id || '';
+      const matchesCourse = selectedCourseFilter === 'ALL' || course.toLowerCase().includes(selectedCourseFilter.toLowerCase());
+      const matchesSearch = !searchQuery.trim() || 
+        b.objective.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.location_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (b.host?.full_name || '').toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesCourse && matchesSearch;
+    });
+  }, [beacons, selectedCourseFilter, searchQuery]);
 
   return (
     <div className="space-y-6 text-white animate-in fade-in duration-150">
@@ -122,66 +182,82 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
       {/* Header - Clean Title (Zero Icon) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-subtle)]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            Networking & Huecos en Común
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            Networking & Compañeros de Estudio
           </h2>
           <p className="text-xs text-neutral-400 mt-1">
-            Encuentra compañeros con ventanas libres en tu mismo campus o salas virtuales de estudio grupal sin fricción.
+            Emparejamiento 1 a 1 por huecos libres en común, asignaturas matriculadas y mesas de estudio en campus.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsCreatingBeacon(!isCreatingBeacon)}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-emerald)] hover:bg-[var(--accent-emerald-hover)] px-4 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
-        >
-          <Plus className="h-4 w-4" />
-          <span>{isCreatingBeacon ? 'Cancelar' : 'Crear Faro de Estudio'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => executeIntent({ type: 'FIND_NETWORKING_BEACON' })}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white transition active:scale-95 shadow-none"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
+            <span>Match con IA</span>
+          </button>
+
+          <button
+            onClick={() => setIsCreatingBeacon(!isCreatingBeacon)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-emerald)] hover:bg-[var(--accent-emerald-hover)] px-4 py-2 text-xs font-bold text-black transition active:scale-95 shadow-none"
+          >
+            <Plus className="h-4 w-4" />
+            <span>{isCreatingBeacon ? 'Cancelar' : 'Crear Mesa Grupal'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Formulario rápido para emitir Faro */}
+      {/* Widget: Mi Radar y Disponibilidad Personal */}
+      <PersonalBeaconCard 
+        courses={courses} 
+        onAskAi={askAgent} 
+      />
+
+      {/* Formulario para Crear Mesa de Estudio Grupal */}
       {isCreatingBeacon && (
         <form onSubmit={handleCreateBeacon} className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border-medium)] p-5 space-y-4 shadow-none animate-in zoom-in-95">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-[var(--accent-emerald)] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xs font-bold text-[var(--accent-emerald)] flex items-center gap-1.5">
               <Sparkles className="h-4 w-4" />
-              <span>Nuevo Faro de Networking y Estudio</span>
+              <span>Nueva Mesa de Estudio / Co-Working</span>
             </span>
-            <span className="text-[11px] text-neutral-400 font-mono">Duración: 60 minutos</span>
+            <span className="text-[11px] text-neutral-400 font-mono">Duración estimada: 60 - 90 min</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="space-y-1">
-              <label className="text-neutral-400 font-semibold">Ubicación / Sala</label>
+              <label className="text-neutral-400 font-semibold">Ubicación / Sala física o Discord:</label>
               <input 
                 type="text" 
-                value={locationName}
-                onChange={e => setLocationName(e.target.value)}
+                value={beaconLocation}
+                onChange={e => setBeaconLocation(e.target.value)}
                 placeholder="Ej: Biblioteca Torre A - Piso 3 o Discord Sala 2"
                 required
                 className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-neutral-400 font-semibold">Asignatura</label>
+              <label className="text-neutral-400 font-semibold">Asignatura:</label>
               <select 
-                value={selectedCourse}
-                onChange={e => setSelectedCourse(e.target.value)}
+                value={beaconCourse}
+                onChange={e => setBeaconCourse(e.target.value)}
                 className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
               >
                 {courses.map(c => (
-                  <option key={c.courseId} value={c.name}>{c.name}</option>
+                  <option key={c.courseId} value={c.name}>{formatCourseName(c.name)}</option>
                 ))}
               </select>
             </div>
           </div>
 
           <div className="space-y-1 text-xs">
-            <label className="text-neutral-400 font-semibold">Meta de la Sesión</label>
+            <label className="text-neutral-400 font-semibold">Meta de la sesión grupal:</label>
             <input 
               type="text" 
-              value={objective}
-              onChange={e => setObjective(e.target.value)}
+              value={beaconObjective}
+              onChange={e => setBeaconObjective(e.target.value)}
               placeholder="Ej: Avanzar entrega APF1 y resolver dudas de código"
               required
               className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
@@ -191,121 +267,238 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
           <div className="flex justify-end pt-1">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-emerald)] px-5 py-2 text-xs font-black text-black hover:bg-[var(--accent-emerald-hover)] transition active:scale-95 shadow-none disabled:opacity-50"
+              disabled={isSubmittingBeacon}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-emerald)] px-5 py-2 text-xs font-bold text-black hover:bg-[var(--accent-emerald-hover)] transition active:scale-95 shadow-none disabled:opacity-50"
             >
-              {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              <span>{isSubmitting ? 'Guardando...' : 'Publicar Faro'}</span>
+              {isSubmittingBeacon ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              <span>{isSubmittingBeacon ? 'Guardando...' : 'Publicar Mesa'}</span>
             </button>
           </div>
         </form>
       )}
 
-      {/* Banner de Sincronía Inteligente de Huecos con Colores Sólidos */}
-      <div className="rounded-3xl bg-[var(--surface-subtle)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="h-12 w-12 rounded-2xl bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] text-[var(--badge-orange-text)] flex items-center justify-center font-black shrink-0">
-            <Users className="h-6 w-6" />
-          </div>
-          <div>
-            <h3 className="text-sm font-black text-white">Hueco en Común Detectado Hoy</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">
-              Tienes una ventana libre de 2h con compañeros de tu sección antes de tu clase de las 6:30 PM.
-            </p>
-          </div>
+      {/* Barra de Filtros & Selector de Modos (1 a 1 vs Grupos) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-2 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
+        
+        {/* Toggle de Modos: Parejas 1 a 1 vs Mesas Grupales */}
+        <div className="flex items-center gap-1 bg-[var(--surface-input)] p-1 rounded-xl text-xs">
+          <button
+            onClick={() => setActiveTab('buddies')}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition font-bold shadow-none ${
+              activeTab === 'buddies'
+                ? 'bg-white text-black'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            <UserCheck className="h-3.5 w-3.5" />
+            <span>Match 1 a 1 ({filteredBuddies.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('beacons')}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition font-bold shadow-none ${
+              activeTab === 'beacons'
+                ? 'bg-[var(--accent-emerald)] text-black'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>Mesas Grupales ({filteredBeacons.length})</span>
+          </button>
         </div>
 
-        <button
-          onClick={() => executeIntent({ type: 'FIND_NETWORKING_BEACON' })}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] px-3.5 py-2 text-xs font-bold text-white transition active:scale-95 whitespace-nowrap shrink-0 shadow-none"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
-          <span>Coordinar con Agente</span>
-        </button>
+        {/* Controles de Filtro: Asignatura + Modalidad + Búsqueda */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          
+          {/* Selector de Asignatura */}
+          <select
+            value={selectedCourseFilter}
+            onChange={(e) => setSelectedCourseFilter(e.target.value)}
+            aria-label="Filtrar por curso"
+            className="bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[var(--accent-emerald)] cursor-pointer"
+          >
+            <option value="ALL">Todas las asignaturas</option>
+            {courses.map(c => (
+              <option key={c.courseId} value={c.name}>{formatCourseName(c.name)}</option>
+            ))}
+          </select>
+
+          {/* Selector de Entorno */}
+          <select
+            value={selectedModalityFilter}
+            onChange={(e) => setSelectedModalityFilter(e.target.value as any)}
+            aria-label="Filtrar por entorno"
+            className="bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[var(--accent-emerald)] cursor-pointer"
+          >
+            <option value="ALL">Presencial & Virtual</option>
+            <option value="Presencial">Solo Campus Físico</option>
+            <option value="Virtual">Solo Discord / Virtual</option>
+          </select>
+
+          {/* Búsqueda rápida */}
+          <div className="relative">
+            <Search className="h-3.5 w-3.5 absolute left-2.5 top-2 text-neutral-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar por tema o skill..."
+              className="bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-[var(--accent-emerald)] w-36 sm:w-44"
+            />
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Loading state */}
-      {isLoading ? (
-        <div className="py-12 flex flex-col items-center justify-center text-neutral-400 space-y-2">
-          <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-emerald)]" />
-          <p className="text-xs">Cargando faros activos desde Supabase...</p>
-        </div>
-      ) : (
-        /* Grid de Faros Activos con Colores Sólidos */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {beacons.map((b) => {
-            const isJoined = joinedBeaconIds.includes(b.id);
-            const isFull = b.current_collaborators >= b.max_collaborators;
+      {/* Contenido Principal: Tab 1 - Match 1 a 1 (Study Buddies) */}
+      {activeTab === 'buddies' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-neutral-400">
+              Compañeros compatibles con ventanas libres hoy y asignaturas compartidas:
+            </p>
+            <span className="text-xs font-mono text-neutral-500">
+              {filteredBuddies.length} {filteredBuddies.length === 1 ? 'coincidencia' : 'coincidencias'}
+            </span>
+          </div>
 
-            return (
-              <div 
-                key={b.id}
-                className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-black text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full">
-                      <span>En Vivo</span>
-                    </span>
-                    <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Expira pronto
-                    </span>
-                  </div>
-
-                  <div>
-                    <h4 className="text-base font-bold text-white group-hover:text-[var(--accent-emerald)] transition-colors">
-                      {b.objective}
-                    </h4>
-                    <p className="text-xs text-neutral-400 flex items-center gap-1.5 mt-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-[var(--accent-orange)] shrink-0" />
-                      <span>{b.location_name}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)]">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-black text-white">
-                      {b.host?.full_name.charAt(0)}
-                    </div>
-                    <div className="text-[11px]">
-                      <p className="font-bold text-white leading-tight">{b.host?.full_name}</p>
-                      <p className="text-neutral-500 font-mono">{b.current_collaborators}/{b.max_collaborators} alumnos</p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleJoinBeacon(b.id)}
-                    disabled={isJoined || isFull}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 shadow-none ${
-                      isJoined
-                        ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] cursor-default'
-                        : isFull
-                        ? 'bg-[var(--surface-muted)] text-neutral-500 cursor-not-allowed'
-                        : 'bg-white hover:bg-neutral-200 text-black'
-                    }`}
-                  >
-                    {isJoined ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" />
-                        <span>Unido</span>
-                      </>
-                    ) : isFull ? (
-                      <span>Lleno</span>
-                    ) : (
-                      <>
-                        <span>Unirme</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {filteredBuddies.length === 0 ? (
+            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] space-y-2">
+              <UserCheck className="h-8 w-8 mx-auto text-neutral-600" />
+              <p className="text-sm font-bold text-white">No se encontraron compañeros con los filtros seleccionados</p>
+              <p className="text-xs text-neutral-400">Prueba cambiando la asignatura o el entorno para ver más opciones.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredBuddies.map((buddy) => (
+                <StudyBuddyCard
+                  key={buddy.id}
+                  buddy={buddy}
+                  onConnect={(target) => setConnectTarget(target)}
+                  onAskAi={askAgent}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
+
+      {/* Contenido Principal: Tab 2 - Mesas de Estudio Grupales */}
+      {activeTab === 'beacons' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-neutral-400">
+              Mesas de co-working activas en biblioteca y salas virtuales de Discord:
+            </p>
+            <span className="text-xs font-mono text-neutral-500">
+              {filteredBeacons.length} {filteredBeacons.length === 1 ? 'mesa activa' : 'mesas activas'}
+            </span>
+          </div>
+
+          {isLoadingBeacons ? (
+            <div className="py-12 flex flex-col items-center justify-center text-neutral-400 space-y-2">
+              <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-emerald)]" />
+              <p className="text-xs">Cargando mesas de estudio en vivo...</p>
+            </div>
+          ) : filteredBeacons.length === 0 ? (
+            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] space-y-2">
+              <Users className="h-8 w-8 mx-auto text-neutral-600" />
+              <p className="text-sm font-bold text-white">No hay mesas grupales abiertas con este filtro</p>
+              <p className="text-xs text-neutral-400">¡Sé el primero en abrir una mesa con el botón &ldquo;Crear Mesa Grupal&rdquo;!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredBeacons.map((b) => {
+                const isJoined = joinedBeaconIds.includes(b.id);
+                const isFull = b.current_collaborators >= b.max_collaborators;
+
+                return (
+                  <div 
+                    key={b.id}
+                    className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] hover:border-neutral-500 p-5 space-y-4 shadow-none transition-all group"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full">
+                          <span>● En Vivo</span>
+                        </span>
+                        <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          60m restantes
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="text-base font-bold text-white group-hover:text-[var(--accent-emerald)] transition-colors">
+                          {b.objective}
+                        </h4>
+                        
+                        <div className="flex items-center gap-3 text-xs text-neutral-400 mt-2">
+                          <span className="flex items-center gap-1 text-white font-medium">
+                            <BookOpen className="h-3.5 w-3.5 text-[var(--accent-lime)] shrink-0" />
+                            {formatCourseName(b.course_id || 'Estudio General')}
+                          </span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1 text-neutral-300">
+                            <MapPin className="h-3.5 w-3.5 text-[var(--accent-orange)] shrink-0" />
+                            {b.location_name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)]">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-bold text-white">
+                          {b.host?.full_name.charAt(0) || 'U'}
+                        </div>
+                        <div className="text-[11px]">
+                          <p className="font-bold text-white leading-tight">{b.host?.full_name || 'Compañero UTP'}</p>
+                          <p className="text-neutral-500 font-mono">{b.current_collaborators}/{b.max_collaborators} alumnos</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleJoinBeacon(b)}
+                        disabled={isFull && !isJoined}
+                        className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition active:scale-95 shadow-none ${
+                          isJoined
+                            ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)]'
+                            : isFull
+                            ? 'bg-[var(--surface-muted)] text-neutral-500 cursor-not-allowed'
+                            : 'bg-white hover:bg-neutral-200 text-black'
+                        }`}
+                      >
+                        {isJoined ? (
+                          <>
+                            <Check className="h-3.5 w-3.5" />
+                            <span>Unido • Ver Contacto</span>
+                          </>
+                        ) : isFull ? (
+                          <span>Mesa Llena</span>
+                        ) : (
+                          <>
+                            <span>Unirme a la Mesa</span>
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal de Conexión Directa y Handshake (WhatsApp / Meet / In-App) */}
+      <DirectConnectModal
+        isOpen={!!connectTarget}
+        onClose={() => setConnectTarget(null)}
+        matchTarget={connectTarget}
+      />
 
     </div>
   );

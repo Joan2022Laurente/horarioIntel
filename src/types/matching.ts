@@ -38,3 +38,30 @@ export interface SquadRequestRow {
   status: SquadRequestStatus;
   created_at: string;
 }
+
+export interface StudyBuddyMatch {
+  id: string;
+  name: string;
+  studentCode: string;
+  avatarLetter: string;
+  career: string;
+  cycle: number;
+  campus: string;
+  courseName: string;
+  sectionCode?: string;
+  sharedWindow: {
+    start: string;
+    end: string;
+    durationMinutes: number;
+    isNow: boolean;
+  };
+  locationPreference: string;
+  currentGoal: string;
+  skills: string[];
+  reputationScore: number;
+  compatibilityPercent: number;
+  status: 'ONLINE_NOW' | 'STUDYING' | 'WINDOW_OPEN';
+  whatsappPhone?: string;
+  discordTag?: string;
+  modality: 'Presencial' | 'Virtual';
+}

@@ -227,70 +227,49 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                         <div
                           key={evt.id}
                           onClick={() => setSelectedEventForModal(evt)}
-                          className={`group relative rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border p-3.5 transition-all duration-300 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
+                          className={`group relative rounded-2xl border p-3.5 transition-all duration-300 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
                             isActiveCard
-                              ? 'animate-card-loop border-[var(--border-medium)]'
-                              : 'border-[var(--border-subtle)] hover:border-neutral-500'
+                              ? 'animate-aura-card'
+                              : 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border-[var(--border-subtle)] hover:border-neutral-500'
                           }`}
                         >
-                          {/* Left Accent indicator for active/next class */}
-                          {isActiveCard && (
-                            <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full ${
-                              isLiveNow ? 'bg-[var(--accent-lime)]' : 'bg-[var(--accent-orange)]'
-                            }`} />
-                          )}
-
-                          {/* Top: Modalidad & Estado */}
+                          {/* Top: Modalidad y Botón Zoom / Ubicación */}
                           <div className="flex items-center justify-between gap-1">
-                            <div className="flex items-center gap-1.5">
-                              {isPresencial ? (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
-                                  <MapPin className="h-2.5 w-2.5" />
-                                  Presencial
-                                </span>
-                              ) : isRemoteZoom ? (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
-                                  <Video className="h-2.5 w-2.5" />
-                                  Zoom
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
-                                  <Radio className="h-2.5 w-2.5" />
-                                  Virtual
-                                </span>
-                              )}
+                            {isPresencial ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
+                                <MapPin className="h-2.5 w-2.5" />
+                                Presencial
+                              </span>
+                            ) : isRemoteZoom ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
+                                <Video className="h-2.5 w-2.5" />
+                                Zoom
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
+                                <Radio className="h-2.5 w-2.5" />
+                                Virtual
+                              </span>
+                            )}
 
-                              {isLiveNow ? (
-                                <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-black bg-[var(--accent-lime)] px-2 py-0.5 rounded-full">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-black animate-live-pulse" />
-                                  En vivo
-                                </span>
-                              ) : isNextToday ? (
-                                <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--badge-orange-text)] animate-live-pulse" />
-                                  Próxima
-                                </span>
-                              ) : null}
-                            </div>
-
-                          {isRemoteZoom && evt.metadata?.zoomLink ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(evt.metadata?.zoomLink, '_blank');
-                              }}
-                              title="Unirse directo a Zoom"
-                              aria-label="Unirse a Zoom"
-                              className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-subtle)] hover:bg-white text-neutral-300 hover:text-black border border-[var(--border-subtle)] transition shrink-0"
-                            >
-                              <Video className="h-3.5 w-3.5" />
-                            </button>
-                          ) : (
-                            <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors">
-                              {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
-                            </span>
-                          )}
-                        </div>
+                            {isRemoteZoom && evt.metadata?.zoomLink ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(evt.metadata?.zoomLink, '_blank');
+                                }}
+                                title="Unirse directo a Zoom"
+                                aria-label="Unirse a Zoom"
+                                className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-subtle)] hover:bg-white text-neutral-300 hover:text-black border border-[var(--border-subtle)] transition shrink-0"
+                              >
+                                <Video className="h-3.5 w-3.5" />
+                              </button>
+                            ) : (
+                              <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors">
+                                {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
+                              </span>
+                            )}
+                          </div>
 
                         {/* Nombre del Curso */}
                         <h4 className="text-xs font-bold text-white group-hover:text-neutral-100 leading-snug line-clamp-2 transition-colors">

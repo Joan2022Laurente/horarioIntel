@@ -78,7 +78,7 @@ export async function getTopFreeTextModels(limit = 10, apiKey?: string): Promise
 
       const isFree = prompt === 0 && completion === 0;
       const isTextOut = outputMods.length === 1 && outputMods[0] === 'text';
-      const isConversational = !/(safety|moderation|guard|rerank|embedding|embed|reward)/i.test(m.id);
+      const isConversational = !/(safety|moderation|guard|rerank|embedding|embed|reward|reasoning|thinking|deepseek-r1|nano-omni.*reasoning)/i.test(m.id);
 
       return isFree && isTextOut && isConversational;
     });

@@ -136,6 +136,29 @@ function extractSuggestedActions(userQuery: string, _answer: string): string[] {
 }
 
 /**
+ * Limpia cualquier rastro de meta-razonamiento o bloques <thought> de modelos de razonamiento
+ */
+function cleanAiResponse(text: string): string {
+  let cleaned = text.trim();
+  // Eliminar bloques <thought>...</thought> o <think>...</think>
+  cleaned = cleaned.replace(/<(?:thought|think)>[\s\S]*?<\/(?:thought|think)>/gi, '').trim();
+  
+  // Eliminar prefijos de meta-razonamiento en inglés
+  if (cleaned.startsWith('We need to answer:') || cleaned.startsWith('The user is asking:') || cleaned.startsWith('Analysis:')) {
+    const lines = cleaned.split('\n');
+    const validLines = lines.filter(l => 
+      !l.startsWith('We need to answer:') && 
+      !l.startsWith('The user is') && 
+      !l.startsWith('In the context,') &&
+      !l.startsWith('So we must') &&
+      !l.startsWith('We have context:')
+    );
+    cleaned = validLines.join('\n').trim();
+  }
+  return cleaned;
+}
+
+/**
  * Ejecuta una consulta con OpenRouter con fallback automático de múltiples claves y modelos
  */
 export async function queryOpenRouterWithFallback(
@@ -206,10 +229,11 @@ export async function queryOpenRouterWithFallback(
         const textContent = data.choices?.[0]?.message?.content;
 
         if (textContent && typeof textContent === 'string' && textContent.trim().length > 0) {
-          const suggestedActions = extractSuggestedActions(userPrompt, textContent);
+          const cleanedAnswer = cleanAiResponse(textContent);
+          const suggestedActions = extractSuggestedActions(userPrompt, cleanedAnswer);
 
           return {
-            answer: textContent.trim(),
+            answer: cleanedAnswer,
             modelUsed: currentModel,
             keyIndexUsed: keyIdx + 1,
             suggestedActions,

@@ -184,7 +184,26 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
         rules: ['Semana 18', 'Ponderación 40%', 'Evaluación flexible / Grupal']
       }
     ],
-    weeklySchedule: []
+    weeklySchedule: [
+      { week: 1, session: 1, unit: 'Unidad 1', topic: 'Conceptos clave de la gestión del servicio: valor, co-creación y partes interesadas' },
+      { week: 2, session: 2, unit: 'Unidad 1', topic: 'Las 4 dimensiones de la gestión de servicios ITIL 4' },
+      { week: 3, session: 3, unit: 'Unidad 1', topic: 'El Sistema de Valor del Servicio (SVS) de ITIL y los 7 principios guía' },
+      { week: 4, session: 4, unit: 'Unidad 1', topic: 'La Cadena de Valor del Servicio: Planear, Mejorar, Diseñar, Obtener y Entregar' },
+      { week: 5, session: 5, unit: 'Unidad 2', topic: 'Práctica de Gestión de Incidentes: Restauración del servicio normal y priorización' },
+      { week: 6, session: 6, unit: 'Unidad 2', topic: 'Evaluación PC1 (20%): Fundamentos de ITIL 4, SVS y 4 dimensiones', evaluation: 'PC1' },
+      { week: 7, session: 7, unit: 'Unidad 2', topic: 'Práctica de Service Desk (Mesa de Ayuda) y experiencia del usuario' },
+      { week: 8, session: 8, unit: 'Unidad 2', topic: 'Práctica de Gestión de Problemas: Análisis de causa raíz (RCA) y workarounds' },
+      { week: 9, session: 9, unit: 'Unidad 3', topic: 'Práctica de Control de Cambios: Maximizar cambios exitosos y comités CAB' },
+      { week: 10, session: 10, unit: 'Unidad 3', topic: 'Práctica de Gestión del Nivel de Servicio (SLA, OLA y contratos UC)' },
+      { week: 11, session: 11, unit: 'Unidad 3', topic: 'Práctica de Gestión de Solicitudes de Servicio y Catálogo de Servicios' },
+      { week: 12, session: 12, unit: 'Unidad 3', topic: 'Diagnóstico y diseño de flujo de atención de incidentes y requerimientos' },
+      { week: 13, session: 13, unit: 'Unidad 3', topic: 'Práctica de Gestión de Activos de TI (ITAM) y Gestión de Configuración (CMDB)' },
+      { week: 14, session: 14, unit: 'Unidad 3', topic: 'Evaluación PC2 (20%): Incidentes, problemas, Service Desk, SLA y CMDB', evaluation: 'PC2' },
+      { week: 15, session: 15, unit: 'Unidad 4', topic: 'Práctica de Gestión de la Disponibilidad y Continuidad del Servicio TI' },
+      { week: 16, session: 16, unit: 'Unidad 4', topic: 'El modelo de Mejora Continua de ITIL y métricas de éxito (KPIs y CSFs)' },
+      { week: 17, session: 17, unit: 'Unidad 4', topic: 'Evaluación PA (20%): Cierre de participación acumulada en foros y talleres', evaluation: 'PA' },
+      { week: 18, session: 18, unit: 'Unidad 4', topic: 'Evaluación PROYECTO FINAL PROY (40%): Sustentación de diseño integral de gestión TI', evaluation: 'PROY' }
+    ]
   },
 
   // 3. DESARROLLO WEB INTEGRADO (100000ST61)
@@ -235,7 +254,7 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
         week: 15,
         weightPercent: 20,
         modality: 'Grupal',
-        observation: 'Evaluación grupal. Integración de frontend con Angular, componentes, rutas, consumo de servicios REST.',
+        observation: 'Evaluación grupal. Integración de frontend con Angular/React, componentes, rutas, consumo de servicios REST.',
         rules: ['Semana 15', 'Ponderación 20%', 'Grupal', 'No rezagado']
       },
       {
@@ -250,40 +269,24 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
       }
     ],
     weeklySchedule: [
-      {
-        week: 1,
-        unit: 'Unidad 1: API REST',
-        topics: ['Introducción al curso. Spring Boot: conceptos básicos, arquitectura y estructura de un proyecto Spring Boot. Configuración del entorno de desarrollo.'],
-        activities: ['Definición y requisitos iniciales del proyecto. Exposición docente. Desarrollo de casos.']
-      },
-      {
-        week: 2,
-        unit: 'Unidad 1: API REST',
-        topics: ['Configuración de endpoints y controladores. Dependency injection.'],
-        activities: ['Exposición docente. Desarrollo de casos prácticos.']
-      },
-      {
-        week: 3,
-        unit: 'Unidad 1: API REST',
-        topics: ['Test-drive development (TDD). Integración de TDD en Spring.'],
-        activities: ['Exposición docente. Desarrollo de casos con pruebas automatizadas.']
-      },
-      {
-        week: 4,
-        unit: 'Unidad 1: API REST',
-        topics: ['Implementación de API REST. Herramientas de prueba de API REST. Métodos HTTP y sus usos en la práctica. Integración de temas.'],
-        activities: ['Exposición docente. Pruebas de API REST con Postman.']
-      },
-      {
-        week: 5,
-        unit: 'Unidad 1: API REST',
-        topics: [
-          'Evaluación: AVANCE DE PROYECTO FINAL 1 (APF1 - 20%)',
-          'Consolidación de API RESTful con Spring Boot y TDD (Semanas 1 a 4)',
-          'Entregables requeridos: Informe hasta el capítulo 3 + PPTx'
-        ],
-        activities: ['Entrega en plataforma PAO (2 intentos permitidos). Sustentación con presentación PPTx.']
-      }
+      { week: 1, session: 1, unit: 'Unidad 1', topic: 'Arquitectura web moderna, Spring Boot y configuración inicial' },
+      { week: 2, session: 2, unit: 'Unidad 1', topic: 'Configuración de endpoints, controladores y Dependency Injection' },
+      { week: 3, session: 3, unit: 'Unidad 1', topic: 'Test-Driven Development (TDD) en servicios y controladores' },
+      { week: 4, session: 4, unit: 'Unidad 1', topic: 'Diseño de APIs RESTful, métodos HTTP y validación de DTOs' },
+      { week: 5, session: 5, unit: 'Unidad 1', topic: 'Evaluación APF1 (20%): API RESTful funcional con Spring Boot y TDD', evaluation: 'APF1' },
+      { week: 6, session: 6, unit: 'Unidad 2', topic: 'Persistencia de datos con Spring Data JPA y Hibernate ORM' },
+      { week: 7, session: 7, unit: 'Unidad 2', topic: 'Mapeo de relaciones de entidades, consultas JPQL y transacciones' },
+      { week: 8, session: 8, unit: 'Unidad 2', topic: 'Autenticación y autorización con Spring Security y tokens JWT' },
+      { week: 9, session: 9, unit: 'Unidad 2', topic: 'Frontend moderno: Componentes, JSX/TSX y arquitectura modular' },
+      { week: 10, session: 10, unit: 'Unidad 2', topic: 'Evaluación APF2 (20%): Backend JPA + Spring Security + JWT', evaluation: 'APF2' },
+      { week: 11, session: 11, unit: 'Unidad 3', topic: 'Hooks de estado, ciclo de vida y consumo de APIs con Axios/Fetch' },
+      { week: 12, session: 12, unit: 'Unidad 3', topic: 'Manejo de estado global, formularios dinámicos y validación con Zod' },
+      { week: 13, session: 13, unit: 'Unidad 3', topic: 'Rutas protegidas por roles y manejo de sesiones en frontend' },
+      { week: 14, session: 14, unit: 'Unidad 3', topic: 'Optimización de rendimiento, caching y server components' },
+      { week: 15, session: 15, unit: 'Unidad 3', topic: 'Evaluación APF3 (20%): Integración Fullstack con Frontend y Backend', evaluation: 'APF3' },
+      { week: 16, session: 16, unit: 'Unidad 4', topic: 'Seguridad web avanzada: Prevención de OWASP Top 10, CORS y CSRF' },
+      { week: 17, session: 17, unit: 'Unidad 4', topic: 'Despliegue en producción con CI/CD (Vercel / Docker en la nube)' },
+      { week: 18, session: 18, unit: 'Unidad 4', topic: 'Sustentación de PROYECTO FINAL PROY (40%): Demostración en vivo', evaluation: 'PROY' }
     ]
   },
 
@@ -358,7 +361,26 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
         rules: ['Semana 18', 'Ponderación 30%', 'Grupal']
       }
     ],
-    weeklySchedule: []
+    weeklySchedule: [
+      { week: 1, session: 1, unit: 'Unidad 1', topic: 'Fundamentos de Cloud Computing y modelos de servicio (IaaS, PaaS, SaaS)' },
+      { week: 2, session: 2, unit: 'Unidad 1', topic: 'Modelos de despliegue, Regiones y Zonas de Disponibilidad (AZ) en AWS' },
+      { week: 3, session: 3, unit: 'Unidad 1', topic: 'Redes en la nube: Amazon VPC, subredes públicas/privadas y Security Groups' },
+      { week: 4, session: 4, unit: 'Unidad 1', topic: 'Cómputo elástico: Instancias Amazon EC2 y ciclo de vida de servidores' },
+      { week: 5, session: 5, unit: 'Unidad 1', topic: 'Evaluación PC1 (15%): Redes VPC, subredes, tablas de ruteo y EC2', evaluation: 'PC1' },
+      { week: 6, session: 6, unit: 'Unidad 2', topic: 'Almacenamiento de objetos y bloques: Amazon S3 (políticas de bucket) y EBS' },
+      { week: 7, session: 7, unit: 'Unidad 2', topic: 'Alta disponibilidad: Elastic Load Balancers (ALB) y grupos de Auto Scaling' },
+      { week: 8, session: 8, unit: 'Unidad 2', topic: 'Examen Parcial EP (20%): Laboratorio práctico de alta disponibilidad en AWS', evaluation: 'EP' },
+      { week: 9, session: 9, unit: 'Unidad 3', topic: 'Arquitecturas Serverless: AWS Lambda, Amazon API Gateway y eventos' },
+      { week: 10, session: 10, unit: 'Unidad 3', topic: 'Bases de datos en la nube: Amazon RDS (Postgres/MySQL) y DynamoDB NoSQL' },
+      { week: 11, session: 11, unit: 'Unidad 3', topic: 'Seguridad en la nube: AWS IAM, roles, políticas y cifrado con KMS' },
+      { week: 12, session: 12, unit: 'Unidad 3', topic: 'Evaluación PC2 (15%): Serverless con Lambda, API Gateway y RDS', evaluation: 'PC2' },
+      { week: 13, session: 13, unit: 'Unidad 4', topic: 'Contenedores en la nube: Docker, Amazon ECS / EKS y repositorios ECR' },
+      { week: 14, session: 14, unit: 'Unidad 4', topic: 'Infraestructura como Código (IaC): Terraform y CloudFormation' },
+      { week: 15, session: 15, unit: 'Unidad 4', topic: 'Evaluación PC3 (20%): Microservicios Docker en ECS y pipelines CI/CD', evaluation: 'PC3' },
+      { week: 16, session: 16, unit: 'Unidad 4', topic: 'FinOps y gestión de costos: AWS Cost Explorer, presupuestos y Trusted Advisor' },
+      { week: 17, session: 17, unit: 'Unidad 4', topic: 'AWS Well-Architected Framework: los 6 pilares de excelencia arquitectónica' },
+      { week: 18, session: 18, unit: 'Unidad 4', topic: 'Examen Final EF (30%): Sustentación de infraestructura cloud integral', evaluation: 'EF' }
+    ]
   },
 
   // 5. HERRAMIENTAS PARA LA COMUNICACIÓN EFECTIVA (100000CO01)
@@ -432,7 +454,26 @@ export const OFFICIAL_SYLLABUS_REGISTRY: Record<string, ParsedSyllabus> = {
         rules: ['Semana 18', 'Ponderación 30%']
       }
     ],
-    weeklySchedule: []
+    weeklySchedule: [
+      { week: 1, session: 1, unit: 'Unidad 1', topic: 'Fundamentos de la comunicación interpersonal y asertividad profesional' },
+      { week: 2, session: 2, unit: 'Unidad 1', topic: 'Lenguaje no verbal, kinésica y manejo del espacio escénico' },
+      { week: 3, session: 3, unit: 'Unidad 1', topic: 'Escucha activa, empatía y retroalimentación constructiva' },
+      { week: 4, session: 4, unit: 'Unidad 1', topic: 'Evaluación Tarea Académica TA1 (20%): Análisis de casos', evaluation: 'TA1' },
+      { week: 5, session: 5, unit: 'Unidad 2', topic: 'Estructura del discurso persuasivo y oratoria estratégica' },
+      { week: 6, session: 6, unit: 'Unidad 2', topic: 'Storytelling aplicado a presentaciones técnicas y de proyectos' },
+      { week: 7, session: 7, unit: 'Unidad 2', topic: 'Modulación de voz, ritmo, pausas y proyección vocal' },
+      { week: 8, session: 8, unit: 'Unidad 2', topic: 'Evaluación Tarea Académica TA2 (20%): Video de discurso persuasivo', evaluation: 'TA2' },
+      { week: 9, session: 9, unit: 'Unidad 3', topic: 'Técnicas de debate, argumentación y refutación de ideas' },
+      { week: 10, session: 10, unit: 'Unidad 3', topic: 'Comunicación en equipos multidisciplinarios y liderazgo' },
+      { week: 11, session: 11, unit: 'Unidad 3', topic: 'Negociación estratégica y resolución de objeciones' },
+      { week: 12, session: 12, unit: 'Unidad 3', topic: 'Evaluación Tarea Académica TA3 (20%): Negociación ejecutiva', evaluation: 'TA3' },
+      { week: 13, session: 13, unit: 'Unidad 4', topic: 'Diseño visual de diapositivas de alto impacto (sin sobrecarga)' },
+      { week: 14, session: 14, unit: 'Unidad 4', topic: 'Manejo del pánico escénico y técnicas de respiración diafragmática' },
+      { week: 15, session: 15, unit: 'Unidad 4', topic: 'Comunicación digital y etiqueta en videoconferencias y correos' },
+      { week: 16, session: 16, unit: 'Unidad 4', topic: 'Evaluación Participación PA (10%): Cierre de foros y dinámicas', evaluation: 'PA' },
+      { week: 17, session: 17, unit: 'Unidad 4', topic: 'Ensayos generales y feedback personalizado de presentaciones' },
+      { week: 18, session: 18, unit: 'Unidad 4', topic: 'Evaluación Trabajo Final TF (30%): Presentación ejecutiva en vivo', evaluation: 'TF' }
+    ]
   },
   // 6. LENGUAJES DE PROGRAMACIÓN (100000SI23)
   '100000SI23': {

@@ -420,7 +420,7 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
 
                 {isLoading && (
                   <div className="flex items-center gap-3 text-xs text-neutral-300 py-3 animate-in fade-in select-none">
-                    <AsciiMatrixOrb size={26} state="thinking" colorMode="lime" />
+                    <AsciiMatrixOrb size={26} state="thinking" colorMode="monochrome" />
                     <div className="flex flex-col">
                       <span className="font-semibold text-white">Consultando sílabo oficial y razonando...</span>
                       <span className="text-[10px] text-neutral-400">Analizando rúbricas, fórmulas y temario de clase</span>

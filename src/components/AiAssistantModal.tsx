@@ -147,7 +147,7 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-3.5 bg-[#16161a] border-b border-white/5">
           <div className="flex items-center gap-3">
-            <AsciiMatrixOrb size={32} state={isLoading ? 'thinking' : 'idle'} colorMode="lime" />
+            <AsciiMatrixOrb size={32} state={isLoading ? 'thinking' : 'idle'} colorMode="monochrome" />
             <div>
               <h3 className="text-sm font-bold text-white">Copiloto Académico UTP</h3>
               <p className="text-[11px] text-neutral-400">
@@ -186,7 +186,7 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
 
           {isLoading && (
             <div className="flex items-center gap-3 text-xs text-neutral-300 py-3 animate-in fade-in select-none">
-              <AsciiMatrixOrb size={26} state="thinking" colorMode="lime" />
+              <AsciiMatrixOrb size={26} state="thinking" colorMode="monochrome" />
               <div className="flex flex-col">
                 <span className="font-semibold text-white">Razonando respuesta académica...</span>
                 <span className="text-[10px] text-neutral-400">Consultando sílabo oficial, rúbricas y cronograma UTP</span>

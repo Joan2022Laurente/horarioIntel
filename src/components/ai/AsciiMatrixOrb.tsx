@@ -45,8 +45,8 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
 
   // Inicializar puntos distribuidos con Fibonacci Sphere con espaciado fino de alta resolución
   useEffect(() => {
-    // Densidad aumentada en +20% con micro-fuentes finas
-    const count = size <= 28 ? 90 : size <= 44 ? 140 : size <= 72 ? 200 : 290;
+    // Densidad óptima para números micro-reducidos en un 50%
+    const count = size <= 28 ? 115 : size <= 44 ? 170 : size <= 72 ? 240 : 340;
     const points: SpherePoint[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -218,10 +218,10 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Micro-dígitos calibrados para nitidez óptima
-      const baseCssFont = Math.max(4.5, Math.min(8.0, size * 0.165));
-      const minFont = Math.round(baseCssFont * 0.85 * dpr);
-      const maxFont = Math.round(baseCssFont * 1.30 * dpr);
+      // Micro-dígitos reducidos en un 50% con alta nitidez
+      const baseCssFont = Math.max(2.2, Math.min(4.2, size * 0.0825));
+      const minFont = Math.max(1.8 * dpr, Math.round(baseCssFont * 0.85 * dpr));
+      const maxFont = Math.max(2.8 * dpr, Math.round(baseCssFont * 1.30 * dpr));
 
       for (let i = 0; i < pointsToDraw.length; i++) {
         const pt = pointsToDraw[i];

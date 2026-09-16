@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChatMessage } from '@/types/utp';
+import { MarkdownRenderer } from '@/components/ai/MarkdownRenderer';
 import { Copy, Check, RotateCcw, ChevronRight, Video } from 'lucide-react';
 
 interface ChatMessageBubbleProps {
@@ -30,86 +31,6 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
     }
   };
 
-  const parseInlineMarkdown = (text: string) => {
-    // Matches **bold**, `code`, [link](url)
-    const parts = text.split(/(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g);
-    return parts.map((part, idx) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={idx} className="font-bold text-white">{part.slice(2, -2)}</strong>;
-      }
-      if (part.startsWith('`') && part.endsWith('`')) {
-        return (
-          <code key={idx} className="rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-xs text-[#bbf451]">
-            {part.slice(1, -1)}
-          </code>
-        );
-      }
-      const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-      if (linkMatch) {
-        return (
-          <a
-            key={idx}
-            href={linkMatch[2]}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#3a86ff] hover:underline font-semibold"
-          >
-            {linkMatch[1]}
-          </a>
-        );
-      }
-      return part;
-    });
-  };
-
-  const renderMarkdown = (content: string) => {
-    const lines = content.split('\n');
-    return lines.map((line, i) => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('### ')) {
-        return (
-          <h4 key={i} className="text-sm sm:text-base font-bold text-white mt-3 mb-1.5 tracking-tight">
-            {trimmed.replace('### ', '')}
-          </h4>
-        );
-      }
-      if (trimmed.startsWith('## ')) {
-        return (
-          <h3 key={i} className="text-base font-extrabold text-white mt-4 mb-2 tracking-tight">
-            {trimmed.replace('## ', '')}
-          </h3>
-        );
-      }
-      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        return (
-          <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-neutral-300 my-1 leading-relaxed pl-2">
-            <span className="text-[#bbf451] font-bold mt-0.5">•</span>
-            <span className="flex-1">{parseInlineMarkdown(trimmed.substring(2))}</span>
-          </div>
-        );
-      }
-      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
-      if (numMatch) {
-        return (
-          <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-300 my-1.5 leading-relaxed pl-1">
-            <span className="font-mono font-bold text-neutral-400 shrink-0 text-xs mt-0.5">
-              {numMatch[1]}.
-            </span>
-            <span className="flex-1">{parseInlineMarkdown(numMatch[2])}</span>
-          </div>
-        );
-      }
-      if (trimmed === '') {
-        return <div key={i} className="h-2" />;
-      }
-      return (
-        <p key={i} className="text-xs sm:text-sm text-neutral-200 leading-relaxed my-1">
-          {parseInlineMarkdown(line)}
-        </p>
-      );
-    });
-  };
-
   // Mensaje del Usuario: Burbuja en el lado derecho estilo Claude/Gemini
   if (!isAssistant) {
     return (
@@ -131,14 +52,12 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
     );
   }
 
-  // Mensaje del Asistente: Abierto en el canvas (Zero Card-ception)
+  // Mensaje del Asistente: Abierto en el canvas con MarkdownRenderer completo
   return (
     <div className="flex flex-col gap-2 my-4 text-neutral-200 animate-in fade-in duration-150">
       
       {/* Contenido sin card envolvente */}
-      <div className="space-y-1">
-        {renderMarkdown(msg.content)}
-      </div>
+      <MarkdownRenderer content={msg.content} />
 
       {/* Enlace a Zoom si aplica */}
       {msg.contextInfo?.zoomLink && (
@@ -171,7 +90,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
         </div>
       )}
 
-      {/* Barra de herramientas: Copiar, Reintentar (Solo para respuestas reales generadas, NO para el aviso/bienvenida inicial) */}
+      {/* Barra de herramientas: Copiar, Reintentar (Solo para respuestas reales generadas) */}
       {!isWelcome && (
         <div className="flex items-center gap-3 pt-1 text-neutral-500 text-xs">
           <button

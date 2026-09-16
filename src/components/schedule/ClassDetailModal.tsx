@@ -47,6 +47,7 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastScrollTopRef = useRef<number>(0);
+  const isProgrammaticScrollRef = useRef<boolean>(false);
 
   const parsed = event ? parseEventTitle(event.title) : { cleanTitle: '', sectionCode: '', weekInTitle: weekNumber };
   const effectiveWeek = parsed.weekInTitle || weekNumber;
@@ -88,7 +89,7 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     setMessages([initialAiMessage]);
   }, [event?.id, effectiveWeek]);
 
-  // Auto-scroll del chat
+  // Auto-scroll del chat al final cuando se envían mensajes
   useEffect(() => {
     if (chatBottomRef.current && isChatExpanded) {
       chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -101,7 +102,7 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     const text = (textToSend || inputMessage).trim();
     if (!text || isLoading) return;
 
-    // Trigger de expansión inteligente del chat: abarca el 100% del alto y ancho del modal
+    // Al enviar el mensaje, transformar inmediatamente a vista completa expandida (deja de ser modal)
     setIsChatExpanded(true);
     setLastUserPrompt(text);
 
@@ -159,20 +160,32 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     }
   };
 
-  // Sensor de scroll bidireccional inteligente (estilo nav moderno):
-  // - Scroll hacia abajo con mensajes activos -> Expande el chat al 100%
-  // - Scroll hacia arriba hacia el tope -> Restaura la cabecera y ficha de aula
+  // Restaurar datos de clase y volver a modo modal
+  const handleRestoreToModal = () => {
+    isProgrammaticScrollRef.current = true;
+    setIsChatExpanded(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 500);
+  };
+
+  // Sensor de scroll bidireccional inteligente
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (isProgrammaticScrollRef.current) return;
+
     const currentScrollTop = e.currentTarget.scrollTop;
     const isScrollingDown = currentScrollTop > lastScrollTopRef.current;
     const isScrollingUp = currentScrollTop < lastScrollTopRef.current;
 
-    // Al hacer scroll hacia abajo en la conversación -> re-expandir chat a foco completo
+    // Scroll hacia abajo con mensajes activos -> expande a pantalla completa (deja de verse como modal)
     if (!isChatExpanded && isScrollingDown && currentScrollTop > 30 && messages.length > 1) {
       setIsChatExpanded(true);
     }
 
-    // Al hacer scroll hacia arriba hacia el inicio -> restaurar cabecera y ficha de clase
+    // Scroll hacia arriba al tope -> regresa al modo modal con la ficha de clase
     if (isChatExpanded && isScrollingUp && currentScrollTop <= 15) {
       setIsChatExpanded(false);
     }
@@ -181,22 +194,34 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
+        isChatExpanded 
+          ? 'p-0 bg-[#0a0a0c]' 
+          : 'p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md'
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isChatExpanded) {
+          onClose();
+        }
+      }}
+    >
       <div 
-        className={`relative w-full flex flex-col rounded-3xl bg-[#111114] text-white shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
+        className={`relative flex flex-col transition-all duration-300 ease-out overflow-hidden ${
           isChatExpanded 
-            ? 'max-w-4xl h-[94vh] sm:h-[92vh]' 
-            : 'max-w-3xl h-[82vh] sm:h-[85vh]'
+            ? 'w-full h-full rounded-none bg-[#0a0a0c] shadow-none' 
+            : 'w-full max-w-3xl h-[82vh] sm:h-[85vh] rounded-3xl bg-[#111114] text-white shadow-2xl'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Superior Inteligente */}
-        <div className={`transition-all duration-300 ease-in-out border-b border-white/5 shrink-0 ${
+        
+        {/* Header Superior Dinámico */}
+        <div className={`transition-all duration-300 border-b border-white/5 shrink-0 ${
           isChatExpanded 
-            ? 'bg-[#141418] px-6 py-2.5' 
+            ? 'bg-[#121216] px-4 sm:px-8 py-3' 
             : 'bg-[#16161a] px-6 py-4'
         }`}>
-          <div className="flex items-center justify-between gap-3">
+          <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-3">
             <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2">
                 {isPresencial ? (
@@ -228,19 +253,19 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
               </div>
 
               <h2 className={`font-bold text-white truncate transition-all ${
-                isChatExpanded ? 'text-xs sm:text-sm text-neutral-300 max-w-[400px]' : 'text-base sm:text-lg'
+                isChatExpanded ? 'text-xs sm:text-sm text-neutral-300 max-w-[500px]' : 'text-base sm:text-lg'
               }`}>
                 {parsed.cleanTitle}
               </h2>
             </div>
 
-            {/* Controles del Header: Expandir / Minimizar / Cerrar */}
+            {/* Controles: Ver datos de clase / Minimizar / Cerrar */}
             <div className="flex items-center gap-2 shrink-0">
               {isChatExpanded ? (
                 <button
-                  onClick={() => setIsChatExpanded(false)}
-                  title="Restaurar datos de aula y horario"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white hover:text-black px-3 py-1.5 text-xs font-semibold text-white transition active:scale-95 shadow-sm"
+                  onClick={handleRestoreToModal}
+                  title="Volver a modo modal y ver datos de clase"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white hover:text-black px-3.5 py-1.5 text-xs font-bold text-white transition active:scale-95 shadow-sm"
                 >
                   <ChevronDown className="h-3.5 w-3.5" />
                   <span>Ver datos de clase</span>
@@ -249,11 +274,11 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
                 messages.length > 1 && (
                   <button
                     onClick={() => setIsChatExpanded(true)}
-                    title="Expandir chat a pantalla completa"
+                    title="Expandir a pantalla completa"
                     className="inline-flex items-center gap-1.5 rounded-xl bg-white/5 hover:bg-white/15 px-3 py-1.5 text-xs font-semibold text-neutral-300 hover:text-white transition"
                   >
                     <Maximize2 className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Expandir chat</span>
+                    <span className="hidden sm:inline">Pantalla completa</span>
                   </button>
                 )
               )}
@@ -269,158 +294,168 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Floating Hint Bar cuando el chat está expandido (Permite al usuario deslizar o hacer clic para restaurar) */}
+        {/* Barra Flotante de Retorno en Modo Pantalla Completa */}
         {isChatExpanded && (
           <div 
-            onClick={() => setIsChatExpanded(false)}
-            className="w-full bg-[#18181f]/80 hover:bg-[#18181f] text-neutral-400 hover:text-neutral-200 text-[11px] py-1 text-center cursor-pointer transition flex items-center justify-center gap-1.5 border-b border-white/5 select-none"
+            onClick={handleRestoreToModal}
+            className="w-full bg-[#141418]/90 hover:bg-[#18181f] text-neutral-400 hover:text-neutral-200 text-xs py-1.5 text-center cursor-pointer transition flex items-center justify-center gap-2 border-b border-white/5 select-none"
           >
             <ArrowUp className="h-3 w-3 animate-bounce" />
-            <span>Desliza hacia arriba o haz clic aquí para ver aula, piso y horario</span>
+            <span>Desliza hacia arriba o haz clic aquí para volver a ver aula, piso y horario</span>
           </div>
         )}
 
-        {/* Scrollable Container Principal */}
+        {/* Contenedor con Scroll de la Conversación */}
         <div 
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar"
+          className={`flex-1 overflow-y-auto custom-scrollbar transition-all ${
+            isChatExpanded ? 'px-4 sm:px-8 py-6' : 'px-6 py-4'
+          }`}
         >
-          
-          {/* Ficha de Ubicación y Horario (Deslizable hacia arriba suavemente al expandir chat) */}
-          <div className={`transition-all duration-300 ease-in-out ${
-            isChatExpanded 
-              ? '-translate-y-4 opacity-0 max-h-0 overflow-hidden pointer-events-none -my-2' 
-              : 'translate-y-0 opacity-100 max-h-[500px]'
-          }`}>
-            <div className="space-y-3 pb-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
-                  <span className="text-[10px] text-neutral-500 uppercase font-semibold">Horario</span>
-                  <p className="font-bold text-white">{dayName}</p>
-                  <p className="font-mono text-[11px] text-neutral-400">
-                    {formatTime(event.startAt)} – {formatTime(event.finishAt)}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
-                  <span className="text-[10px] text-neutral-500 uppercase font-semibold">
-                    {isPresencial ? 'Aula y Piso' : 'Plataforma'}
-                  </span>
-                  <p className="font-bold text-white">
-                    {isPresencial ? location.aula : isRemoteZoom ? 'Zoom UTP' : 'Canvas LMS'}
-                  </p>
-                  <p className="text-[11px] text-neutral-400">
-                    {isPresencial ? `Piso ${location.piso}` : 'Sesión Virtual'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
-                  <span className="text-[10px] text-neutral-500 uppercase font-semibold">
-                    {isPresencial ? 'Pabellón' : 'Modalidad'}
-                  </span>
-                  <p className="font-bold text-white">
-                    {isPresencial ? location.pabellon : isRemoteZoom ? 'Remota en Vivo' : 'Asíncrono'}
-                  </p>
-                  <p className="text-[11px] text-neutral-400 truncate" title={location.tipo}>
-                    {isPresencial ? location.tipo : 'Digital'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
-                  <span className="text-[10px] text-neutral-500 uppercase font-semibold">Campus</span>
-                  <p className="font-bold text-white">{location.campus}</p>
-                  <p className="text-[11px] text-neutral-400 font-mono">
-                    {courseSyllabus?.generalInfo.courseCode || 'UTP'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Botón Zoom directo */}
-              {isRemoteZoom && event.metadata?.zoomLink && (
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#16161b]">
-                  <div className="flex items-center gap-2 text-xs">
-                    <Video className="h-4 w-4 text-[#ff7043]" />
-                    <span className="text-neutral-300 font-medium">Clase remota en vivo programada por Zoom</span>
+          <div className="max-w-4xl mx-auto w-full space-y-4">
+            
+            {/* Ficha de Ubicación y Horario (Oculta suavemente en modo pantalla completa) */}
+            <div className={`transition-all duration-300 ease-in-out ${
+              isChatExpanded 
+                ? '-translate-y-4 opacity-0 max-h-0 overflow-hidden pointer-events-none -my-2' 
+                : 'translate-y-0 opacity-100 max-h-[500px]'
+            }`}>
+              <div className="space-y-3 pb-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
+                    <span className="text-[10px] text-neutral-500 uppercase font-semibold">Horario</span>
+                    <p className="font-bold text-white">{dayName}</p>
+                    <p className="font-mono text-[11px] text-neutral-400">
+                      {formatTime(event.startAt)} – {formatTime(event.finishAt)}
+                    </p>
                   </div>
-                  <a
-                    href={event.metadata.zoomLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-neutral-200 px-4 py-2 text-xs font-bold text-black shadow transition active:scale-95"
-                  >
-                    <span>Entrar a Zoom</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Conversación IA Expandida: Abarca el 100% del espacio */}
-          <div className={`${!isChatExpanded ? 'pt-2 border-t border-white/5' : ''}`}>
-            {!isChatExpanded && (
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-neutral-400 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-[#bbf451]" />
-                  Copiloto de Clase & Sílabo
-                </span>
-                <span className="text-[11px] text-neutral-500">
-                  Semana {effectiveWeek} • {syllabusWeekSession?.unit || 'Sílabo Oficial'}
-                </span>
+                  <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
+                    <span className="text-[10px] text-neutral-500 uppercase font-semibold">
+                      {isPresencial ? 'Aula y Piso' : 'Plataforma'}
+                    </span>
+                    <p className="font-bold text-white">
+                      {isPresencial ? location.aula : isRemoteZoom ? 'Zoom UTP' : 'Canvas LMS'}
+                    </p>
+                    <p className="text-[11px] text-neutral-400">
+                      {isPresencial ? `Piso ${location.piso}` : 'Sesión Virtual'}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
+                    <span className="text-[10px] text-neutral-500 uppercase font-semibold">
+                      {isPresencial ? 'Pabellón' : 'Modalidad'}
+                    </span>
+                    <p className="font-bold text-white">
+                      {isPresencial ? location.pabellon : isRemoteZoom ? 'Remota en Vivo' : 'Asíncrono'}
+                    </p>
+                    <p className="text-[11px] text-neutral-400 truncate" title={location.tipo}>
+                      {isPresencial ? location.tipo : 'Digital'}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#16161b] space-y-0.5">
+                    <span className="text-[10px] text-neutral-500 uppercase font-semibold">Campus</span>
+                    <p className="font-bold text-white">{location.campus}</p>
+                    <p className="text-[11px] text-neutral-400 font-mono">
+                      {courseSyllabus?.generalInfo.courseCode || 'UTP'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botón Zoom directo */}
+                {isRemoteZoom && event.metadata?.zoomLink && (
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#16161b]">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Video className="h-4 w-4 text-[#ff7043]" />
+                      <span className="text-neutral-300 font-medium">Clase remota en vivo programada por Zoom</span>
+                    </div>
+                    <a
+                      href={event.metadata.zoomLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-neutral-200 px-4 py-2 text-xs font-bold text-black shadow transition active:scale-95"
+                    >
+                      <span>Entrar a Zoom</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Lista de Mensajes estilo Claude/Gemini */}
-            <div className="space-y-4">
-              {messages.map((m) => (
-                <ChatMessageBubble
-                  key={m.id}
-                  msg={m}
-                  onSendAction={handleSendMessage}
-                  onRetry={handleRetry}
-                />
-              ))}
-
-              {isLoading && (
-                <div className="flex items-center gap-2 text-xs text-neutral-400 py-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#bbf451] animate-ping" />
-                  <span>Consultando sílabo oficial y respondiendo...</span>
+            {/* Conversación IA: Renderizado Editorial Limpio con Markdown */}
+            <div className={`${!isChatExpanded ? 'pt-2 border-t border-white/5' : ''}`}>
+              {!isChatExpanded && (
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-neutral-400 flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-[#bbf451]" />
+                    Copiloto de Clase & Sílabo
+                  </span>
+                  <span className="text-[11px] text-neutral-500">
+                    Semana {effectiveWeek} • {syllabusWeekSession?.unit || 'Sílabo Oficial'}
+                  </span>
                 </div>
               )}
 
-              <div ref={chatBottomRef} />
-            </div>
-          </div>
+              {/* Mensajes */}
+              <div className="space-y-4">
+                {messages.map((m) => (
+                  <ChatMessageBubble
+                    key={m.id}
+                    msg={m}
+                    onSendAction={handleSendMessage}
+                    onRetry={handleRetry}
+                  />
+                ))}
 
+                {isLoading && (
+                  <div className="flex items-center gap-2 text-xs text-neutral-400 py-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-[#bbf451] animate-ping" />
+                    <span>Consultando sílabo oficial y respondiendo...</span>
+                  </div>
+                )}
+
+                <div ref={chatBottomRef} />
+              </div>
+            </div>
+
+          </div>
         </div>
 
-        {/* Input Bar Inferior Integrado a lo ancho del modal */}
-        <div className="p-4 bg-[#141418] border-t border-white/5 shrink-0">
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            className="flex items-center gap-2 bg-[#1b1b22] rounded-2xl px-4 py-2 focus-within:ring-1 focus-within:ring-[#ff5722]"
-          >
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder={`Pregunta sobre la clase de ${parsed.cleanTitle}...`}
-              className="flex-1 bg-transparent py-1.5 text-xs sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={!inputMessage.trim() || isLoading}
-              aria-label="Enviar mensaje"
-              className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff5722] hover:bg-[#ff7043] text-white transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+        {/* Input Bar Inferior */}
+        <div className={`border-t border-white/5 shrink-0 ${
+          isChatExpanded 
+            ? 'bg-[#121216] px-4 sm:px-8 py-3.5' 
+            : 'bg-[#141418] p-4'
+        }`}>
+          <div className="max-w-4xl mx-auto w-full">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex items-center gap-2 bg-[#1b1b22] rounded-2xl px-4 py-2 focus-within:ring-1 focus-within:ring-[#ff5722]"
             >
-              <Send className="h-3.5 w-3.5" />
-            </button>
-          </form>
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder={`Pregunta sobre la clase de ${parsed.cleanTitle}...`}
+                className="flex-1 bg-transparent py-1.5 text-xs sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!inputMessage.trim() || isLoading}
+                aria-label="Enviar mensaje"
+                className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff5722] hover:bg-[#ff7043] text-white transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+              >
+                <Send className="h-3.5 w-3.5" />
+              </button>
+            </form>
+          </div>
         </div>
 
       </div>

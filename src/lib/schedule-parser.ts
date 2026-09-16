@@ -71,9 +71,37 @@ export function parseDate(dateStr: string): Date {
 export function formatTime(dateStr: string): string {
   try {
     const d = parseDate(dateStr);
-    return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const h12 = hours % 12 || 12;
+    return `${h12.toString().padStart(2, '0')}:${minutes} ${ampm}`;
   } catch {
     return dateStr;
+  }
+}
+
+export function formatScheduleTimeRange(startStr: string, finishStr: string): string {
+  try {
+    const s = parseDate(startStr);
+    const f = parseDate(finishStr);
+
+    const sHours = s.getHours();
+    const sMinutes = s.getMinutes().toString().padStart(2, '0');
+    const sAmpm = sHours >= 12 ? 'PM' : 'AM';
+    const sH12 = (sHours % 12 || 12).toString().padStart(2, '0');
+
+    const fHours = f.getHours();
+    const fMinutes = f.getMinutes().toString().padStart(2, '0');
+    const fAmpm = fHours >= 12 ? 'PM' : 'AM';
+    const fH12 = (fHours % 12 || 12).toString().padStart(2, '0');
+
+    if (sAmpm === fAmpm) {
+      return `${sH12}:${sMinutes} – ${fH12}:${fMinutes} ${fAmpm}`;
+    }
+    return `${sH12}:${sMinutes} ${sAmpm} – ${fH12}:${fMinutes} ${fAmpm}`;
+  } catch {
+    return `${formatTime(startStr)} – ${formatTime(finishStr)}`;
   }
 }
 
@@ -126,6 +154,23 @@ export function getProcessedCourses(events: UTPEvent[]): ProcessedCourse[] {
       existing.sectionId = event.metadata.sectionId;
     }
     existing.sessions.push(event);
+  }
+
+  // Incorporar asignaturas virtuales 24/7 registradas que no generan slots en el calendario semanal
+  for (const [knownId, knownData] of Object.entries(KNOWN_SYLLABUS_MAP)) {
+    const isAlreadyPresent = Array.from(courseMap.values()).some(
+      (c) => c.name.toLowerCase().trim() === knownData.name.toLowerCase().trim()
+    );
+
+    if (!isAlreadyPresent) {
+      courseMap.set(knownId, {
+        courseId: knownId,
+        name: knownData.name.toUpperCase(),
+        sectionCode: '54262',
+        modalities: new Set(['VT']),
+        sessions: [],
+      });
+    }
   }
 
   const result: ProcessedCourse[] = [];

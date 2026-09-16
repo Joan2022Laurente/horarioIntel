@@ -15,7 +15,7 @@
     --surface-muted: #24242c;
     --surface-elevated: #2c2c36;
     --surface-input: #121215;
-    
+
     /* Solid Neutral Borders */
     --border-subtle: #22222a;
     --border-medium: #2e2e38;
@@ -84,7 +84,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     letter-spacing: -0.025em;
   }
 }
@@ -95,13 +100,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #0a0a0c;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.18);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
 }
@@ -112,16 +120,19 @@
   font-size: 0.875rem;
   line-height: 1.625;
 }
+
 .utp-instructions-content * {
   color: inherit !important;
   background-color: transparent !important;
   font-family: inherit !important;
 }
+
 .utp-instructions-content strong,
 .utp-instructions-content b {
   color: #ffffff !important;
   font-weight: 800 !important;
 }
+
 .utp-instructions-content h1,
 .utp-instructions-content h2,
 .utp-instructions-content h3,
@@ -131,6 +142,7 @@
   margin-top: 1rem !important;
   margin-bottom: 0.5rem !important;
 }
+
 .utp-instructions-content figure {
   background-color: rgba(255, 87, 34, 0.15) !important;
   border-radius: 1rem;
@@ -138,17 +150,21 @@
   margin: 1rem 0;
   color: #ff8a65 !important;
 }
+
 .utp-instructions-content figure p {
   color: #ffccbc !important;
   margin: 0;
 }
+
 .utp-instructions-content p {
   margin-bottom: 0.5rem;
 }
+
 .utp-instructions-content p:empty,
 .utp-instructions-content p:has(> br:only-child) {
   display: none !important;
 }
+
 .utp-instructions-content ul {
   list-style-type: none !important;
   padding-left: 0 !important;
@@ -157,13 +173,15 @@
   flex-direction: column;
   gap: 0.35rem;
 }
-.utp-instructions-content ul > li {
+
+.utp-instructions-content ul>li {
   position: relative;
   padding-left: 1.35rem;
   color: #f4f4f5;
   font-weight: 600;
 }
-.utp-instructions-content ul > li::before {
+
+.utp-instructions-content ul>li::before {
   content: "•";
   position: absolute;
   left: 0.35rem;
@@ -172,10 +190,12 @@
   font-size: 1.1rem;
   line-height: 1;
 }
+
 .utp-instructions-content ol {
   padding-left: 1.25rem;
   margin-bottom: 0.75rem;
 }
+
 .utp-instructions-content a {
   color: #3a86ff !important;
   text-decoration: underline;
@@ -188,18 +208,22 @@
     transform: translate3d(0%, 0%, 0) scale(1) rotate(0deg);
     opacity: 0.85;
   }
+
   25% {
     transform: translate3d(22%, -16%, 0) scale(1.12) rotate(14deg);
     opacity: 1;
   }
+
   50% {
     transform: translate3d(-18%, 20%, 0) scale(0.92) rotate(-10deg);
     opacity: 0.78;
   }
+
   75% {
     transform: translate3d(14%, 18%, 0) scale(1.06) rotate(18deg);
     opacity: 0.92;
   }
+
   100% {
     transform: translate3d(0%, 0%, 0) scale(1) rotate(0deg);
     opacity: 0.85;
@@ -211,14 +235,17 @@
     transform: translate3d(0%, 0%, 0) scale(1.08) rotate(0deg);
     opacity: 0.75;
   }
+
   33% {
     transform: translate3d(-24%, -14%, 0) scale(0.9) rotate(35deg);
     opacity: 0.95;
   }
+
   66% {
     transform: translate3d(20%, -22%, 0) scale(1.16) rotate(-25deg);
     opacity: 0.68;
   }
+
   100% {
     transform: translate3d(0%, 0%, 0) scale(1.08) rotate(0deg);
     opacity: 0.75;
@@ -240,7 +267,7 @@
   left: -55%;
   width: 210%;
   height: 210%;
-  background: 
+  background:
     radial-gradient(ellipse 45% 40% at 25% 25%, rgba(255, 87, 34, 0.35) 0%, transparent 65%),
     radial-gradient(ellipse 40% 45% at 75% 70%, rgba(58, 134, 255, 0.32) 0%, transparent 65%),
     radial-gradient(ellipse 50% 50% at 50% 80%, rgba(112, 117, 255, 0.26) 0%, transparent 65%),
@@ -258,7 +285,7 @@
   left: -45%;
   width: 190%;
   height: 190%;
-  background: 
+  background:
     radial-gradient(ellipse 35% 45% at 70% 30%, rgba(255, 183, 3, 0.24) 0%, transparent 60%),
     radial-gradient(ellipse 45% 35% at 25% 75%, rgba(168, 85, 247, 0.28) 0%, transparent 60%);
   filter: blur(34px);
@@ -267,11 +294,7 @@
   z-index: -1;
 }
 
-.aurora-ambient-card > * {
+.aurora-ambient-card>* {
   position: relative;
   z-index: 1;
 }
-
-
-
-

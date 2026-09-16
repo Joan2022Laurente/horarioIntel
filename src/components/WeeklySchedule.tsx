@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import { UTPCurrentInterval, UTPEvent } from '@/types/utp';
+import React, { useState, useMemo } from 'react';
+import { UTPCurrentInterval, UTPEvent, ProcessedCourse } from '@/types/utp';
 import { 
   getEventsByWeek, 
-  formatTime, 
+  formatScheduleTimeRange, 
   parseEventTitle, 
   DAYS_OF_WEEK, 
-  parseDate 
+  parseDate,
+  getProcessedCourses
 } from '@/lib/schedule-parser';
 import { getClassroomLocation } from '@/lib/classroom-helper';
 import { ClassDetailModal } from '@/components/schedule/ClassDetailModal';
@@ -19,21 +20,25 @@ import {
   Radio, 
   Calendar,
   Clock,
-  Sparkles
+  Sparkles,
+  Award,
+  FileText
 } from 'lucide-react';
 
 import { useAgent } from '@/context/AgentContext';
 
 interface WeeklyScheduleProps {
   interval: UTPCurrentInterval;
+  courses?: ProcessedCourse[];
   onAskAi?: (prompt: string) => void;
 }
 
 export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
   interval,
+  courses,
   onAskAi,
 }) => {
-  const { askAgent } = useAgent();
+  const { askAgent, openSyllabus } = useAgent();
   const handleAsk = onAskAi || askAgent;
   const currentWeek = interval.week_number || 5;
   const totalWeeks = interval.total_weeks || 18;
@@ -67,8 +72,22 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
   const daysToDisplay = [1, 2, 3, 4, 5, 6];
 
+  // Identificar asignaturas 100% Virtuales 24/7 (Asíncronas / Autoaprendizaje sin horario semanal fijo)
+  const allCourses = useMemo(() => {
+    if (courses && courses.length > 0) return courses;
+    return getProcessedCourses(events);
+  }, [courses, events]);
+
+  const virtual247Courses = useMemo(() => {
+    return allCourses.filter(c => 
+      c.modalities.includes('VT') || 
+      c.weeklySchedules.length === 0 ||
+      c.name.toUpperCase().includes('COMUNICACIÓN EFECTIVA')
+    );
+  }, [allCourses]);
+
   return (
-    <div className="space-y-5 text-white">
+    <div className="space-y-6 text-white">
       
       {/* Barra de Control de Semana & Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
@@ -181,7 +200,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
               key={dayNum}
               className="flex flex-col space-y-2.5"
             >
-              {/* Header Minimalista del Día */}
+              {/* Header Minimalista del Día (Sin conteo redundante de clases) */}
               <div className="pb-2 flex items-center justify-between border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-xs font-black uppercase tracking-wider ${
@@ -195,10 +214,6 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                     </span>
                   )}
                 </div>
-
-                <span className="text-[10px] font-mono text-neutral-500">
-                  {dayEvents.length} {dayEvents.length === 1 ? 'clase' : 'clases'}
-                </span>
               </div>
 
               {/* Lista de Sesiones */}
@@ -265,36 +280,110 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                                 <Video className="h-3.5 w-3.5" />
                               </button>
                             ) : (
-                              <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors">
+                              <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors truncate max-w-[80px]">
                                 {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
                               </span>
                             )}
                           </div>
 
-                        {/* Nombre del Curso */}
-                        <h4 className="text-xs font-bold text-white group-hover:text-neutral-100 leading-snug line-clamp-2 transition-colors">
-                          {parsed.cleanTitle}
-                        </h4>
+                          {/* Nombre del Curso */}
+                          <h4 className="text-xs font-bold text-white group-hover:text-neutral-100 leading-snug line-clamp-2 transition-colors">
+                            {parsed.cleanTitle}
+                          </h4>
 
-                        {/* Horario */}
-                        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400">
-                          <div className="flex items-center gap-1.5">
+                          {/* Horario Limpio y Ordenado en 1 sola línea */}
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-400 whitespace-nowrap">
                             <Clock className="h-3 w-3 text-neutral-500 shrink-0" />
-                            <span>{formatTime(evt.startAt)} — {formatTime(evt.finishAt)}</span>
+                            <span className="truncate">{formatScheduleTimeRange(evt.startAt, evt.finishAt)}</span>
                           </div>
-
-                          <Sparkles className="h-3 w-3 text-[var(--accent-orange)] opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                      </div>
-                    );
-                  });
-                })()
-              )}
+                      );
+                    });
+                  })()
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Sección Dedicada: Cursos Virtuales 24/7 (Acceso Permanente) */}
+      {virtual247Courses.length > 0 && (
+        <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-black tracking-tight text-white uppercase">
+                Asignaturas Virtuales 24/7 (Acceso Permanente)
+              </h3>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Cursos 100% asíncronos sin horario semanal fijo. Disponibles en cualquier momento en UTP Canvas.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-neutral-500">
+              {virtual247Courses.length} {virtual247Courses.length === 1 ? 'curso' : 'cursos'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {virtual247Courses.map((course) => (
+              <div
+                key={course.courseId}
+                className="flex flex-col justify-between rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-neutral-500 transition-all p-4 space-y-3.5 shadow-none"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
+                      <Radio className="h-2.5 w-2.5" />
+                      Virtual 24/7
+                    </span>
+                    <span className="text-[10px] font-mono text-neutral-400">
+                      {course.sectionCode ? `Sección ${course.sectionCode}` : 'Autoaprendizaje'}
+                    </span>
+                  </div>
+
+                  <h4 className="text-xs font-bold text-white leading-snug line-clamp-2">
+                    {course.name}
+                  </h4>
+
+                  <p className="text-[11px] text-neutral-400 leading-relaxed">
+                    Autoaprendizaje continuo • Entregas y evaluaciones por semana en Canvas
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-subtle)]">
+                  <button
+                    onClick={() => openSyllabus(course.name)}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] py-2 px-3 text-xs font-bold text-black transition active:scale-95 shadow-none"
+                  >
+                    <Award className="h-3.5 w-3.5 shrink-0" />
+                    <span>Sílabo & Rúbricas</span>
+                  </button>
+
+                  {course.syllabusUrl && (
+                    <a
+                      href={course.syllabusUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Descargar Sílabo Oficial PDF"
+                      className="inline-flex items-center justify-center h-8 w-8 rounded-xl bg-[var(--surface-muted)] hover:bg-[var(--surface-elevated)] border border-[var(--border-medium)] text-white transition active:scale-95 shrink-0 shadow-none"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+
+                  <button
+                    onClick={() => handleAsk(`Explícame la metodología, evaluaciones y rúbricas del curso ${course.name}`)}
+                    title="Consultar al Agente sobre este curso"
+                    className="inline-flex items-center justify-center h-8 w-8 rounded-xl bg-[var(--accent-orange)] hover:bg-[var(--accent-orange-hover)] text-white transition active:scale-95 shrink-0 shadow-none"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modal de Detalle de Clase */}
       <ClassDetailModal
@@ -309,3 +398,4 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
     </div>
   );
 };
+

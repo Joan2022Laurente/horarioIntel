@@ -98,6 +98,7 @@ function MainAppDashboard({
           {activeTab === 'weekly' && (
             <WeeklySchedule
               interval={currentInterval}
+              courses={processedCourses}
             />
           )}
 

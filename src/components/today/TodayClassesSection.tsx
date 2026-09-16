@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { UTPEvent, UTPCurrentInterval } from '@/types/utp';
-import { formatTime, parseEventTitle } from '@/lib/schedule-parser';
+import { formatTime, parseEventTitle, parseDate } from '@/lib/schedule-parser';
 import { Badge } from '@/components/ui/Badge';
 import { getClassroomLocation } from '@/lib/classroom-helper';
 import { ClassDetailModal } from '@/components/schedule/ClassDetailModal';
@@ -26,6 +26,8 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
   onAskAi,
 }) => {
   const [selectedEventForModal, setSelectedEventForModal] = useState<UTPEvent | null>(null);
+  const now = new Date();
+  const nextOrLiveEvt = todayEvents.find(e => parseDate(e.finishAt) >= now) || todayEvents[0];
 
   const getModalityBadge = (modality: string) => {
     switch (modality) {
@@ -68,11 +70,21 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
             const isPresencial = ev.modality === 'P';
             const location = getClassroomLocation(parsed.cleanTitle, parsed.sectionCode);
 
+            const startDate = parseDate(ev.startAt);
+            const finishDate = parseDate(ev.finishAt);
+            const isLiveNow = now >= startDate && now <= finishDate;
+            const isNextToday = !isLiveNow && ev.id === nextOrLiveEvt?.id && now < startDate;
+            const isActiveCard = isLiveNow || isNextToday;
+
             return (
               <div 
                 key={ev.id} 
                 onClick={() => setSelectedEventForModal(ev)}
-                className="group p-4 sm:p-5 rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] flex items-center justify-between gap-4 transition shadow-none cursor-pointer"
+                className={`group p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 shadow-none cursor-pointer ${
+                  isActiveCard
+                    ? 'aurora-ambient-card'
+                    : 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)]'
+                }`}
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">

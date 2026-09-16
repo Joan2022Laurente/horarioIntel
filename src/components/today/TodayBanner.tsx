@@ -21,7 +21,7 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
   isLiveNow,
   minutesRemainingCurrent,
   minutesToNext,
-  currentWeek,
+  currentWeek: _currentWeek,
   totalWeeks: _totalWeeks,
   onAskAi,
 }) => {
@@ -41,11 +41,7 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
   };
 
   return (
-    <div className={`rounded-2xl p-5 sm:p-6 transition-all shadow-none bg-[var(--surface-card)] border ${
-      isLiveNow 
-        ? 'border-[var(--badge-emerald-border)]' 
-        : 'border-[var(--border-subtle)]'
-    }`}>
+    <div className="aurora-ambient-card rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-none">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2 min-w-0">
           <div className="flex items-center gap-2">

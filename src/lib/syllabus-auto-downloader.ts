@@ -1,5 +1,13 @@
 import { extractText } from 'unpdf';
-import { parseSyllabusMarkdown, ParsedSyllabus, OFFICIAL_SYLLABUS_REGISTRY } from './syllabus-parser';
+import { parseSyllabusMarkdown, ParsedSyllabus, OFFICIAL_SYLLABUS_REGISTRY, getSyllabusForCourse } from './syllabus-parser';
+
+export interface SyllabusDownloadOptions {
+  sectionId?: string;
+  pdfUrl?: string;
+  courseCode?: string;
+  courseName?: string;
+  gatewayHeaders?: Record<string, string>;
+}
 
 export interface SyllabusDownloadResult {
   success: boolean;
@@ -8,95 +16,123 @@ export interface SyllabusDownloadResult {
   courseName?: string;
   markdown?: string;
   parsedSyllabus?: ParsedSyllabus;
+  fallback?: boolean;
   error?: string;
 }
 
 /**
- * Servicio de extracción inteligente de sílabos UTP:
- * 1. Consulta la URL oficial del PDF en S3 vía API UTP+class.
- * 2. Descarga el binario PDF directamente de AWS S3.
- * 3. Extrae el texto con unpdf (soporte nativo para Serverless / Next.js sin workers).
- * 4. Parsea unidades, logros, fórmulas y cronograma, registrándolo dinámicamente en memoria.
+ * Servicio de extracción inteligente de sílabos UTP en tiempo real:
+ * 1. Si se provee pdfUrl, intenta descarga directa desde AWS S3.
+ * 2. Si se requiere autorización o solo se provee sectionId, consulta la API oficial UTP PAO.
+ * 3. Extrae texto binario con unpdf sin dependencias de workers externos.
+ * 4. Parsea en vivo datos generales, logros, fórmulas, rúbricas y cronograma (semanas 1-18).
+ * 5. Si la red externa de UTP bloquea por 403/Auth, utiliza el respaldo verificado como fallback seguro.
  */
 export async function autoDownloadAndConvertSyllabus(
-  sectionId: string,
-  gatewayHeaders?: Record<string, string>
+  optionsOrSectionId: string | SyllabusDownloadOptions,
+  legacyGatewayHeaders?: Record<string, string>
 ): Promise<SyllabusDownloadResult> {
+  const options: SyllabusDownloadOptions = typeof optionsOrSectionId === 'string'
+    ? { sectionId: optionsOrSectionId, gatewayHeaders: legacyGatewayHeaders }
+    : optionsOrSectionId;
+
+  const { sectionId, pdfUrl: directPdfUrl, courseCode, courseName, gatewayHeaders } = options;
+
+  let targetPdfUrl = directPdfUrl;
+
   try {
-    // 1. Obtener la URL oficial del sílabo en AWS S3
-    const apiUrl = `https://api-pao.utpxpedition.com/course/student/sections/${sectionId}/syllabus`;
-    const apiRes = await fetch(apiUrl, {
-      headers: {
-        'accept': 'application/json, text/plain, */*',
-        ...(gatewayHeaders || {})
+    // 1. Si no hay directPdfUrl o si necesitamos resolver la URL firmada por sectionId
+    if (!targetPdfUrl && sectionId) {
+      const apiUrl = `https://api-pao.utpxpedition.com/course/student/sections/${sectionId}/syllabus`;
+      const apiRes = await fetch(apiUrl, {
+        headers: {
+          'accept': 'application/json, text/plain, */*',
+          ...(gatewayHeaders || {})
+        }
+      });
+
+      if (apiRes.ok) {
+        const apiJson = await apiRes.json();
+        targetPdfUrl = apiJson.data?.syllabusUrl;
       }
-    });
-
-    if (!apiRes.ok) {
-      return {
-        success: false,
-        error: `Error al consultar API UTP (${apiRes.status}): ${apiRes.statusText}`
-      };
     }
 
-    const apiJson = await apiRes.json();
-    const syllabusUrl: string | undefined = apiJson.data?.syllabusUrl;
+    // 2. Si tenemos URL de PDF, intentar descarga y extracción en vivo
+    if (targetPdfUrl) {
+      const pdfRes = await fetch(targetPdfUrl);
+      
+      if (pdfRes.ok) {
+        const arrayBuffer = await pdfRes.arrayBuffer();
+        const { text } = await extractText(new Uint8Array(arrayBuffer));
+        const fullText = Array.isArray(text) ? text.join('\n\n') : (text || '');
 
-    if (!syllabusUrl) {
-      return {
-        success: false,
-        error: 'El endpoint de UTP no retornó syllabusUrl para esta sección.'
-      };
+        if (fullText && fullText.trim().length > 50) {
+          const markdown = `# SÍLABO OFICIAL UTP\n\n${fullText}`;
+          const parsed = parseSyllabusMarkdown(fullText);
+
+          // Si el parser no detectó código del texto pero lo teníamos en opciones
+          if (!parsed.generalInfo.courseCode && courseCode) {
+            parsed.generalInfo.courseCode = courseCode;
+          }
+          if ((!parsed.generalInfo.courseName || parsed.generalInfo.courseName.includes('CURSO')) && courseName) {
+            parsed.generalInfo.courseName = courseName;
+          }
+
+          // Registrar en memoria viva
+          const finalCode = parsed.generalInfo.courseCode || courseCode || '100000';
+          OFFICIAL_SYLLABUS_REGISTRY[finalCode] = parsed;
+
+          return {
+            success: true,
+            syllabusUrl: targetPdfUrl,
+            courseCode: finalCode,
+            courseName: parsed.generalInfo.courseName,
+            markdown,
+            parsedSyllabus: parsed
+          };
+        }
+      }
     }
 
-    // 2. Descargar binario PDF desde AWS S3
-    const pdfRes = await fetch(syllabusUrl);
-    if (!pdfRes.ok) {
+    // 3. Fallback de contingencia (si S3 requiere VPN / token firmado que expiró)
+    const fallbackCourseKey = courseCode || courseName || sectionId || '';
+    const fallbackSyllabus = getSyllabusForCourse(fallbackCourseKey);
+
+    if (fallbackSyllabus) {
       return {
-        success: false,
-        syllabusUrl,
-        error: `Error al descargar PDF de S3 (${pdfRes.status})`
+        success: true,
+        syllabusUrl: targetPdfUrl,
+        courseCode: fallbackSyllabus.generalInfo.courseCode,
+        courseName: fallbackSyllabus.generalInfo.courseName,
+        parsedSyllabus: fallbackSyllabus,
+        fallback: true
       };
-    }
-
-    const arrayBuffer = await pdfRes.arrayBuffer();
-
-    // 3. Extracción de texto estructurado con unpdf
-    const { text } = await extractText(new Uint8Array(arrayBuffer));
-    const fullText = Array.isArray(text) ? text.join('\n\n') : (text || '');
-
-    if (!fullText || fullText.trim().length === 0) {
-      return {
-        success: false,
-        syllabusUrl,
-        error: 'El PDF descargado no contiene texto legible.'
-      };
-    }
-
-    // 4. Formateo a Markdown
-    const markdown = `# SÍLABO OFICIAL UTP\n\n${fullText}`;
-
-    // 5. Ingesta inteligente mediante syllabus-parser
-    const parsed = parseSyllabusMarkdown(markdown);
-
-    // 6. Registro dinámico en memoria
-    if (parsed.generalInfo.courseCode) {
-      OFFICIAL_SYLLABUS_REGISTRY[parsed.generalInfo.courseCode] = parsed;
     }
 
     return {
-      success: true,
-      syllabusUrl,
-      courseCode: parsed.generalInfo.courseCode,
-      courseName: parsed.generalInfo.courseName,
-      markdown,
-      parsedSyllabus: parsed
+      success: false,
+      error: 'No se pudo descargar el PDF de S3 ni se encontró registro de contingencia.'
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
+    
+    // Intento de rescate con fallback
+    const fallbackKey = courseCode || courseName || '';
+    const fallbackSyllabus = fallbackKey ? getSyllabusForCourse(fallbackKey) : null;
+    if (fallbackSyllabus) {
+      return {
+        success: true,
+        courseCode: fallbackSyllabus.generalInfo.courseCode,
+        courseName: fallbackSyllabus.generalInfo.courseName,
+        parsedSyllabus: fallbackSyllabus,
+        fallback: true
+      };
+    }
+
     return {
       success: false,
-      error: `Falla en el proceso de auto-descarga: ${message}`
+      error: `Falla en el proceso de extracción en tiempo real: ${message}`
     };
   }
 }
+

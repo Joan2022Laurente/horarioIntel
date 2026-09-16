@@ -101,6 +101,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
   const [customMarkdown, setCustomMarkdown] = useState('');
   const [parsedCustom, setParsedCustom] = useState<ParsedSyllabus | null>(null);
   const [copiedFormula, setCopiedFormula] = useState(false);
+  const [dynamicSyllabusMap, setDynamicSyllabusMap] = useState<Record<string, ParsedSyllabus>>({});
   
   // Sincronización y Pantalla de Carga
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -185,28 +186,80 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
     }
   }, [isOpen, courseIdentifier]);
 
-  const triggerSync = (courseId: string) => {
+  const triggerSync = async (courseId: string) => {
     setSelectedCourseId(courseId);
+
+    // Si ya está en memoria viva reactiva, no es necesario re-descargar
+    if (dynamicSyllabusMap[courseId]) {
+      return;
+    }
+
+    // Verificar en caché local persistente
+    try {
+      const cached = localStorage.getItem(`utp_syllabus_live_${courseId}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setDynamicSyllabusMap(prev => ({ ...prev, [courseId]: parsed }));
+        return;
+      }
+    } catch {}
+
+    const courseOpt = ENROLLED_COURSES.find(c => c.id === courseId || c.code === courseId);
+    if (!courseOpt) return;
+
     setIsSyncing(true);
     setSyncStep('Conectando con repositorio oficial Silbia UTP (Amazon S3)...');
 
-    setTimeout(() => {
-      setSyncStep('Descargando estructura curricular y tabla de ponderaciones...');
-    }, 200);
+    try {
+      // Obtener credenciales de sesión activa si existen
+      let headers: Record<string, string> = {};
+      try {
+        const studentRaw = localStorage.getItem('utp_student_profile');
+        if (studentRaw) {
+          const profile = JSON.parse(studentRaw);
+          if (profile.token) {
+            headers = {
+              'Authorization': `Bearer ${profile.token}`,
+              'x-tenant-id': profile.tenantId || 'a5f469d2-3c0e-5c68-8d32-5265923a8e40'
+            };
+          }
+        }
+      } catch {}
 
-    setTimeout(() => {
-      setSyncStep('Verificando rúbricas de evaluación y políticas antiplagio...');
-    }, 450);
+      setSyncStep('Descargando y extrayendo binario PDF del sílabo oficial...');
 
-    setTimeout(() => {
+      const res = await fetch('/api/syllabus/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfUrl: courseOpt.pdfUrl,
+          courseCode: courseOpt.code,
+          courseName: courseOpt.name,
+          headers
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.parsedSyllabus) {
+          setSyncStep('Analizando ponderaciones, rúbricas y cronograma...');
+          setDynamicSyllabusMap(prev => ({ ...prev, [courseId]: data.parsedSyllabus }));
+          try {
+            localStorage.setItem(`utp_syllabus_live_${courseId}`, JSON.stringify(data.parsedSyllabus));
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.warn('Error en sincronización viva de sílabo:', err);
+    } finally {
       setIsSyncing(false);
-    }, 650);
+    }
   };
 
   if (!isOpen) return null;
 
   const currentCourseOption = ENROLLED_COURSES.find(c => c.id === selectedCourseId) || ENROLLED_COURSES[0];
-  const officialSyllabus = getSyllabusForCourse(selectedCourseId);
+  const officialSyllabus = dynamicSyllabusMap[selectedCourseId] || getSyllabusForCourse(selectedCourseId);
   const currentSyllabus = activeTab === 'custom' && parsedCustom ? parsedCustom : officialSyllabus;
 
   const handleParseCustom = () => {

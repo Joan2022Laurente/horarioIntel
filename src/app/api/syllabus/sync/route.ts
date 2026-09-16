@@ -1,19 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { autoDownloadAndConvertSyllabus } from '@/lib/syllabus-auto-downloader';
+import { autoDownloadAndConvertSyllabus, SyllabusDownloadOptions } from '@/lib/syllabus-auto-downloader';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { sectionId, headers } = body;
+    const { sectionId, pdfUrl, courseCode, courseName, headers } = body;
 
-    if (!sectionId) {
+    if (!sectionId && !pdfUrl && !courseCode) {
       return NextResponse.json(
-        { success: false, error: 'Falta el parámetro obligatorio: sectionId' },
+        { success: false, error: 'Debe especificar sectionId, pdfUrl o courseCode.' },
         { status: 400 }
       );
     }
 
-    const result = await autoDownloadAndConvertSyllabus(sectionId, headers);
+    const options: SyllabusDownloadOptions = {
+      sectionId,
+      pdfUrl,
+      courseCode,
+      courseName,
+      gatewayHeaders: headers
+    };
+
+    const result = await autoDownloadAndConvertSyllabus(options);
 
     if (!result.success) {
       return NextResponse.json(result, { status: 422 });
@@ -28,3 +36,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

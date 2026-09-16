@@ -84,6 +84,11 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
     setInput('');
     setIsLoading(true);
 
+    if (query.toLowerCase() === '/piensa' || query.toLowerCase().startsWith('/piensa')) {
+      // Modo de prueba de animación: pensar indefinidamente
+      return;
+    }
+
     try {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',

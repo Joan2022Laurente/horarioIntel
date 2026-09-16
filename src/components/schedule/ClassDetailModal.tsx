@@ -116,6 +116,11 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     setInputMessage('');
     setIsLoading(true);
 
+    if (text.toLowerCase() === '/piensa' || text.toLowerCase().startsWith('/piensa')) {
+      // Modo de prueba de animación: pensar indefinidamente
+      return;
+    }
+
     try {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',

@@ -14,7 +14,7 @@ interface AsciiMatrixOrbProps {
   interactive?: boolean;
 }
 
-const GLYPHS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'λ', 'π', 'Σ', 'Ω', 'Δ', '{', '}', '*', '+', '/', '~', '∞'];
+const GLYPHS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '7', '4', '0', '9', '5', '8', '2', '3', '6', '1'];
 
 interface SpherePoint {
   x: number;
@@ -28,7 +28,7 @@ interface SpherePoint {
 }
 
 export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
-  size = 40,
+  size = 32,
   state = 'idle',
   colorMode = 'monochrome',
   className = '',
@@ -38,19 +38,19 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const pointsRef = useRef<SpherePoint[]>([]);
-  const rotationRef = useRef({ x: 0.2, y: 0.4, z: 0.1 });
+  const rotationRef = useRef({ x: 0.25, y: 0.35, z: 0.1 });
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, isHovered: false });
   const isVisibleRef = useRef<boolean>(true);
 
-  // Inicializar puntos distribuidos con Fibonacci Sphere
+  // Inicializar puntos distribuidos con Fibonacci Sphere con espaciado limpio y nítido
   useEffect(() => {
-    // Ajustar número de puntos según el tamaño para máxima nitidez y 0 lag
-    const count = size <= 32 ? 80 : size <= 64 ? 130 : 200;
+    // Densidad calibrada para que los números NO se solapen en tamaños pequeños
+    const count = size <= 28 ? 32 : size <= 44 ? 54 : size <= 72 ? 88 : 140;
     const points: SpherePoint[] = [];
 
     for (let i = 0; i < count; i++) {
       const y = 1 - (i / (count - 1)) * 2; // de 1 a -1
-      const radiusAtY = Math.sqrt(1 - y * y);
+      const radiusAtY = Math.sqrt(Math.max(0, 1 - y * y));
       const phi = i * 2.399963229728653; // Golden angle en radianes
 
       const x = Math.cos(phi) * radiusAtY;
@@ -64,7 +64,7 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         baseY: y,
         baseZ: z,
         char: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-        mutationSpeed: 0.02 + Math.random() * 0.08,
+        mutationSpeed: 0.015 + Math.random() * 0.04,
       });
     }
 
@@ -86,9 +86,10 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
     );
     observer.observe(canvas);
 
-    const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2);
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
+    // Soporte Hi-DPI nítido
+    const dpr = Math.max(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2);
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
 
     let lastTime = performance.now();
 
@@ -101,26 +102,26 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
       lastTime = time;
 
       // Velocidad según el estado reactivo
-      let rotSpeedY = 0.6 * speedMultiplier;
-      let rotSpeedX = 0.35 * speedMultiplier;
+      let rotSpeedY = 0.45 * speedMultiplier;
+      let rotSpeedX = 0.28 * speedMultiplier;
       let pulseScale = 1.0;
 
       if (state === 'thinking') {
-        rotSpeedY = 2.4 * speedMultiplier;
-        rotSpeedX = 1.6 * speedMultiplier;
-        pulseScale = 1.0 + Math.sin(time * 0.008) * 0.08;
+        rotSpeedY = 1.8 * speedMultiplier;
+        rotSpeedX = 1.1 * speedMultiplier;
+        pulseScale = 1.0 + Math.sin(time * 0.007) * 0.06;
       } else if (state === 'streaming') {
-        rotSpeedY = 1.2 * speedMultiplier;
-        rotSpeedX = 0.8 * speedMultiplier;
-        pulseScale = 1.0 + Math.sin(time * 0.015) * 0.04;
+        rotSpeedY = 0.9 * speedMultiplier;
+        rotSpeedX = 0.5 * speedMultiplier;
+        pulseScale = 1.0 + Math.sin(time * 0.012) * 0.03;
       }
 
       // Suavizado de mouse interactivo
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.08;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.08;
+      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.06;
+      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.06;
 
-      rotationRef.current.y += (rotSpeedY + mouseRef.current.x * 2) * dt;
-      rotationRef.current.x += (rotSpeedX + mouseRef.current.y * 2) * dt;
+      rotationRef.current.y += (rotSpeedY + mouseRef.current.x * 1.5) * dt;
+      rotationRef.current.x += (rotSpeedX + mouseRef.current.y * 1.5) * dt;
 
       const cosY = Math.cos(rotationRef.current.y);
       const sinY = Math.sin(rotationRef.current.y);
@@ -131,8 +132,8 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
 
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      const sphereRadius = (size * dpr * 0.42) * pulseScale;
-      const fov = 2.8;
+      const sphereRadius = (size * dpr * 0.40) * pulseScale;
+      const fov = 2.6;
 
       const points = pointsRef.current;
       const pointsToDraw: {
@@ -142,27 +143,19 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         depth: number;
         char: string;
         alpha: number;
-        scale: number;
       }[] = [];
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // Mutación cuántica aleatoria de caracteres
-        if (Math.random() < p.mutationSpeed * (state === 'thinking' ? 4 : 1)) {
+        // Mutación procedural de números
+        if (Math.random() < p.mutationSpeed * (state === 'thinking' ? 3 : 0.6)) {
           p.char = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
         }
 
-        // Deformación de onda armónica si está en streaming
         let px = p.baseX;
         let py = p.baseY;
         let pz = p.baseZ;
-
-        if (state === 'streaming') {
-          const wave = Math.sin(py * 6 + time * 0.01) * 0.06;
-          px += p.baseX * wave;
-          pz += p.baseZ * wave;
-        }
 
         // Rotación 3D (Y axis, then X axis)
         const x1 = px * cosY + pz * sinY;
@@ -171,14 +164,17 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
         const y2 = py * cosX - z1 * sinX;
         const z2 = py * sinX + z1 * cosX;
 
+        // Atenuar fuertemente los puntos traseros para que no se empaste el dibujo
+        if (z2 < -0.4) continue;
+
         // Proyección de perspectiva 3D
         const perspective = fov / (fov + z2);
         const screenX = centerX + x1 * sphereRadius * perspective;
         const screenY = centerY + y2 * sphereRadius * perspective;
 
-        // Profundidad normalizada: -1 (fondo) a +1 (frente)
-        const depthNorm = (z2 + 1) / 2;
-        const alpha = Math.max(0.12, Math.min(1.0, 0.15 + 0.85 * Math.pow(depthNorm, 1.8)));
+        // Profundidad normalizada
+        const depthNorm = Math.max(0, Math.min(1, (z2 + 1) / 2));
+        const alpha = Math.max(0.15, Math.min(1.0, Math.pow(depthNorm, 2.2)));
 
         pointsToDraw.push({
           x: screenX,
@@ -187,54 +183,55 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
           depth: depthNorm,
           char: p.char,
           alpha,
-          scale: perspective,
         });
       }
 
-      // Ordenar por eje Z (Painter's algorithm para oclusión)
+      // Ordenar por eje Z (Painter's algorithm para oclusión nítida)
       pointsToDraw.sort((a, b) => a.z - b.z);
 
-      // Renderizar caracteres en Canvas
+      // Renderizar números en Canvas con nitidez
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const baseFontSize = (size * dpr * 0.13);
-      const minFontSize = Math.max(7 * dpr, baseFontSize * 0.7);
-      const maxFontSize = Math.max(10 * dpr, baseFontSize * 1.3);
+      // Cálculo de tamaño de fuente proporcional y nítido
+      const minFont = Math.max(6 * dpr, size * dpr * 0.12);
+      const maxFont = Math.max(9 * dpr, size * dpr * 0.20);
 
       for (let i = 0; i < pointsToDraw.length; i++) {
         const pt = pointsToDraw[i];
-        const fontSize = Math.round(minFontSize + (maxFontSize - minFontSize) * pt.depth);
+        const fontSize = Math.round(minFont + (maxFont - minFont) * pt.depth);
 
-        ctx.font = `bold ${fontSize}px "JetBrains Mono", monospace`;
+        ctx.font = `600 ${fontSize}px "JetBrains Mono", "Courier New", monospace`;
 
-        // Coloración según paleta
+        // Colores nítidos de alto contraste estilo Matrix / Referencia
         if (colorMode === 'lime') {
-          if (pt.depth > 0.7) {
-            ctx.fillStyle = `rgba(187, 244, 81, ${pt.alpha})`;
+          if (pt.depth > 0.65) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
+          } else if (pt.depth > 0.35) {
+            ctx.fillStyle = `rgba(187, 244, 81, ${pt.alpha * 0.9})`;
           } else {
-            ctx.fillStyle = `rgba(163, 230, 53, ${pt.alpha * 0.8})`;
+            ctx.fillStyle = `rgba(100, 140, 50, ${pt.alpha * 0.5})`;
           }
         } else if (colorMode === 'orange') {
-          if (pt.depth > 0.7) {
-            ctx.fillStyle = `rgba(255, 87, 34, ${pt.alpha})`;
+          if (pt.depth > 0.65) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
+          } else if (pt.depth > 0.35) {
+            ctx.fillStyle = `rgba(255, 112, 67, ${pt.alpha * 0.9})`;
           } else {
-            ctx.fillStyle = `rgba(255, 112, 67, ${pt.alpha * 0.8})`;
+            ctx.fillStyle = `rgba(160, 60, 30, ${pt.alpha * 0.5})`;
           }
-        } else if (colorMode === 'cyan') {
-          ctx.fillStyle = `rgba(56, 189, 248, ${pt.alpha})`;
         } else {
-          // Monochrome Apple / Vercel style
-          if (pt.depth > 0.8) {
+          // Monocromo de alta fidelidad (exacto al render blanco/gris de referencia)
+          if (pt.depth > 0.7) {
             ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
           } else if (pt.depth > 0.4) {
-            ctx.fillStyle = `rgba(200, 200, 210, ${pt.alpha})`;
+            ctx.fillStyle = `rgba(200, 205, 215, ${pt.alpha * 0.85})`;
           } else {
-            ctx.fillStyle = `rgba(120, 120, 135, ${pt.alpha})`;
+            ctx.fillStyle = `rgba(100, 105, 120, ${pt.alpha * 0.45})`;
           }
         }
 
-        ctx.fillText(pt.char, pt.x, pt.y);
+        ctx.fillText(pt.char, Math.round(pt.x), Math.round(pt.y));
       }
     };
 

@@ -59,7 +59,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
       
       {/* Cabecera sutil del Asistente */}
       <div className="flex items-center gap-2 select-none">
-        <AsciiMatrixOrb size={22} state="idle" colorMode="lime" />
+        <AsciiMatrixOrb size={26} state="idle" colorMode="monochrome" />
         <span className="text-[11px] font-bold text-neutral-400">Copiloto UTP</span>
       </div>
 

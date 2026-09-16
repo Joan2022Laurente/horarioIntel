@@ -16,10 +16,10 @@
     --surface-elevated: #2c2c36;
     --surface-input: #121215;
 
-    /* Solid Neutral Borders */
-    --border-subtle: #22222a;
-    --border-medium: #2e2e38;
-    --border-strong: #3d3d4a;
+    /* Solid Neutral Borders (Configurable via Global Variables) */
+    --border-subtle: transparent;
+    --border-medium: transparent;
+    --border-strong: transparent;
 
     /* Solid Semantic Badges & Pills (100% Solid Vibrant Fill, Zero Dark Tint / Zero Transparency) */
     --badge-orange-bg: #ff5722;

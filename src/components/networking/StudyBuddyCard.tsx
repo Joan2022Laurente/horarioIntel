@@ -8,9 +8,7 @@ import {
   Sparkles, 
   UserPlus, 
   Zap, 
-  Radio, 
-  ShieldCheck,
-  Code
+  ShieldCheck
 } from 'lucide-react';
 import { formatCourseName } from '@/lib/schedule-parser';
 
@@ -28,10 +26,10 @@ export const StudyBuddyCard: React.FC<StudyBuddyCardProps> = ({
   const isOnlineNow = buddy.status === 'ONLINE_NOW';
 
   return (
-    <div className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-neutral-500 p-5 space-y-4 shadow-none transition-all group">
+    <div className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] p-5 space-y-4 shadow-none transition-colors group">
       
       {/* Top Bar: Compatibility Gauge + Status */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <div className="flex items-center justify-between gap-2">
           
           {/* Compatibility Pill */}
@@ -43,12 +41,12 @@ export const StudyBuddyCard: React.FC<StudyBuddyCardProps> = ({
           {/* Time & Environment Status */}
           <div className="flex items-center gap-2">
             {isOnlineNow ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] px-2 py-0.5 rounded-full">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
                 Libre ahora
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-neutral-400 bg-[var(--surface-subtle)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-neutral-400 bg-[var(--surface-subtle)] px-2 py-0.5 rounded-full">
                 <Clock className="h-3 w-3" />
                 {buddy.sharedWindow.start}
               </span>
@@ -61,8 +59,8 @@ export const StudyBuddyCard: React.FC<StudyBuddyCardProps> = ({
         </div>
 
         {/* Student Profile Info */}
-        <div className="flex items-start gap-3 pt-1">
-          <div className="h-11 w-11 rounded-2xl bg-[var(--surface-subtle)] border border-[var(--border-medium)] text-white font-bold flex items-center justify-center text-sm shrink-0 group-hover:border-[var(--accent-lime)] transition-colors">
+        <div className="flex items-start gap-3">
+          <div className="h-11 w-11 rounded-2xl bg-[var(--surface-subtle)] text-white font-bold flex items-center justify-center text-sm shrink-0">
             {buddy.avatarLetter}
           </div>
 
@@ -74,18 +72,18 @@ export const StudyBuddyCard: React.FC<StudyBuddyCardProps> = ({
               <ShieldCheck className="h-3.5 w-3.5 text-[var(--accent-emerald)] shrink-0" title="Verificado UTP" />
             </div>
 
-            <p className="text-[11px] text-neutral-400 truncate">
+            <p className="text-[11px] text-neutral-400 truncate mt-0.5">
               {buddy.career} • Ciclo {buddy.cycle}
             </p>
           </div>
         </div>
 
-        {/* Target Subject & Free Window */}
-        <div className="rounded-2xl bg-[var(--surface-subtle)] p-3 space-y-1.5 border border-[var(--border-subtle)] text-xs">
-          <div className="flex items-center justify-between text-neutral-300 font-bold">
+        {/* Course & Goal (Clean direct typography, NO nested container box) */}
+        <div className="space-y-1.5 text-xs">
+          <div className="flex items-center justify-between text-neutral-200 font-bold">
             <span className="truncate">{formatCourseName(buddy.courseName)}</span>
             {buddy.sectionCode && (
-              <span className="text-[10px] font-mono text-neutral-400 shrink-0 ml-1">
+              <span className="text-[10px] font-mono text-neutral-500 shrink-0 ml-1">
                 Sec. {buddy.sectionCode}
               </span>
             )}
@@ -96,19 +94,18 @@ export const StudyBuddyCard: React.FC<StudyBuddyCardProps> = ({
             <span className="truncate">{buddy.locationPreference}</span>
           </p>
 
-          <p className="text-[11px] text-white font-medium pt-1 border-t border-[var(--border-subtle)] line-clamp-2">
+          <p className="text-[11px] text-neutral-300 italic pt-1 line-clamp-2">
             &ldquo;{buddy.currentGoal}&rdquo;
           </p>
         </div>
 
-        {/* Skills Tag Pills */}
-        <div className="flex flex-wrap gap-1.5 pt-1">
+        {/* Skills Tag Pills (Clean background, NO borders) */}
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
           {buddy.skills.map((skill, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 text-[10px] font-mono bg-[var(--surface-input)] border border-[var(--border-subtle)] text-neutral-300 px-2 py-0.5 rounded-lg"
+              className="inline-flex items-center text-[10px] font-mono bg-[var(--surface-subtle)] text-neutral-300 px-2 py-0.5 rounded-lg"
             >
-              <Code className="h-2.5 w-2.5 text-neutral-500" />
               {skill}
             </span>
           ))}

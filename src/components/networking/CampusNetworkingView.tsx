@@ -12,9 +12,7 @@ import {
   Send,
   Loader2,
   UserCheck,
-  Filter,
   Search,
-  Radio,
   BookOpen
 } from 'lucide-react';
 import { StudyBeaconRow, StudyBuddyMatch } from '@/types/matching';
@@ -193,7 +191,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => executeIntent({ type: 'FIND_NETWORKING_BEACON' })}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white transition active:scale-95 shadow-none"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white transition active:scale-95 shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
             <span>Match con IA</span>
@@ -209,7 +207,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
         </div>
       </div>
 
-      {/* Widget: Mi Radar y Disponibilidad Personal */}
+      {/* Widget: Mi Radar y Disponibilidad Personal (Flat seamless strip) */}
       <PersonalBeaconCard 
         courses={courses} 
         onAskAi={askAgent} 
@@ -217,7 +215,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
 
       {/* Formulario para Crear Mesa de Estudio Grupal */}
       {isCreatingBeacon && (
-        <form onSubmit={handleCreateBeacon} className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border-medium)] p-5 space-y-4 shadow-none animate-in zoom-in-95">
+        <form onSubmit={handleCreateBeacon} className="rounded-3xl bg-[var(--surface-card)] p-5 space-y-4 shadow-none animate-in zoom-in-95">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--accent-emerald)] flex items-center gap-1.5">
               <Sparkles className="h-4 w-4" />
@@ -235,7 +233,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
                 onChange={e => setBeaconLocation(e.target.value)}
                 placeholder="Ej: Biblioteca Torre A - Piso 3 o Discord Sala 2"
                 required
-                className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
+                className="w-full bg-[var(--surface-input)] rounded-xl px-3 py-2 text-white focus:outline-none"
               />
             </div>
             <div className="space-y-1">
@@ -243,7 +241,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
               <select 
                 value={beaconCourse}
                 onChange={e => setBeaconCourse(e.target.value)}
-                className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
+                className="w-full bg-[var(--surface-input)] rounded-xl px-3 py-2 text-white focus:outline-none"
               >
                 {courses.map(c => (
                   <option key={c.courseId} value={c.name}>{formatCourseName(c.name)}</option>
@@ -260,7 +258,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
               onChange={e => setBeaconObjective(e.target.value)}
               placeholder="Ej: Avanzar entrega APF1 y resolver dudas de código"
               required
-              className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
+              className="w-full bg-[var(--surface-input)] rounded-xl px-3 py-2 text-white focus:outline-none"
             />
           </div>
 
@@ -277,8 +275,8 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
         </form>
       )}
 
-      {/* Barra de Filtros & Selector de Modos (1 a 1 vs Grupos) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-2 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
+      {/* Barra de Filtros & Selector de Modos (Flat seamlessly integrated) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-2 rounded-2xl bg-[var(--surface-card)]">
         
         {/* Toggle de Modos: Parejas 1 a 1 vs Mesas Grupales */}
         <div className="flex items-center gap-1 bg-[var(--surface-input)] p-1 rounded-xl text-xs">
@@ -315,7 +313,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
             value={selectedCourseFilter}
             onChange={(e) => setSelectedCourseFilter(e.target.value)}
             aria-label="Filtrar por curso"
-            className="bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[var(--accent-emerald)] cursor-pointer"
+            className="bg-[var(--surface-input)] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer"
           >
             <option value="ALL">Todas las asignaturas</option>
             {courses.map(c => (
@@ -328,7 +326,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
             value={selectedModalityFilter}
             onChange={(e) => setSelectedModalityFilter(e.target.value as any)}
             aria-label="Filtrar por entorno"
-            className="bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[var(--accent-emerald)] cursor-pointer"
+            className="bg-[var(--surface-input)] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer"
           >
             <option value="ALL">Presencial & Virtual</option>
             <option value="Presencial">Solo Campus Físico</option>
@@ -343,7 +341,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por tema o skill..."
-              className="bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-[var(--accent-emerald)] w-36 sm:w-44"
+              className="bg-[var(--surface-input)] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none w-36 sm:w-44"
             />
           </div>
 
@@ -364,7 +362,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
           </div>
 
           {filteredBuddies.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] space-y-2">
+            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] space-y-2">
               <UserCheck className="h-8 w-8 mx-auto text-neutral-600" />
               <p className="text-sm font-bold text-white">No se encontraron compañeros con los filtros seleccionados</p>
               <p className="text-xs text-neutral-400">Prueba cambiando la asignatura o el entorno para ver más opciones.</p>
@@ -402,7 +400,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
               <p className="text-xs">Cargando mesas de estudio en vivo...</p>
             </div>
           ) : filteredBeacons.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] space-y-2">
+            <div className="p-12 text-center rounded-3xl bg-[var(--surface-card)] space-y-2">
               <Users className="h-8 w-8 mx-auto text-neutral-600" />
               <p className="text-sm font-bold text-white">No hay mesas grupales abiertas con este filtro</p>
               <p className="text-xs text-neutral-400">¡Sé el primero en abrir una mesa con el botón &ldquo;Crear Mesa Grupal&rdquo;!</p>
@@ -416,11 +414,11 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
                 return (
                   <div 
                     key={b.id}
-                    className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] hover:border-neutral-500 p-5 space-y-4 shadow-none transition-all group"
+                    className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] p-5 space-y-4 shadow-none transition-colors group"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] px-2.5 py-0.5 rounded-full">
                           <span>● En Vivo</span>
                         </span>
                         <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
@@ -450,7 +448,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
 
                     <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)]">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-bold text-white">
+                        <div className="h-8 w-8 rounded-full bg-[var(--surface-subtle)] flex items-center justify-center text-xs font-bold text-white">
                           {b.host?.full_name.charAt(0) || 'U'}
                         </div>
                         <div className="text-[11px]">
@@ -464,7 +462,7 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
                         disabled={isFull && !isJoined}
                         className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition active:scale-95 shadow-none ${
                           isJoined
-                            ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)]'
+                            ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)]'
                             : isFull
                             ? 'bg-[var(--surface-muted)] text-neutral-500 cursor-not-allowed'
                             : 'bg-white hover:bg-neutral-200 text-black'

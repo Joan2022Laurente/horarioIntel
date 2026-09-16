@@ -229,7 +229,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                           onClick={() => setSelectedEventForModal(evt)}
                           className={`group relative rounded-2xl border p-3.5 transition-all duration-300 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
                             isActiveCard
-                              ? 'animate-aura-card'
+                              ? 'aurora-ambient-card'
                               : 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border-[var(--border-subtle)] hover:border-neutral-500'
                           }`}
                         >

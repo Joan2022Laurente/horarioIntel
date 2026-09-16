@@ -182,20 +182,33 @@
   font-weight: 700;
 }
 
-/* Minimalist Ambient Background Aura for Schedule Card */
-@keyframes ambient-card-aura {
-  0%, 100% {
-    background-color: #17171c;
-    border-color: #3f3f46;
+/* Fluid Dynamic Aurora Mesh Animation for Active Cards */
+@keyframes aurora-gradient-shift {
+  0% {
+    background-position: 0% 50%, 100% 50%, 50% 0%;
   }
-  50% {
-    background-color: #22222a;
-    border-color: #71717a;
+  33% {
+    background-position: 100% 100%, 0% 0%, 100% 100%;
+  }
+  66% {
+    background-position: 50% 0%, 100% 100%, 0% 50%;
+  }
+  100% {
+    background-position: 0% 50%, 100% 50%, 50% 0%;
   }
 }
 
-.animate-aura-card {
-  animation: ambient-card-aura 3.5s ease-in-out infinite;
+.aurora-ambient-card {
+  position: relative;
+  background-color: #121215;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(255, 87, 34, 0.28) 0%, transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(58, 134, 255, 0.25) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, rgba(112, 117, 255, 0.22) 0%, transparent 60%);
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  animation: aurora-gradient-shift 8s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
+
 
 

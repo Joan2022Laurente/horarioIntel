@@ -107,8 +107,10 @@ export const TodayView: React.FC<TodayViewProps> = ({
         <TodayClassesSection
           todayEvents={todayEvents}
           todayDate={now}
+          interval={interval}
           onNavigateToWeekly={onNavigateToWeekly}
           onOpenSyllabus={handleOpenSyllabus}
+          onAskAi={onAskAi}
         />
       )}
 

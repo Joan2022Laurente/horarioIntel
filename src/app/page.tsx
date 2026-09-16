@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { PillNavbar } from '@/components/navigation/PillNavbar';
-import { ChunkyHeroDock } from '@/components/hero/ChunkyHeroDock';
 import { TodayView } from '@/components/TodayView';
 import { WeeklySchedule } from '@/components/WeeklySchedule';
 import { CoursesList } from '@/components/CoursesList';
@@ -137,20 +136,8 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Hero Showcase with Chunky 5 Shapes Dock */}
-        <ChunkyHeroDock
-          interval={currentInterval}
-          activeTab={activeTab}
-          onSelectTab={(tab) => {
-            if (tab === 'ai') handleAskAi();
-            else setActiveTab(tab);
-          }}
-          onOpenAi={handleAskAi}
-          onOpenSyllabusModal={() => setIsSyllabusOpen(true)}
-        />
-
         {/* Active View Container */}
-        <div className="pt-6">
+        <div className="pt-2">
           {activeTab === 'today' && (
             <TodayView
               interval={currentInterval}

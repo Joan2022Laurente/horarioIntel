@@ -9,16 +9,17 @@ import {
   DAYS_OF_WEEK, 
   parseDate 
 } from '@/lib/schedule-parser';
+import { getClassroomLocation } from '@/lib/classroom-helper';
+import { ClassDetailModal } from '@/components/schedule/ClassDetailModal';
 import { 
   ChevronLeft, 
   ChevronRight, 
   Video, 
   MapPin, 
   Radio, 
-  Sparkles, 
   Calendar,
   Clock,
-  Layers
+  Sparkles
 } from 'lucide-react';
 
 interface WeeklyScheduleProps {
@@ -34,6 +35,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
   const totalWeeks = interval.total_weeks || 18;
   const [selectedWeek, setSelectedWeek] = useState<number>(currentWeek);
   const [selectedModality, setSelectedModality] = useState<string>('ALL');
+  const [selectedEventForModal, setSelectedEventForModal] = useState<UTPEvent | null>(null);
 
   const events = interval.events || [];
   const weekEvents = getEventsByWeek(events, selectedWeek);
@@ -162,7 +164,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
       </div>
 
-      {/* Grid de 6 Días (Lanes abiertas sin cajas contenedoras anidadas) */}
+      {/* Grid de 6 Días (Lanes abiertas sin cajas anidadas) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {daysToDisplay.map((dayNum) => {
           const dayName = DAYS_OF_WEEK[dayNum];
@@ -198,7 +200,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                 </span>
               </div>
 
-              {/* Lista de Sesiones - Tarjeta de capa única sin bordes */}
+              {/* Lista de Sesiones - Tarjeta de capa única interactiva */}
               <div className="space-y-3 flex-1">
                 {dayEvents.length === 0 ? (
                   <div className="h-28 rounded-2xl bg-[#151519]/40 flex items-center justify-center text-center text-xs text-neutral-600 font-medium select-none">
@@ -209,13 +211,15 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                     const parsed = parseEventTitle(evt.title);
                     const isRemoteZoom = evt.modality === 'R';
                     const isPresencial = evt.modality === 'P';
+                    const location = getClassroomLocation(parsed.cleanTitle, parsed.sectionCode);
 
                     return (
                       <div
                         key={evt.id}
-                        className="group relative rounded-2xl bg-[#151519] hover:bg-[#1a1a20] p-3.5 transition-all duration-200 space-y-3 shadow-md hover:shadow-xl"
+                        onClick={() => setSelectedEventForModal(evt)}
+                        className="group relative rounded-2xl bg-[#151519] hover:bg-[#1b1b22] p-3.5 transition-all duration-200 space-y-2.5 shadow-md hover:shadow-xl cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
                       >
-                        {/* Top: Modalidad + Código de Sección */}
+                        {/* Top: Modalidad + Acción rápida (Cámara compacta o Ubicación) */}
                         <div className="flex items-center justify-between gap-1">
                           {isPresencial ? (
                             <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
@@ -234,62 +238,39 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                             </span>
                           )}
 
-                          {parsed.sectionCode && (
-                            <span className="text-[10px] font-mono text-neutral-500">
-                              Sec. {parsed.sectionCode}
+                          {isRemoteZoom && evt.metadata?.zoomLink ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(evt.metadata?.zoomLink, '_blank');
+                              }}
+                              title="Unirse directo a Zoom"
+                              aria-label="Unirse a Zoom"
+                              className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/10 hover:bg-white text-neutral-300 hover:text-black transition shrink-0"
+                            >
+                              <Video className="h-3.5 w-3.5" />
+                            </button>
+                          ) : (
+                            <span className="text-[10px] font-mono text-neutral-500 group-hover:text-neutral-300 transition-colors">
+                              {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
                             </span>
                           )}
                         </div>
 
                         {/* Nombre del Curso */}
-                        <h4 className="text-xs font-black text-white leading-snug line-clamp-2">
+                        <h4 className="text-xs font-black text-white group-hover:text-[#bbf451] leading-snug line-clamp-2 transition-colors">
                           {parsed.cleanTitle}
                         </h4>
 
                         {/* Horario */}
-                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-400">
-                          <Clock className="h-3 w-3 text-neutral-500 shrink-0" />
-                          <span>{formatTime(evt.startAt)} — {formatTime(evt.finishAt)}</span>
+                        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3 w-3 text-neutral-500 shrink-0" />
+                            <span>{formatTime(evt.startAt)} — {formatTime(evt.finishAt)}</span>
+                          </div>
+
+                          <Sparkles className="h-3 w-3 text-[#ff5722] opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-
-                        {/* Footer Contextual de la Clase */}
-                        {isRemoteZoom && evt.metadata?.zoomLink ? (
-                          <div className="flex items-center gap-2 pt-1">
-                            <a
-                              href={evt.metadata.zoomLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-neutral-200 py-1.5 text-xs font-black text-black shadow-md transition active:scale-95"
-                            >
-                              <Video className="h-3.5 w-3.5 text-black" />
-                              <span>Entrar a Zoom</span>
-                            </a>
-
-                            <button
-                              onClick={() => onAskAi(`¿Qué temas se tocan en la Semana ${selectedWeek} en ${parsed.cleanTitle}?`)}
-                              title="Consultar tema a la IA"
-                              className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition shrink-0"
-                            >
-                              <Sparkles className="h-3.5 w-3.5 text-[#ff5722]" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-between pt-1 text-[10px] text-neutral-400">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3 text-emerald-400 shrink-0" />
-                              <span className="truncate max-w-[110px]">Campus Lima Centro</span>
-                            </span>
-
-                            <button
-                              onClick={() => onAskAi(`¿Qué temas se tocan en la Semana ${selectedWeek} en ${parsed.cleanTitle}?`)}
-                              title="Consultar tema a la IA"
-                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 text-neutral-400 hover:text-white transition"
-                            >
-                              <Sparkles className="h-3 w-3 text-[#ff5722]" />
-                            </button>
-                          </div>
-                        )}
-
                       </div>
                     );
                   })
@@ -300,6 +281,17 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
         })}
       </div>
 
+      {/* Modal de Detalle de Clase con Aula, Piso, Campus, Sílabo & Chat IA */}
+      <ClassDetailModal
+        isOpen={!!selectedEventForModal}
+        event={selectedEventForModal}
+        weekNumber={selectedWeek}
+        interval={interval}
+        onClose={() => setSelectedEventForModal(null)}
+        onOpenGlobalAi={onAskAi}
+      />
+
     </div>
   );
 };
+

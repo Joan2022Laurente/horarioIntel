@@ -123,46 +123,46 @@ export const CoursesList: React.FC<CoursesListProps> = ({
               {/* Fila Única de Acciones (Colores Sólidos y Sin Neon) */}
               <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-subtle)]">
                 
-                {/* Botón Principal: Ver Sílabo */}
+                {/* Botón Principal: Ver Sílabo (Solid Yellow Fill) */}
                 <button
                   onClick={() => handleOpenSyllabus(course.name)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2.5 px-3 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-[#ffc107] transition active:scale-95 shadow-none"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] py-2.5 px-3 text-xs font-black text-black transition active:scale-95 shadow-none"
                 >
                   <Award className="h-4 w-4 shrink-0" />
                   <span>Ver Sílabo & Rúbricas</span>
                 </button>
 
-                {/* Botón Zoom directo si aplica */}
+                {/* Botón Zoom directo si aplica (Solid Blue Fill) */}
                 {course.zoomLink && (
                   <a
                     href={course.zoomLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Entrar a sala Zoom del curso"
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--badge-blue-bg)] hover:bg-[#182845] border border-[var(--badge-blue-border)] text-[var(--badge-blue-text)] transition active:scale-95 shrink-0 shadow-none"
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--accent-blue)] hover:bg-[var(--accent-blue-hover)] text-white transition active:scale-95 shrink-0 shadow-none"
                   >
                     <Video className="h-4 w-4" />
                   </a>
                 )}
 
-                {/* Botón Descargar PDF Oficial si está disponible */}
+                {/* Botón Descargar PDF Oficial si está disponible (Solid Dark Grey Surface) */}
                 {course.syllabusUrl && (
                   <a
                     href={course.syllabusUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Descargar Sílabo Oficial PDF"
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white transition active:scale-95 shrink-0 shadow-none"
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--surface-muted)] hover:bg-[var(--surface-elevated)] border border-[var(--border-medium)] text-white transition active:scale-95 shrink-0 shadow-none"
                   >
                     <FileText className="h-4 w-4" />
                   </a>
                 )}
 
-                {/* Botón Consultar IA */}
+                {/* Botón Consultar IA (Solid Orange Fill) */}
                 <button
                   onClick={() => onAskAi(`¿Qué temas tocan en ${course.name}, qué viene en los exámenes y cómo aprobar con 20?`)}
                   title="Preguntar a la IA sobre este curso"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--badge-orange-bg)] hover:bg-[#381e18] border border-[var(--badge-orange-border)] text-[var(--badge-orange-text)] transition active:scale-95 shrink-0 shadow-none"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--accent-orange)] hover:bg-[var(--accent-orange-hover)] text-white transition active:scale-95 shrink-0 shadow-none"
                 >
                   <Sparkles className="h-4 w-4" />
                 </button>

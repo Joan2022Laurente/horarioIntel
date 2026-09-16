@@ -84,11 +84,11 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
             onClick={() => onTabChange('radar')}
             className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5 shadow-none ${
               activeTab === 'radar'
-                ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] font-bold'
+                ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)]" />
             <span>Radar</span>
           </button>
 
@@ -96,7 +96,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
             onClick={() => onTabChange('community')}
             className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'community'
-                ? 'bg-[var(--badge-purple-bg)] text-[var(--badge-purple-text)] border border-[var(--badge-purple-border)] font-bold'
+                ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -107,7 +107,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
             onClick={() => onTabChange('marketplace')}
             className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'marketplace'
-                ? 'bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] border border-[var(--badge-yellow-border)] font-bold'
+                ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -130,10 +130,10 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
             <button
               onClick={onOpenSettings}
               title="Cuenta UTP activa. Clic para ver perfil o cambiar cuenta."
-              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] hover:bg-[var(--surface-card-hover)] px-3 py-1.5 text-xs font-bold text-[var(--badge-emerald-text)] transition shadow-none"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-muted)] hover:bg-[var(--surface-elevated)] border border-[var(--border-medium)] px-3 py-1.5 text-xs font-bold text-white transition shadow-none"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
-              <span>{student.username}</span>
+              <span className="h-2 w-2 rounded-full bg-[var(--accent-emerald)] shrink-0" />
+              <span className="font-mono text-neutral-200">{student.username}</span>
             </button>
           ) : (
             <button

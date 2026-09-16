@@ -21,42 +21,42 @@
     --border-medium: #2e2e38;
     --border-strong: #3d3d4a;
 
-    /* Solid Semantic Badges (Zero Transparency / No Alphas) */
-    --badge-orange-bg: #2b1510;
-    --badge-orange-text: #ff7043;
-    --badge-orange-border: #4a2118;
+    /* Solid Semantic Badges & Pills (100% Solid Vibrant Fill, Zero Dark Tint / Zero Transparency) */
+    --badge-orange-bg: #ff5722;
+    --badge-orange-text: #ffffff;
+    --badge-orange-border: #ff5722;
 
-    --badge-emerald-bg: #0e2417;
-    --badge-emerald-text: #00e676;
-    --badge-emerald-border: #18452a;
+    --badge-emerald-bg: #00c853;
+    --badge-emerald-text: #000000;
+    --badge-emerald-border: #00c853;
 
-    --badge-purple-bg: #1c1a32;
-    --badge-purple-text: #9d9fff;
-    --badge-purple-border: #332f5e;
+    --badge-purple-bg: #7075ff;
+    --badge-purple-text: #ffffff;
+    --badge-purple-border: #7075ff;
 
-    --badge-yellow-bg: #291f09;
-    --badge-yellow-text: #ffb703;
-    --badge-yellow-border: #4d3a0f;
+    --badge-yellow-bg: #ffb703;
+    --badge-yellow-text: #000000;
+    --badge-yellow-border: #ffb703;
 
-    --badge-blue-bg: #111e33;
-    --badge-blue-text: #60a5fa;
-    --badge-blue-border: #1e355b;
+    --badge-blue-bg: #3a86ff;
+    --badge-blue-text: #ffffff;
+    --badge-blue-border: #3a86ff;
 
-    --badge-lime-bg: #1e290d;
-    --badge-lime-text: #bbf451;
-    --badge-lime-border: #3b5217;
+    --badge-lime-bg: #bbf451;
+    --badge-lime-text: #000000;
+    --badge-lime-border: #bbf451;
 
-    --badge-neutral-bg: #202026;
-    --badge-neutral-text: #d4d4d8;
-    --badge-neutral-border: #32323a;
+    --badge-neutral-bg: #24242c;
+    --badge-neutral-text: #ffffff;
+    --badge-neutral-border: #383844;
 
-    --badge-cyan-bg: #0c2328;
-    --badge-cyan-text: #22d3ee;
-    --badge-cyan-border: #15424b;
+    --badge-cyan-bg: #00bcd4;
+    --badge-cyan-text: #000000;
+    --badge-cyan-border: #00bcd4;
 
-    --badge-red-bg: #2b0f12;
-    --badge-red-text: #f87171;
-    --badge-red-border: #4c1d24;
+    --badge-red-bg: #e63946;
+    --badge-red-text: #ffffff;
+    --badge-red-border: #e63946;
 
     /* Solid Action Colors */
     --accent-orange: #ff5722;

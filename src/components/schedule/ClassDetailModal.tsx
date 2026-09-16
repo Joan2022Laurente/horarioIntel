@@ -188,17 +188,17 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
             <div className="space-y-0.5 min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 {isPresencial ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[#00e676] bg-[#00c853]/15 px-2 py-0.5 rounded-full shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full shrink-0 shadow-none">
                     <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     Presencial
                   </span>
                 ) : isRemoteZoom ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[#ff7043] bg-[#ff5722]/15 px-2 py-0.5 rounded-full shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2.5 py-0.5 rounded-full shrink-0 shadow-none">
                     <Video className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     Zoom
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[#9195ff] bg-[#7075ff]/15 px-2 py-0.5 rounded-full shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2.5 py-0.5 rounded-full shrink-0 shadow-none">
                     <Radio className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     Virtual
                   </span>

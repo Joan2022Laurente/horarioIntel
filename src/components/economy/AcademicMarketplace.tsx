@@ -2,19 +2,16 @@
 
 import React, { useState } from 'react';
 import { 
-  Wallet, 
   ShieldCheck, 
   Star, 
   Clock, 
   CheckCircle2, 
   Plus, 
-  Sparkles, 
   ArrowUpRight, 
   Lock, 
-  BookOpen, 
   CreditCard 
 } from 'lucide-react';
-import { AcademicServiceRow, ServiceType } from '@/types/economy';
+import { AcademicServiceRow } from '@/types/economy';
 import { ProcessedCourse } from '@/types/utp';
 
 interface AcademicMarketplaceProps {
@@ -104,7 +101,7 @@ const INITIAL_SERVICES: AcademicServiceRow[] = [
 ];
 
 export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
-  courses,
+  courses: _courses,
   onAskAi,
 }) => {
   const [services] = useState<AcademicServiceRow[]>(INITIAL_SERVICES);
@@ -134,12 +131,11 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
   return (
     <div className="space-y-6 text-white animate-in fade-in duration-150">
       
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/5">
+      {/* Header - Clean Title (Zero Icon) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-subtle)]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            <Wallet className="h-6 w-6 text-[#ffb703]" />
-            <span>Marketplace Académico & Mentorías</span>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Marketplace Académico & Mentorías
           </h2>
           <p className="text-xs text-neutral-400 mt-1">
             Contrata asesorías 1 a 1, simulacros de sustentación y auditorías de código con garantía Escrow.
@@ -149,7 +145,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onAskAi('¿Cómo puedo ofrecer mis propios servicios de mentoría o asesoría académica en la plataforma?')}
-            className="inline-flex items-center gap-2 rounded-2xl bg-[#ffb703] hover:bg-[#ffa700] px-4 py-2 text-xs font-black text-black shadow-lg shadow-[#ffb703]/20 transition active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] px-4 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
           >
             <Plus className="h-4 w-4" />
             <span>Ofrecer Servicio</span>
@@ -157,12 +153,12 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
         </div>
       </div>
 
-      {/* Wallet Card */}
+      {/* Wallet Card - Solid Matte Surfaces */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="sm:col-span-2 rounded-3xl bg-gradient-to-r from-[#1c1c24] to-[#141418] border border-white/5 p-5 shadow-xl flex flex-col justify-between space-y-4">
+        <div className="sm:col-span-2 rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#bbf451]" />
+              <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)]" />
               <span className="text-xs font-black uppercase tracking-wider text-neutral-300">Billetera Estudiantil (Escrow)</span>
             </div>
             <span className="text-[10px] text-neutral-500 font-mono">UTP Pay ID: #WAL-9021</span>
@@ -173,12 +169,12 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
             <span className="text-xs font-semibold text-neutral-400">PEN disponibles</span>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-neutral-400">
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)] text-xs text-neutral-400">
             <span className="flex items-center gap-1.5">
-              <Lock className="h-3.5 w-3.5 text-[#ffb703]" />
+              <Lock className="h-3.5 w-3.5 text-[var(--accent-yellow)]" />
               <span>En garantía (Escrow): S/ {(lockedEscrow / 100).toFixed(2)}</span>
             </span>
-            <span className="text-emerald-400 font-bold flex items-center gap-1">
+            <span className="text-[var(--badge-emerald-text)] font-bold flex items-center gap-1">
               <ShieldCheck className="h-4 w-4" />
               Protección 100%
             </span>
@@ -186,27 +182,27 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
         </div>
 
         {/* Retiro Yape / Plin */}
-        <div className="rounded-3xl bg-[#141418] border border-white/5 p-5 shadow-xl flex flex-col justify-between space-y-3">
+        <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col justify-between space-y-3">
           <div className="space-y-1">
             <p className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-              <CreditCard className="h-4 w-4 text-[#ff5722]" />
+              <CreditCard className="h-4 w-4 text-[var(--accent-orange)]" />
               <span>Retiros Inmediatos</span>
             </p>
             <p className="text-[11px] text-neutral-400">Retira tus ganancias directamente a tu cuenta:</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="px-3 py-1 rounded-xl bg-purple-600/20 text-purple-400 font-bold text-xs">
+            <div className="px-3 py-1 rounded-xl bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] text-[var(--badge-purple-text)] font-bold text-xs">
               Yape
             </div>
-            <div className="px-3 py-1 rounded-xl bg-cyan-600/20 text-cyan-400 font-bold text-xs">
+            <div className="px-3 py-1 rounded-xl bg-[var(--badge-cyan-bg)] border border-[var(--badge-cyan-border)] text-[var(--badge-cyan-text)] font-bold text-xs">
               Plin
             </div>
           </div>
 
           <button 
             onClick={() => onAskAi('¿Cuáles son los pasos para vincular mi cuenta de Yape/Plin y retirar mis ganancias?')}
-            className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-neutral-300 hover:text-white transition"
+            className="w-full py-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
           >
             Configurar Cobro
           </button>
@@ -217,32 +213,40 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
       <div className="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar text-xs">
         <button
           onClick={() => setSelectedType('ALL')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedType === 'ALL' ? 'bg-white text-black shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedType === 'ALL' 
+              ? 'bg-white text-black' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Todos los Servicios
         </button>
         <button
           onClick={() => setSelectedType('MOCK_DEFENSE')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedType === 'MOCK_DEFENSE' ? 'bg-[#ff5722] text-white shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedType === 'MOCK_DEFENSE' 
+              ? 'bg-[var(--accent-orange)] text-white' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Simulacros de Sustentación
         </button>
         <button
           onClick={() => setSelectedType('TUTORING_1ON1')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedType === 'TUTORING_1ON1' ? 'bg-[#ffb703] text-black shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedType === 'TUTORING_1ON1' 
+              ? 'bg-[var(--accent-yellow)] text-black' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Asesorías 1 a 1
         </button>
         <button
           onClick={() => setSelectedType('CODE_REVIEW')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedType === 'CODE_REVIEW' ? 'bg-[#00e676] text-black shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedType === 'CODE_REVIEW' 
+              ? 'bg-[var(--accent-emerald)] text-black' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Revisión de Código & Labs
@@ -254,11 +258,11 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
         {filteredServices.map((srv) => (
           <div
             key={srv.id}
-            className="flex flex-col justify-between rounded-3xl bg-[#141417] border border-white/5 hover:border-white/10 p-5 space-y-4 shadow-xl transition-all group"
+            className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#ffb703] bg-[#ffb703]/15 px-2.5 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-yellow-text)] bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] px-2.5 py-0.5 rounded-full">
                   <Star className="h-3 w-3 fill-current" />
                   {srv.rating_avg} ({srv.total_reviews} reviews)
                 </span>
@@ -270,7 +274,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
               </div>
 
               <div>
-                <h3 className="text-base font-bold text-white group-hover:text-[#ffb703] transition-colors leading-snug">
+                <h3 className="text-base font-bold text-white group-hover:text-[var(--accent-yellow)] transition-colors leading-snug">
                   {srv.title}
                 </h3>
                 <p className="text-xs text-neutral-400 mt-2 line-clamp-2">
@@ -279,20 +283,20 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
               </div>
             </div>
 
-            <div className="space-y-3 pt-3 border-t border-white/5">
+            <div className="space-y-3 pt-3 border-t border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold text-white leading-tight">{srv.mentor?.full_name}</p>
                   <p className="text-[10px] text-neutral-400">{srv.mentor?.career}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-black text-[#bbf451]">S/ {(srv.price_cents / 100).toFixed(2)}</p>
+                  <p className="text-lg font-black text-[var(--accent-lime)]">S/ {(srv.price_cents / 100).toFixed(2)}</p>
                 </div>
               </div>
 
               <button
                 onClick={() => handleOrderService(srv)}
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-2xl bg-[#ffb703]/15 hover:bg-[#ffb703]/25 border border-[#ffb703]/30 py-2.5 text-xs font-black text-[#ffb703] hover:text-white transition active:scale-95"
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2.5 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-white transition active:scale-95 shadow-none"
               >
                 <span>Solicitar Asesoría</span>
                 <ArrowUpRight className="h-3.5 w-3.5" />
@@ -304,10 +308,10 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
 
       {/* Modal de Confirmación Escrow */}
       {selectedServiceForOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-3xl bg-[#141418] border border-white/10 p-6 space-y-5 shadow-2xl text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-3xl bg-[var(--surface-card)] border border-[var(--border-strong)] p-6 space-y-5 shadow-2xl text-white">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-[#ffb703] uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-black text-[var(--accent-yellow)] uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4" />
                 <span>Garantía de Pago Escrow</span>
               </span>
@@ -321,7 +325,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
 
             {orderSuccess ? (
               <div className="py-8 text-center space-y-3 animate-in zoom-in-95">
-                <CheckCircle2 className="h-12 w-12 text-[#00e676] mx-auto" />
+                <CheckCircle2 className="h-12 w-12 text-[var(--accent-emerald)] mx-auto" />
                 <h3 className="text-base font-bold text-white">¡Sesión Solicitada con Éxito!</h3>
                 <p className="text-xs text-neutral-400">
                   Los fondos están protegidos en Escrow. Se liberarán una vez finalices la sesión con tu mentor.
@@ -334,7 +338,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                   <p className="text-xs text-neutral-400">Mentor: <strong className="text-white">{selectedServiceForOrder.mentor?.full_name}</strong> ({selectedServiceForOrder.mentor?.career})</p>
                 </div>
 
-                <div className="rounded-2xl bg-[#1b1b22] p-4 space-y-2 text-xs">
+                <div className="rounded-2xl bg-[var(--surface-subtle)] border border-[var(--border-subtle)] p-4 space-y-2 text-xs">
                   <div className="flex justify-between text-neutral-300">
                     <span>Monto del servicio:</span>
                     <span className="font-bold text-white">S/ {(selectedServiceForOrder.price_cents / 100).toFixed(2)}</span>
@@ -343,7 +347,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                     <span>Duración estimada:</span>
                     <span className="font-bold text-white">{selectedServiceForOrder.duration_minutes} minutos</span>
                   </div>
-                  <div className="flex justify-between text-emerald-400 font-semibold pt-1 border-t border-white/5">
+                  <div className="flex justify-between text-[var(--badge-emerald-text)] font-semibold pt-1 border-t border-[var(--border-subtle)]">
                     <span>Comisión de protección:</span>
                     <span>S/ 0.00 (Gratis)</span>
                   </div>
@@ -352,13 +356,13 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => setSelectedServiceForOrder(null)}
-                    className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-neutral-400 hover:text-white transition"
+                    className="flex-1 py-2.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleConfirmOrder}
-                    className="flex-1 py-2.5 rounded-xl bg-[#ffb703] hover:bg-[#ffa700] text-xs font-black text-black shadow-lg shadow-[#ffb703]/25 transition active:scale-95"
+                    className="flex-1 py-2.5 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] text-xs font-black text-black transition active:scale-95 shadow-none"
                   >
                     Confirmar con Yape
                   </button>

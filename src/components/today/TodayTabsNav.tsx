@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { FileCheck2, Clock, Award } from 'lucide-react';
 
 export type TodayTabSection = 'tasks' | 'todayClasses' | 'evaluations';
 
@@ -26,41 +25,38 @@ export const TodayTabsNav: React.FC<TodayTabsNavProps> = ({
 }) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-      <div className="flex items-center gap-1 bg-[#141417] p-1 rounded-2xl text-xs">
+      <div className="flex items-center gap-1 bg-[var(--surface-card)] border border-[var(--border-subtle)] p-1 rounded-2xl text-xs shadow-none">
         <button
           onClick={() => onSelectSection('todayClasses')}
-          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold transition ${
+          className={`px-3.5 py-1.5 rounded-xl font-bold transition shadow-none ${
             activeSection === 'todayClasses' 
-              ? 'bg-white text-black shadow-sm' 
+              ? 'bg-white text-black' 
               : 'text-neutral-400 hover:text-white'
           }`}
         >
-          <Clock className="h-3.5 w-3.5" />
-          <span>Clases de Hoy ({todayClassesCount})</span>
+          Clases de Hoy ({todayClassesCount})
         </button>
 
         <button
           onClick={() => onSelectSection('tasks')}
-          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold transition ${
+          className={`px-3.5 py-1.5 rounded-xl font-bold transition shadow-none ${
             activeSection === 'tasks' 
-              ? 'bg-white text-black shadow-sm' 
+              ? 'bg-white text-black' 
               : 'text-neutral-400 hover:text-white'
           }`}
         >
-          <FileCheck2 className="h-3.5 w-3.5" />
-          <span>Tareas ({tasksCount})</span>
+          Tareas ({tasksCount})
         </button>
 
         <button
           onClick={() => onSelectSection('evaluations')}
-          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold transition ${
+          className={`px-3.5 py-1.5 rounded-xl font-bold transition shadow-none ${
             activeSection === 'evaluations' 
-              ? 'bg-white text-black shadow-sm' 
+              ? 'bg-white text-black' 
               : 'text-neutral-400 hover:text-white'
           }`}
         >
-          <Award className="h-3.5 w-3.5" />
-          <span>Evaluaciones</span>
+          Evaluaciones
         </button>
       </div>
 

@@ -18,24 +18,24 @@ export const Badge: React.FC<BadgeProps> = ({
   const sizeClasses = size === 'sm' ? 'px-2.5 py-0.5 text-[11px]' : 'px-3 py-1 text-xs';
 
   const variantClasses: Record<BadgeVariant, string> = {
-    // Pop Orange (#ff5722)
-    orange: 'bg-[#ff5722]/20 text-[#ff7043] font-bold',
+    // Pop Orange
+    orange: 'bg-[var(--badge-orange-bg)] text-[var(--badge-orange-text)] border border-[var(--badge-orange-border)] font-bold',
     // Iron / Coral
-    iron: 'bg-[#ff5722]/15 text-[#ff8a65] font-semibold',
-    // Pop Emerald Green (#00c853)
-    emerald: 'bg-[#00c853]/20 text-[#00e676] font-bold',
-    // Pop Purple (#7075ff)
-    purple: 'bg-[#7075ff]/20 text-[#9195ff] font-bold',
-    // Pop Yellow (#ffb703)
-    yellow: 'bg-[#ffb703]/20 text-[#ffc107] font-bold',
-    // Pop Lime (#bbf451)
-    lime: 'bg-[#bbf451]/25 text-[#bbf451] font-black',
-    // Pop Blue (#3a86ff)
-    blue: 'bg-[#3a86ff]/20 text-[#60a5fa] font-bold',
+    iron: 'bg-[var(--badge-orange-bg)] text-[var(--badge-orange-text)] border border-[var(--badge-orange-border)] font-semibold',
+    // Pop Emerald Green
+    emerald: 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] font-bold',
+    // Pop Purple
+    purple: 'bg-[var(--badge-purple-bg)] text-[var(--badge-purple-text)] border border-[var(--badge-purple-border)] font-bold',
+    // Pop Yellow
+    yellow: 'bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] border border-[var(--badge-yellow-border)] font-bold',
+    // Pop Lime
+    lime: 'bg-[var(--badge-lime-bg)] text-[var(--badge-lime-text)] border border-[var(--badge-lime-border)] font-black',
+    // Pop Blue
+    blue: 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)] border border-[var(--badge-blue-border)] font-bold',
     // Neutral Dark Surface
-    neutral: 'bg-white/10 text-neutral-300 font-medium',
+    neutral: 'bg-[var(--badge-neutral-bg)] text-[var(--badge-neutral-text)] border border-[var(--badge-neutral-border)] font-medium',
     // Outline / Soft subtle
-    outline: 'bg-white/5 text-neutral-300 font-medium',
+    outline: 'bg-[var(--surface-subtle)] text-neutral-300 border border-[var(--border-subtle)] font-medium',
   };
 
   return (
@@ -46,3 +46,4 @@ export const Badge: React.FC<BadgeProps> = ({
     </span>
   );
 };
+

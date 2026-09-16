@@ -197,26 +197,26 @@ Las indicaciones oficiales del docente son:
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-[#19191e] flex flex-wrap items-center justify-between gap-3">
+        <div className="px-6 py-4 bg-[var(--surface-card)] border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3">
           <button
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 px-4 py-2 text-xs font-bold text-neutral-300 hover:text-white transition"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] px-4 py-2 text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? <Check className="h-3.5 w-3.5 text-[var(--accent-emerald)]" /> : <Copy className="h-3.5 w-3.5" />}
             <span>{copied ? 'Copiado al Portapapeles' : 'Copiar Texto'}</span>
           </button>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleAiConsult}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#ff5722] hover:bg-[#f44710] text-white px-4 py-2 text-xs font-black shadow-lg shadow-[#ff5722]/20 transition active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-orange)] hover:bg-[var(--accent-orange-hover)] text-white px-4 py-2 text-xs font-black shadow-none transition active:scale-95"
             >
               <Sparkles className="h-3.5 w-3.5 text-white" />
               <span>Analizar con Copiloto IA</span>
             </button>
             <button
               onClick={onClose}
-              className="rounded-full bg-white/10 hover:bg-white/15 px-4 py-2 text-xs font-bold text-neutral-300 hover:text-white transition"
+              className="rounded-full bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] px-4 py-2 text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
             >
               Cerrar
             </button>

@@ -6,7 +6,7 @@ import { formatTime, parseEventTitle } from '@/lib/schedule-parser';
 import { Badge } from '@/components/ui/Badge';
 import { getClassroomLocation } from '@/lib/classroom-helper';
 import { ClassDetailModal } from '@/components/schedule/ClassDetailModal';
-import { Clock, Calendar, Video, MapPin, Radio, Sparkles, ChevronRight } from 'lucide-react';
+import { Calendar, Video, MapPin, Radio, Sparkles, ChevronRight } from 'lucide-react';
 
 interface TodayClassesSectionProps {
   todayEvents: UTPEvent[];
@@ -22,7 +22,7 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
   todayDate,
   interval,
   onNavigateToWeekly,
-  onOpenSyllabus,
+  onOpenSyllabus: _onOpenSyllabus,
   onAskAi,
 }) => {
   const [selectedEventForModal, setSelectedEventForModal] = useState<UTPEvent | null>(null);
@@ -43,20 +43,19 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black text-white flex items-center gap-2">
-          <Clock className="h-5 w-5 text-[#3a86ff]" />
-          <span>Horario del Día: {todayDate.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+        <h3 className="text-lg font-black text-white">
+          Horario del Día: {todayDate.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}
         </h3>
         <button
           onClick={onNavigateToWeekly}
-          className="text-xs text-[#3a86ff] hover:text-[#60a5fa] font-bold"
+          className="text-xs text-[var(--accent-blue)] hover:text-[var(--accent-blue-hover)] font-bold transition-colors"
         >
           Ver horario semanal completo →
         </button>
       </div>
 
       {todayEvents.length === 0 ? (
-        <div className="py-16 text-center rounded-3xl bg-[#141417] p-8 space-y-3 shadow-xl">
+        <div className="py-16 text-center rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-8 space-y-3 shadow-none">
           <Calendar className="h-10 w-10 mx-auto text-neutral-600" />
           <p className="text-base font-bold text-white">¡No tienes sesiones programadas para hoy!</p>
           <p className="text-xs text-neutral-400">Aprovecha para avanzar en tus entregables y proyectos.</p>
@@ -73,7 +72,7 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
               <div 
                 key={ev.id} 
                 onClick={() => setSelectedEventForModal(ev)}
-                className="group p-4 sm:p-5 rounded-2xl bg-[#141417] hover:bg-[#1a1a20] flex items-center justify-between gap-4 transition shadow-md cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                className="group p-4 sm:p-5 rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] flex items-center justify-between gap-4 transition shadow-none cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
@@ -87,7 +86,7 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
                       </span>
                     )}
                   </div>
-                  <h4 className="text-sm font-black text-white group-hover:text-[#bbf451] transition-colors">
+                  <h4 className="text-sm font-black text-white group-hover:text-[var(--accent-lime)] transition-colors">
                     {parsed.cleanTitle}
                   </h4>
                 </div>
@@ -101,14 +100,14 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
                       }}
                       title="Unirse directo a Zoom"
                       aria-label="Unirse a Zoom"
-                      className="flex h-8 w-8 items-center justify-center rounded-xl bg-white hover:bg-neutral-200 text-black shadow transition active:scale-95 shrink-0"
+                      className="flex h-8 w-8 items-center justify-center rounded-xl bg-white hover:bg-neutral-200 text-black shadow-none transition active:scale-95 shrink-0"
                     >
                       <Video className="h-4 w-4 text-black" />
                     </button>
                   )}
 
                   <div className="flex items-center gap-1 text-xs text-neutral-400 group-hover:text-white font-bold pl-2">
-                    <Sparkles className="h-3.5 w-3.5 text-[#ff5722]" />
+                    <Sparkles className="h-3.5 w-3.5 text-[var(--accent-orange)]" />
                     <span className="hidden sm:inline">Detalles & IA</span>
                     <ChevronRight className="h-3.5 w-3.5 text-neutral-500 group-hover:text-white" />
                   </div>
@@ -131,4 +130,3 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
     </div>
   );
 };
-

@@ -7,22 +7,68 @@
 
 @layer base {
   :root {
-    /* Pure Modern Dark Palette */
+    /* Pure Solid Dark Surfaces (Zero Transparency) */
     --bg-main: #0a0a0c;
     --surface-card: #141417;
-    --surface-card-hover: #1c1c21;
-    --surface-elevated: #222228;
+    --surface-card-hover: #19191e;
+    --surface-subtle: #1c1c22;
+    --surface-muted: #24242c;
+    --surface-elevated: #2c2c36;
+    --surface-input: #121215;
     
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-medium: rgba(255, 255, 255, 0.16);
+    /* Solid Neutral Borders */
+    --border-subtle: #22222a;
+    --border-medium: #2e2e38;
+    --border-strong: #3d3d4a;
 
-    /* Chunky Neo-Brutalist Pop Colors */
-    --pop-purple: #7075ff;
-    --pop-green: #00c853;
-    --pop-orange: #ff5722;
-    --pop-yellow: #ffb703;
-    --pop-blue: #3a86ff;
-    --pop-lime: #bbf451;
+    /* Solid Semantic Badges (Zero Transparency / No Alphas) */
+    --badge-orange-bg: #2b1510;
+    --badge-orange-text: #ff7043;
+    --badge-orange-border: #4a2118;
+
+    --badge-emerald-bg: #0e2417;
+    --badge-emerald-text: #00e676;
+    --badge-emerald-border: #18452a;
+
+    --badge-purple-bg: #1c1a32;
+    --badge-purple-text: #9d9fff;
+    --badge-purple-border: #332f5e;
+
+    --badge-yellow-bg: #291f09;
+    --badge-yellow-text: #ffb703;
+    --badge-yellow-border: #4d3a0f;
+
+    --badge-blue-bg: #111e33;
+    --badge-blue-text: #60a5fa;
+    --badge-blue-border: #1e355b;
+
+    --badge-lime-bg: #1e290d;
+    --badge-lime-text: #bbf451;
+    --badge-lime-border: #3b5217;
+
+    --badge-neutral-bg: #202026;
+    --badge-neutral-text: #d4d4d8;
+    --badge-neutral-border: #32323a;
+
+    --badge-cyan-bg: #0c2328;
+    --badge-cyan-text: #22d3ee;
+    --badge-cyan-border: #15424b;
+
+    --badge-red-bg: #2b0f12;
+    --badge-red-text: #f87171;
+    --badge-red-border: #4c1d24;
+
+    /* Solid Action Colors */
+    --accent-orange: #ff5722;
+    --accent-orange-hover: #ff7043;
+    --accent-yellow: #ffb703;
+    --accent-yellow-hover: #ffc107;
+    --accent-lime: #bbf451;
+    --accent-lime-hover: #a3e635;
+    --accent-purple: #7075ff;
+    --accent-purple-hover: #5b61ff;
+    --accent-emerald: #00e676;
+    --accent-emerald-hover: #00c853;
 
     --foreground: #ffffff;
     --text-muted: #8e8e93;
@@ -42,6 +88,7 @@
     letter-spacing: -0.025em;
   }
 }
+
 
 /* Custom Minimal Scrollbar */
 ::-webkit-scrollbar {

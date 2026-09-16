@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { TaskWithSyllabusContext, AssignmentRubric, CourseAssignment } from '@/types/utp';
 import { TaskSyllabusSyncRow } from '@/components/tasks/TaskSyllabusSyncRow';
-import { CheckCircle2, Sparkles } from 'lucide-react';
 
 interface TodayTasksSectionProps {
   tasks: TaskWithSyllabusContext[];
@@ -34,9 +33,8 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
       {/* Clean Header with Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-[#bbf451]" />
-            <span>Entregables y Tareas</span>
+          <h3 className="text-base sm:text-lg font-bold text-white">
+            Entregables y Tareas
           </h3>
           <span className="text-xs text-neutral-500 font-medium">
             ({filteredTasks.length} de {tasks.length})
@@ -44,12 +42,12 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-[#141417] p-1 rounded-xl text-xs">
+        <div className="flex items-center gap-1.5 bg-[var(--surface-card)] border border-[var(--border-subtle)] p-1 rounded-xl text-xs">
           <button
             onClick={() => setTaskFilter('all')}
-            className={`px-3 py-1 rounded-lg transition font-medium ${
+            className={`px-3 py-1 rounded-lg transition font-medium shadow-none ${
               taskFilter === 'all' 
-                ? 'bg-white text-black font-bold shadow-sm' 
+                ? 'bg-white text-black font-bold' 
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -57,9 +55,9 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
           </button>
           <button
             onClick={() => setTaskFilter('graded')}
-            className={`px-3 py-1 rounded-lg transition font-medium ${
+            className={`px-3 py-1 rounded-lg transition font-medium shadow-none ${
               taskFilter === 'graded' 
-                ? 'bg-[#ff5722] text-white font-bold shadow-sm' 
+                ? 'bg-[var(--accent-orange)] text-white font-bold' 
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -67,9 +65,9 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
           </button>
           <button
             onClick={() => setTaskFilter('practice')}
-            className={`px-3 py-1 rounded-lg transition font-medium ${
+            className={`px-3 py-1 rounded-lg transition font-medium shadow-none ${
               taskFilter === 'practice' 
-                ? 'bg-white/15 text-white font-bold' 
+                ? 'bg-[var(--surface-muted)] text-white font-bold' 
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -81,7 +79,7 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
       {/* Task List */}
       <div className="space-y-2.5">
         {filteredTasks.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-[#131317] text-xs text-neutral-400">
+          <div className="p-8 text-center rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-xs text-neutral-400">
             No hay actividades en esta categoría.
           </div>
         ) : (

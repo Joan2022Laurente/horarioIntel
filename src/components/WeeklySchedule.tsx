@@ -66,23 +66,23 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
   return (
     <div className="space-y-5 text-white">
       
-      {/* Barra de Control de Semana & Filtros (Flat & Sleek, sin bordes) */}
+      {/* Barra de Control de Semana & Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
         
         {/* Selector de Semana */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-[#151519] rounded-2xl p-1 shadow-sm">
+          <div className="flex items-center bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-2xl p-1 shadow-none">
             <button
               onClick={() => setSelectedWeek(prev => Math.max(1, prev - 1))}
               disabled={selectedWeek <= 1}
               aria-label="Semana anterior"
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition disabled:opacity-20"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-white hover:bg-[var(--surface-subtle)] transition disabled:opacity-20"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
 
             <div className="flex items-center gap-2 px-3">
-              <Calendar className="h-4 w-4 text-[#ff5722]" />
+              <Calendar className="h-4 w-4 text-[var(--accent-orange)]" />
               <select
                 value={selectedWeek}
                 onChange={(e) => setSelectedWeek(Number(e.target.value))}
@@ -90,7 +90,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                 className="bg-transparent border-0 text-xs font-bold text-white focus:outline-none cursor-pointer"
               >
                 {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((w) => (
-                  <option key={w} value={w} className="bg-[#141417] text-white">
+                  <option key={w} value={w} className="bg-[var(--surface-card)] text-white">
                     Semana {w} {w === currentWeek ? '(Actual)' : ''}
                   </option>
                 ))}
@@ -101,27 +101,27 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
               onClick={() => setSelectedWeek(prev => Math.min(totalWeeks, prev + 1))}
               disabled={selectedWeek >= totalWeeks}
               aria-label="Semana siguiente"
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition disabled:opacity-20"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-white hover:bg-[var(--surface-subtle)] transition disabled:opacity-20"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
 
           {selectedWeek === currentWeek && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#bbf451] text-black font-extrabold px-3 py-1 text-[11px] shadow-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-lime)] text-black font-extrabold px-3 py-1 text-[11px] shadow-none">
               <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse" />
               En curso
             </span>
           )}
         </div>
 
-        {/* Filtros de Modalidad (Pill Tabs Planas) */}
-        <div className="flex items-center gap-1 bg-[#151519] p-1 rounded-2xl text-xs font-semibold shadow-sm">
+        {/* Filtros de Modalidad */}
+        <div className="flex items-center gap-1 bg-[var(--surface-card)] border border-[var(--border-subtle)] p-1 rounded-2xl text-xs font-semibold shadow-none">
           <button
             onClick={() => setSelectedModality('ALL')}
-            className={`px-3 py-1 rounded-xl transition-all ${
+            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
               selectedModality === 'ALL'
-                ? 'bg-white text-black font-extrabold shadow-sm'
+                ? 'bg-white text-black font-extrabold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -130,9 +130,9 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
           <button
             onClick={() => setSelectedModality('P')}
-            className={`px-3 py-1 rounded-xl transition-all ${
+            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
               selectedModality === 'P'
-                ? 'bg-[#00c853] text-black font-extrabold shadow-sm'
+                ? 'bg-[var(--accent-emerald)] text-black font-extrabold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -141,9 +141,9 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
           <button
             onClick={() => setSelectedModality('R')}
-            className={`px-3 py-1 rounded-xl transition-all ${
+            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
               selectedModality === 'R'
-                ? 'bg-[#ff5722] text-white font-extrabold shadow-sm'
+                ? 'bg-[var(--accent-orange)] text-white font-extrabold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -152,9 +152,9 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
           <button
             onClick={() => setSelectedModality('VT')}
-            className={`px-3 py-1 rounded-xl transition-all ${
+            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
               selectedModality === 'VT'
-                ? 'bg-[#7075ff] text-white font-extrabold shadow-sm'
+                ? 'bg-[var(--accent-purple)] text-white font-extrabold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -164,7 +164,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
       </div>
 
-      {/* Grid de 6 Días (Lanes abiertas sin cajas anidadas) */}
+      {/* Grid de 6 Días */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {daysToDisplay.map((dayNum) => {
           const dayName = DAYS_OF_WEEK[dayNum];
@@ -176,7 +176,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
               key={dayNum}
               className={`flex flex-col rounded-2xl transition-all ${
                 isToday
-                  ? 'bg-white/[0.02] p-2 -m-2 rounded-2xl ring-1 ring-[#bbf451]/30'
+                  ? 'bg-[var(--surface-card)] p-2 -m-2 rounded-2xl border border-[var(--badge-lime-border)]'
                   : ''
               }`}
             >
@@ -184,12 +184,12 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
               <div className="pb-2 mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-[11px] font-black uppercase tracking-wider ${
-                    isToday ? 'text-[#bbf451]' : 'text-neutral-300'
+                    isToday ? 'text-[var(--accent-lime)]' : 'text-neutral-300'
                   }`}>
                     {dayName}
                   </span>
                   {isToday && (
-                    <span className="rounded-full bg-[#bbf451] px-1.5 py-0.5 text-[9px] font-black uppercase text-black leading-none">
+                    <span className="rounded-full bg-[var(--accent-lime)] px-1.5 py-0.5 text-[9px] font-black uppercase text-black leading-none">
                       Hoy
                     </span>
                   )}
@@ -200,10 +200,10 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                 </span>
               </div>
 
-              {/* Lista de Sesiones - Tarjeta de capa única interactiva */}
+              {/* Lista de Sesiones */}
               <div className="space-y-3 flex-1">
                 {dayEvents.length === 0 ? (
-                  <div className="h-28 rounded-2xl bg-[#151519]/40 flex items-center justify-center text-center text-xs text-neutral-600 font-medium select-none">
+                  <div className="h-28 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] flex items-center justify-center text-center text-xs text-neutral-600 font-medium select-none">
                     Sin clases
                   </div>
                 ) : (
@@ -217,22 +217,22 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                       <div
                         key={evt.id}
                         onClick={() => setSelectedEventForModal(evt)}
-                        className="group relative rounded-2xl bg-[#151519] hover:bg-[#1b1b22] p-3.5 transition-all duration-200 space-y-2.5 shadow-md hover:shadow-xl cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
+                        className="group relative rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-3.5 transition-all duration-200 space-y-2.5 shadow-none cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
                       >
-                        {/* Top: Modalidad + Acción rápida (Cámara compacta o Ubicación) */}
+                        {/* Top: Modalidad */}
                         <div className="flex items-center justify-between gap-1">
                           {isPresencial ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
                               <MapPin className="h-2.5 w-2.5" />
                               Presencial
                             </span>
                           ) : isRemoteZoom ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[#ff7043] bg-[#ff5722]/10 px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
                               <Video className="h-2.5 w-2.5" />
                               Zoom
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
                               <Radio className="h-2.5 w-2.5" />
                               Virtual
                             </span>
@@ -246,7 +246,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                               }}
                               title="Unirse directo a Zoom"
                               aria-label="Unirse a Zoom"
-                              className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/10 hover:bg-white text-neutral-300 hover:text-black transition shrink-0"
+                              className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-subtle)] hover:bg-white text-neutral-300 hover:text-black border border-[var(--border-subtle)] transition shrink-0"
                             >
                               <Video className="h-3.5 w-3.5" />
                             </button>
@@ -258,7 +258,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                         </div>
 
                         {/* Nombre del Curso */}
-                        <h4 className="text-xs font-black text-white group-hover:text-[#bbf451] leading-snug line-clamp-2 transition-colors">
+                        <h4 className="text-xs font-black text-white group-hover:text-[var(--accent-lime)] leading-snug line-clamp-2 transition-colors">
                           {parsed.cleanTitle}
                         </h4>
 
@@ -269,7 +269,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                             <span>{formatTime(evt.startAt)} — {formatTime(evt.finishAt)}</span>
                           </div>
 
-                          <Sparkles className="h-3 w-3 text-[#ff5722] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <Sparkles className="h-3 w-3 text-[var(--accent-orange)] opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </div>
                     );
@@ -281,7 +281,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
         })}
       </div>
 
-      {/* Modal de Detalle de Clase con Aula, Piso, Campus, Sílabo & Chat IA */}
+      {/* Modal de Detalle de Clase */}
       <ClassDetailModal
         isOpen={!!selectedEventForModal}
         event={selectedEventForModal}
@@ -294,4 +294,3 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
     </div>
   );
 };
-

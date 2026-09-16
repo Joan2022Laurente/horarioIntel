@@ -28,7 +28,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
   return (
     <header className="sticky top-4 z-50 w-full flex justify-center px-4 pointer-events-none mb-6">
-      <div className="pointer-events-auto flex items-center justify-between gap-2 sm:gap-4 bg-[#141417]/95 backdrop-blur-2xl rounded-full px-3 sm:px-5 py-2 shadow-2xl max-w-5xl w-full border border-white/5">
+      <div className="pointer-events-auto flex items-center justify-between gap-2 sm:gap-4 bg-[var(--surface-card)] rounded-full px-3 sm:px-5 py-2 shadow-none max-w-5xl w-full border border-[var(--border-subtle)]">
         
         {/* Brand Square Badge */}
         <button
@@ -36,11 +36,11 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
           title="Ajustes de cuenta y perfil"
           className="flex items-center gap-2.5 text-left transition focus:outline-none group shrink-0"
         >
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-[#ff5722] text-[#0a0a0c] font-black text-lg shadow-md select-none transition-transform group-hover:scale-105">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-[var(--accent-orange)] text-[#0a0a0c] font-black text-lg shadow-none select-none transition-transform group-hover:scale-105">
             U
           </div>
           <div className="hidden lg:flex flex-col text-left">
-            <span className="text-xs font-black tracking-wider text-white uppercase group-hover:text-[#bbf451] transition">UTP Class</span>
+            <span className="text-xs font-black tracking-wider text-white uppercase group-hover:text-[var(--accent-lime)] transition">UTP Class</span>
             <span className="text-[10px] font-mono text-neutral-400">{student.username}</span>
           </div>
         </button>
@@ -49,9 +49,9 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
         <nav className="flex items-center gap-1 text-xs font-semibold overflow-x-auto no-scrollbar py-0.5">
           <button
             onClick={() => onTabChange('today')}
-            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'today'
-                ? 'bg-white/15 text-white font-bold'
+                ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -60,9 +60,9 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={() => onTabChange('weekly')}
-            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'weekly'
-                ? 'bg-white/15 text-white font-bold'
+                ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -71,9 +71,9 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={() => onTabChange('courses')}
-            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'courses'
-                ? 'bg-white/15 text-white font-bold'
+                ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -82,21 +82,21 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={() => onTabChange('radar')}
-            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5 shadow-none ${
               activeTab === 'radar'
-                ? 'bg-[#00e676]/20 text-[#00e676] font-bold ring-1 ring-[#00e676]/30'
+                ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#00e676] animate-pulse" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
             <span>Radar</span>
           </button>
 
           <button
             onClick={() => onTabChange('community')}
-            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'community'
-                ? 'bg-[#7075ff]/20 text-[#9195ff] font-bold ring-1 ring-[#7075ff]/30'
+                ? 'bg-[var(--badge-purple-bg)] text-[var(--badge-purple-text)] border border-[var(--badge-purple-border)] font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -105,9 +105,9 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={() => onTabChange('marketplace')}
-            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap shadow-none ${
               activeTab === 'marketplace'
-                ? 'bg-[#ffb703]/20 text-[#ffb703] font-bold ring-1 ring-[#ffb703]/30'
+                ? 'bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] border border-[var(--badge-yellow-border)] font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -116,7 +116,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={onOpenAi}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white/90 hover:text-white font-bold hover:bg-white/10 transition group whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white/90 hover:text-white font-bold hover:bg-[var(--surface-subtle)] transition group whitespace-nowrap shadow-none"
           >
             <AsciiMatrixOrb size={18} state="idle" colorMode="monochrome" />
             <span className="hidden sm:inline">Copiloto</span>
@@ -124,21 +124,21 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
         </nav>
 
 
-        {/* Right CTA Action: Lime pill matching "Sign Up" from reference */}
+        {/* Right CTA Action */}
         <div className="flex items-center gap-2">
           {student.token ? (
             <button
               onClick={onOpenSettings}
               title="Cuenta UTP activa. Clic para ver perfil o cambiar cuenta."
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 text-xs font-bold text-emerald-400 transition"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] hover:bg-[var(--surface-card-hover)] px-3 py-1.5 text-xs font-bold text-[var(--badge-emerald-text)] transition shadow-none"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
               <span>{student.username}</span>
             </button>
           ) : (
             <button
               onClick={onOpenSettings}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#ff5722] hover:bg-[#ff7043] px-3.5 py-1.5 text-xs font-black text-[#0a0a0c] shadow-md transition active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-orange)] hover:bg-[var(--accent-orange-hover)] px-3.5 py-1.5 text-xs font-black text-[#0a0a0c] shadow-none transition active:scale-95"
             >
               <span>Conectar UTP</span>
             </button>
@@ -146,7 +146,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={onOpenAi}
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#bbf451] hover:bg-[#a3e635] px-3.5 py-1.5 text-xs font-extrabold text-[#0a0a0c] shadow-md transition-all active:scale-95"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-lime)] hover:bg-[var(--accent-lime-hover)] px-3.5 py-1.5 text-xs font-extrabold text-[#0a0a0c] shadow-none transition-all active:scale-95"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#0a0a0c] animate-pulse" />
             <span>Sem. {currentWeek}</span>

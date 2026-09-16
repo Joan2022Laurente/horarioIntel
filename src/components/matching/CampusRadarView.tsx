@@ -134,16 +134,12 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
   return (
     <div className="space-y-6 text-white animate-in fade-in duration-150">
       
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/5">
+      {/* Header - Clean Title (Zero Icon, No Ping) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-subtle)]">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-[#00e676] animate-ping" />
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-              <Radio className="h-6 w-6 text-[#00e676]" />
-              <span>Campus Radar & Huecos en Común</span>
-            </h2>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Campus Radar & Huecos en Común
+          </h2>
           <p className="text-xs text-neutral-400 mt-1">
             Encuentra compañeros con ventanas libres en tu mismo campus o salas virtuales de estudio grupal sin fricción.
           </p>
@@ -151,7 +147,7 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
 
         <button
           onClick={() => setIsCreatingBeacon(!isCreatingBeacon)}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#00e676] hover:bg-[#00c853] px-4 py-2 text-xs font-black text-black shadow-lg shadow-[#00e676]/20 transition active:scale-95"
+          className="inline-flex items-center gap-2 rounded-2xl bg-[var(--accent-emerald)] hover:bg-[var(--accent-emerald-hover)] px-4 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
         >
           <Plus className="h-4 w-4" />
           <span>{isCreatingBeacon ? 'Cancelar' : 'Encender Faro de Estudio'}</span>
@@ -160,9 +156,9 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
 
       {/* Formulario rápido para emitir Faro */}
       {isCreatingBeacon && (
-        <form onSubmit={handleCreateBeacon} className="rounded-3xl bg-[#141418] border border-[#00e676]/30 p-5 space-y-4 shadow-2xl animate-in zoom-in-95">
+        <form onSubmit={handleCreateBeacon} className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border-medium)] p-5 space-y-4 shadow-none animate-in zoom-in-95">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-[#00e676] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xs font-black text-[var(--accent-emerald)] uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="h-4 w-4" />
               <span>Nuevo Faro de Estudio en Tiempo Real</span>
             </span>
@@ -178,7 +174,7 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
                 onChange={e => setLocationName(e.target.value)}
                 placeholder="Ej: Biblioteca Torre A - Piso 3 o Zoom Sala 2"
                 required
-                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#00e676]"
+                className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
               />
             </div>
             <div className="space-y-1">
@@ -186,7 +182,7 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
               <select 
                 value={selectedCourse}
                 onChange={e => setSelectedCourse(e.target.value)}
-                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#00e676]"
+                className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
               >
                 {courses.map(c => (
                   <option key={c.courseId} value={c.name}>{c.name}</option>
@@ -203,14 +199,14 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
               onChange={e => setObjective(e.target.value)}
               placeholder="Ej: Avanzar entrega APF1 y resolver dudas de código"
               required
-              className="w-full bg-[#1b1b22] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#00e676]"
+              className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-emerald)]"
             />
           </div>
 
           <div className="flex justify-end pt-1">
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#00e676] px-5 py-2 text-xs font-black text-black hover:bg-[#00c853] transition active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-emerald)] px-5 py-2 text-xs font-black text-black hover:bg-[var(--accent-emerald-hover)] transition active:scale-95 shadow-none"
             >
               <Send className="h-3.5 w-3.5" />
               <span>Emitir Faro en Vivo</span>
@@ -219,10 +215,10 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
         </form>
       )}
 
-      {/* Banner de Sincronía Inteligente de Huecos */}
-      <div className="rounded-3xl bg-gradient-to-r from-[#181822] to-[#121216] border border-white/5 p-5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Banner de Sincronía Inteligente de Huecos con Colores Sólidos */}
+      <div className="rounded-3xl bg-[var(--surface-subtle)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="h-12 w-12 rounded-2xl bg-[#ff5722]/15 text-[#ff7043] flex items-center justify-center font-black shrink-0">
+          <div className="h-12 w-12 rounded-2xl bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] text-[var(--badge-orange-text)] flex items-center justify-center font-black shrink-0">
             <Users className="h-6 w-6" />
           </div>
           <div>
@@ -235,14 +231,14 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
 
         <button
           onClick={() => onAskAi('¿Qué compañeros tienen hueco libre hoy conmigo y qué temas de estudio podemos coordinar?')}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 px-3.5 py-2 text-xs font-bold text-white transition active:scale-95 whitespace-nowrap shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] px-3.5 py-2 text-xs font-bold text-white transition active:scale-95 whitespace-nowrap shrink-0 shadow-none"
         >
-          <Sparkles className="h-3.5 w-3.5 text-[#bbf451]" />
+          <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
           <span>Ver con Copiloto</span>
         </button>
       </div>
 
-      {/* Grid de Faros Activos */}
+      {/* Grid de Faros Activos con Colores Sólidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {beacons.map((b) => {
           const isJoined = joinedBeaconIds.includes(b.id);
@@ -251,13 +247,12 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
           return (
             <div 
               key={b.id}
-              className="flex flex-col justify-between rounded-3xl bg-[#141417] border border-white/5 hover:border-white/10 p-5 space-y-4 shadow-xl transition-all group"
+              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00e676] bg-[#00c853]/15 px-2.5 py-0.5 rounded-full">
-                    <Radio className="h-3 w-3 animate-pulse" />
-                    En Vivo
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2.5 py-0.5 rounded-full">
+                    <span>En Vivo</span>
                   </span>
                   <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
                     <Clock className="h-3 w-3" />
@@ -266,19 +261,19 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
                 </div>
 
                 <div>
-                  <h4 className="text-base font-bold text-white group-hover:text-[#00e676] transition-colors">
+                  <h4 className="text-base font-bold text-white group-hover:text-[var(--accent-emerald)] transition-colors">
                     {b.objective}
                   </h4>
                   <p className="text-xs text-neutral-400 flex items-center gap-1.5 mt-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-[#ff7043] shrink-0" />
+                    <MapPin className="h-3.5 w-3.5 text-[var(--accent-orange)] shrink-0" />
                     <span>{b.location_name}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/5">
+              <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)]">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center text-xs font-black text-white">
+                  <div className="h-7 w-7 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-black text-white">
                     {b.host?.full_name.charAt(0)}
                   </div>
                   <div className="text-[11px]">
@@ -290,12 +285,12 @@ export const CampusRadarView: React.FC<CampusRadarViewProps> = ({
                 <button
                   onClick={() => handleJoinBeacon(b.id)}
                   disabled={isJoined || isFull}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 shadow-none ${
                     isJoined
-                      ? 'bg-emerald-500/20 text-emerald-400 cursor-default'
+                      ? 'bg-[var(--badge-emerald-bg)] text-[var(--badge-emerald-text)] border border-[var(--badge-emerald-border)] cursor-default'
                       : isFull
-                      ? 'bg-white/5 text-neutral-500 cursor-not-allowed'
-                      : 'bg-white hover:bg-neutral-200 text-black shadow'
+                      ? 'bg-[var(--surface-muted)] text-neutral-500 cursor-not-allowed'
+                      : 'bg-white hover:bg-neutral-200 text-black'
                   }`}
                 >
                   {isJoined ? (

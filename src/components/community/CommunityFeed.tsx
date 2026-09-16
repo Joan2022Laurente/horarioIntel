@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import { 
-  MessageSquare, 
   ThumbsUp, 
   Plus, 
-  Tag, 
   Sparkles, 
   Send, 
   BookOpen, 
-  Share2 
+  MessageSquare
 } from 'lucide-react';
 import { PostRow, PostCategory } from '@/types/community';
 import { ProcessedCourse } from '@/types/utp';
@@ -144,12 +142,11 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   return (
     <div className="space-y-6 text-white animate-in fade-in duration-150">
       
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/5">
+      {/* Header - Clean Title (Zero Icon) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-subtle)]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-[#9195ff]" />
-            <span>Comunidad & Foro Académico</span>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Comunidad & Foro Académico
           </h2>
           <p className="text-xs text-neutral-400 mt-1">
             Resuelve dudas de clase, comparte resúmenes y encuentra compañeros de equipo por asignatura.
@@ -158,7 +155,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
         <button
           onClick={() => setIsCreatingPost(!isCreatingPost)}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#7075ff] hover:bg-[#5b61ff] px-4 py-2 text-xs font-black text-white shadow-lg shadow-[#7075ff]/25 transition active:scale-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-hover)] px-4 py-2 text-xs font-black text-white transition active:scale-95 shadow-none"
         >
           <Plus className="h-4 w-4" />
           <span>{isCreatingPost ? 'Cancelar' : 'Crear Publicación'}</span>
@@ -169,32 +166,40 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
       <div className="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar text-xs">
         <button
           onClick={() => setSelectedCategory('ALL')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedCategory === 'ALL' ? 'bg-white text-black shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedCategory === 'ALL' 
+              ? 'bg-white text-black' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Todos los Posts
         </button>
         <button
           onClick={() => setSelectedCategory('PROJECT_RECRUITMENT')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedCategory === 'PROJECT_RECRUITMENT' ? 'bg-[#ff5722] text-white shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedCategory === 'PROJECT_RECRUITMENT' 
+              ? 'bg-[var(--accent-orange)] text-white' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Equipos para Proyectos
         </button>
         <button
           onClick={() => setSelectedCategory('STUDY_TIPS')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedCategory === 'STUDY_TIPS' ? 'bg-[#bbf451] text-black shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedCategory === 'STUDY_TIPS' 
+              ? 'bg-[var(--accent-lime)] text-black' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Tips y Exámenes
         </button>
         <button
           onClick={() => setSelectedCategory('ACADEMIC_QUESTION')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap ${
-            selectedCategory === 'ACADEMIC_QUESTION' ? 'bg-[#9195ff] text-white shadow' : 'bg-white/5 text-neutral-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+            selectedCategory === 'ACADEMIC_QUESTION' 
+              ? 'bg-[var(--accent-purple)] text-white' 
+              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
           }`}
         >
           Dudas de Asignatura
@@ -203,8 +208,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
       {/* Modal / Formulario de Nuevo Post */}
       {isCreatingPost && (
-        <form onSubmit={handleCreatePost} className="rounded-3xl bg-[#141418] border border-[#7075ff]/30 p-5 space-y-4 shadow-2xl animate-in zoom-in-95">
-          <h3 className="text-xs font-black text-[#9195ff] uppercase tracking-wider flex items-center gap-1.5">
+        <form onSubmit={handleCreatePost} className="rounded-3xl bg-[var(--surface-card)] border border-[var(--badge-purple-border)] p-5 space-y-4 shadow-none animate-in zoom-in-95">
+          <h3 className="text-xs font-black text-[var(--badge-purple-text)] uppercase tracking-wider flex items-center gap-1.5">
             <Sparkles className="h-4 w-4" />
             <span>Publicar en la Comunidad UTP</span>
           </h3>
@@ -215,7 +220,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               <select
                 value={postCategory}
                 onChange={e => setPostCategory(e.target.value as PostCategory)}
-                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#7075ff]"
+                className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-purple)]"
               >
                 <option value="ACADEMIC_QUESTION">Duda Académica</option>
                 <option value="PROJECT_RECRUITMENT">Reclutamiento de Equipo</option>
@@ -228,7 +233,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               <select
                 value={postCourse}
                 onChange={e => setPostCourse(e.target.value)}
-                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#7075ff]"
+                className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-purple)]"
               >
                 {courses.map(c => (
                   <option key={c.courseId} value={c.name}>{c.name}</option>
@@ -245,7 +250,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               onChange={e => setPostTitle(e.target.value)}
               placeholder="Ej: ¿Alguien tiene dudas sobre la pregunta 3 de la guía de Desarrollo Web?"
               required
-              className="w-full bg-[#1b1b22] border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#7075ff]"
+              className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--accent-purple)]"
             />
           </div>
 
@@ -257,14 +262,14 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               onChange={e => setPostContent(e.target.value)}
               placeholder="Escribe los detalles de tu consulta o propuesta..."
               required
-              className="w-full bg-[#1b1b22] border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-[#7075ff]"
+              className="w-full bg-[var(--surface-input)] border border-[var(--border-subtle)] rounded-xl p-3 text-white focus:outline-none focus:border-[var(--accent-purple)]"
             />
           </div>
 
           <div className="flex justify-end pt-1">
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#7075ff] px-5 py-2 text-xs font-black text-white hover:bg-[#5b61ff] transition active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-purple)] px-5 py-2 text-xs font-black text-white hover:bg-[var(--accent-purple-hover)] transition active:scale-95 shadow-none"
             >
               <Send className="h-3.5 w-3.5" />
               <span>Publicar</span>
@@ -278,12 +283,12 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
         {filteredPosts.map((post) => (
           <div 
             key={post.id}
-            className="rounded-3xl bg-[#141417] border border-white/5 hover:border-white/10 p-5 sm:p-6 space-y-4 shadow-xl transition-all"
+            className="rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 sm:p-6 space-y-4 shadow-none transition-all"
           >
             {/* Post Header */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-full bg-[#7075ff]/20 text-[#9195ff] font-black flex items-center justify-center text-xs">
+                <div className="h-8 w-8 rounded-full bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] text-[var(--badge-purple-text)] font-black flex items-center justify-center text-xs">
                   {post.author?.full_name.charAt(0)}
                 </div>
                 <div>
@@ -293,8 +298,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               </div>
 
               {post.course_id && (
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-neutral-300 bg-white/5 px-2.5 py-1 rounded-full">
-                  <BookOpen className="h-3 w-3 text-[#ffb703]" />
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-neutral-300 bg-[var(--surface-subtle)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full">
+                  <BookOpen className="h-3 w-3 text-[var(--accent-yellow)]" />
                   <span>{post.course_id}</span>
                 </span>
               )}
@@ -302,7 +307,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
             {/* Post Body */}
             <div className="space-y-2">
-              <h3 className="text-base font-bold text-white hover:text-[#9195ff] transition-colors cursor-pointer">
+              <h3 className="text-base font-bold text-white hover:text-[var(--badge-purple-text)] transition-colors cursor-pointer">
                 {post.title}
               </h3>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
@@ -311,14 +316,14 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
             </div>
 
             {/* Post Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/5 text-xs">
+            <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)] text-xs">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleToggleUpvote(post.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition active:scale-90 ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition active:scale-90 shadow-none ${
                     post.has_user_upvoted
-                      ? 'bg-[#7075ff] text-white shadow-md shadow-[#7075ff]/30'
-                      : 'bg-white/5 text-neutral-400 hover:text-white'
+                      ? 'bg-[var(--accent-purple)] text-white'
+                      : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
                   }`}
                 >
                   <ThumbsUp className="h-3.5 w-3.5" />
@@ -327,7 +332,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
                 <button 
                   onClick={() => onAskAi(`Analiza este post de la comunidad y dame la mejor respuesta académica: "${post.title} - ${post.content}"`)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white transition"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white transition shadow-none"
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   <span>{post.comments_count} respuestas</span>
@@ -336,7 +341,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
               <button 
                 onClick={() => onAskAi(`¿Qué recomendaciones darías para este post de la comunidad: "${post.title}"?`)}
-                className="inline-flex items-center gap-1 text-neutral-400 hover:text-[#bbf451] transition"
+                className="inline-flex items-center gap-1 text-neutral-400 hover:text-[var(--accent-lime)] transition"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Responder con IA</span>

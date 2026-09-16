@@ -375,23 +375,23 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                         ref={isSelected ? selectedBtnRef : null}
                         type="button"
                         onClick={() => triggerSync(course.id)}
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 whitespace-nowrap ${
+                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 whitespace-nowrap shadow-none ${
                           isSelected
-                            ? 'bg-[#bbf451] text-[#0a0a0c] shadow-lg shadow-[#bbf451]/20 ring-2 ring-[#bbf451]'
-                            : 'bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white'
+                            ? 'bg-[var(--accent-lime)] text-[#0a0a0c]'
+                            : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white'
                         }`}
                       >
                         <span
                           className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                            isSelected ? 'bg-[#0a0a0c]' : 'bg-[#ff5722]'
+                            isSelected ? 'bg-[#0a0a0c]' : 'bg-[var(--accent-orange)]'
                           }`}
                         />
                         <span>{course.short}</span>
                         <span
                           className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold ${
                             isSelected
-                              ? 'bg-black/15 text-[#0a0a0c]'
-                              : 'bg-black/30 text-neutral-400'
+                              ? 'bg-[var(--surface-subtle)] text-[#0a0a0c]'
+                              : 'bg-[var(--surface-card)] text-neutral-400'
                           }`}
                         >
                           {course.code}
@@ -416,8 +416,8 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 title="Desplazar a la derecha"
                 className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                   canScrollRight
-                    ? 'bg-white/10 hover:bg-white/20 text-white cursor-pointer shadow-sm active:scale-90'
-                    : 'bg-white/[0.02] text-neutral-600 cursor-not-allowed opacity-30'
+                    ? 'bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-white cursor-pointer shadow-none active:scale-90'
+                    : 'bg-transparent text-neutral-600 cursor-not-allowed opacity-30'
                 }`}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -431,10 +431,10 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                     onChange={(e) => triggerSync(e.target.value)}
                     aria-label="Selector directo de curso"
                     title="Ir directo a un curso"
-                    className="appearance-none bg-[#141417] hover:bg-[#1c1c22] text-neutral-200 text-xs font-semibold py-1.5 pl-2.5 pr-7 rounded-xl cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#bbf451] transition"
+                    className="appearance-none bg-[var(--surface-input)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] text-neutral-200 text-xs font-semibold py-1.5 pl-2.5 pr-7 rounded-xl cursor-pointer focus:outline-none focus:border-[var(--accent-lime)] transition"
                   >
                     {enrolledCourses.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-[#141417] text-white">
+                      <option key={c.id} value={c.id} className="bg-[var(--surface-card)] text-white">
                         {c.short} ({c.code})
                       </option>
                     ))}
@@ -462,8 +462,8 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
           {/* Pantalla de Carga y Sincronización Automática */}
           {activeTab === 'official' && isSyncing ? (
             <div className="py-16 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in duration-100">
-              <div className="relative flex items-center justify-center h-16 w-16 rounded-3xl bg-[#bbf451]/15 shadow-xl">
-                <Loader2 className="h-8 w-8 text-[#bbf451] animate-spin" />
+              <div className="relative flex items-center justify-center h-16 w-16 rounded-3xl bg-[var(--badge-lime-bg)] border border-[var(--badge-lime-border)] shadow-none">
+                <Loader2 className="h-8 w-8 text-[var(--accent-lime)] animate-spin" />
               </div>
               <div className="space-y-1.5 max-w-md">
                 <h3 className="text-sm font-black text-white">

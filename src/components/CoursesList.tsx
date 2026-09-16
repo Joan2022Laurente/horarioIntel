@@ -51,12 +51,11 @@ export const CoursesList: React.FC<CoursesListProps> = ({
   return (
     <div className="space-y-6 text-white">
       
-      {/* Header Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+      {/* Header Info - Clean Title (Zero Icon) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-subtle)]">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-[#ffb703]" />
-            <span>Asignaturas Matriculadas ({courses.length})</span>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Asignaturas Matriculadas ({courses.length})
           </h2>
           <p className="text-xs text-neutral-400 mt-1">
             Periodo {interval.period_name || '2026 - Ciclo 2 Agosto'} • Sílabos oficiales, fórmulas de notas y accesos directos.
@@ -66,15 +65,15 @@ export const CoursesList: React.FC<CoursesListProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleOpenSyllabus(courses[0]?.name || '')}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#18181d] hover:bg-[#22222a] border border-white/[0.06] px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white transition active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] px-3.5 py-2 text-xs font-bold text-neutral-200 hover:text-white transition active:scale-95 shadow-none"
           >
-            <UploadCloud className="h-3.5 w-3.5 text-[#ffb703]" />
+            <UploadCloud className="h-3.5 w-3.5 text-[var(--accent-yellow)]" />
             <span>Importar Sílabo</span>
           </button>
 
           <button
             onClick={() => onAskAi('Haz un resumen comparativo de todos mis cursos, sus exigencias y fechas de exámenes')}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#bbf451] hover:bg-[#a3e635] px-3.5 py-2 text-xs font-black text-black shadow transition active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-lime)] hover:bg-[var(--accent-lime-hover)] px-3.5 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5" />
             <span>Resumen IA</span>
@@ -82,7 +81,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
         </div>
       </div>
 
-      {/* Grid de Cursos Limpio y Despejado */}
+      {/* Grid de Cursos Limpio y Despejado con Colores Sólidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((course) => {
           const isZoom = !!course.zoomLink || course.modalities.includes('R');
@@ -91,7 +90,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
           return (
             <div
               key={course.courseId}
-              className="flex flex-col justify-between rounded-3xl bg-[#141417] hover:bg-[#17171d] border border-white/[0.05] hover:border-white/[0.12] transition-all p-5 sm:p-6 shadow-xl space-y-5 group"
+              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] transition-all p-5 sm:p-6 space-y-5 group"
             >
               {/* Parte Superior: Modalidad + Sesiones */}
               <div className="space-y-3">
@@ -100,14 +99,14 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                     {course.modalities.map((m, mIdx) => getModalityBadge(m, `${course.courseId}-${m}-${mIdx}`))}
                   </div>
 
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 bg-white/5 px-2.5 py-1 rounded-full">
+                  <span className="flex items-center gap-1 text-[11px] font-medium text-neutral-400 bg-[var(--surface-subtle)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full">
                     <Layers className="h-3 w-3 text-neutral-500" />
                     {course.totalSessions} sesiones
                   </span>
                 </div>
 
                 {/* Nombre de la Asignatura */}
-                <h3 className="text-base font-black text-white leading-snug tracking-tight group-hover:text-[#ffb703] transition-colors">
+                <h3 className="text-base font-black text-white leading-snug tracking-tight group-hover:text-[var(--accent-yellow)] transition-colors">
                   {course.name}
                 </h3>
 
@@ -121,13 +120,13 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                 </p>
               </div>
 
-              {/* Fila Única de Acciones (Limpia y Compacta) */}
-              <div className="flex items-center gap-2 pt-2 border-t border-white/[0.04]">
+              {/* Fila Única de Acciones (Colores Sólidos y Sin Neon) */}
+              <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-subtle)]">
                 
                 {/* Botón Principal: Ver Sílabo */}
                 <button
                   onClick={() => handleOpenSyllabus(course.name)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#ffb703]/10 hover:bg-[#ffb703]/20 border border-[#ffb703]/20 py-2.5 px-3 text-xs font-bold text-[#ffb703] hover:text-[#ffc107] transition active:scale-95"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2.5 px-3 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-[#ffc107] transition active:scale-95 shadow-none"
                 >
                   <Award className="h-4 w-4 shrink-0" />
                   <span>Ver Sílabo & Rúbricas</span>
@@ -140,7 +139,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Entrar a sala Zoom del curso"
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 text-blue-400 hover:text-blue-300 transition active:scale-95 shrink-0"
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--badge-blue-bg)] hover:bg-[#182845] border border-[var(--badge-blue-border)] text-[var(--badge-blue-text)] transition active:scale-95 shrink-0 shadow-none"
                   >
                     <Video className="h-4 w-4" />
                   </a>
@@ -153,7 +152,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     title="Descargar Sílabo Oficial PDF"
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition active:scale-95 shrink-0"
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white transition active:scale-95 shrink-0 shadow-none"
                   >
                     <FileText className="h-4 w-4" />
                   </a>
@@ -163,7 +162,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                 <button
                   onClick={() => onAskAi(`¿Qué temas tocan en ${course.name}, qué viene en los exámenes y cómo aprobar con 20?`)}
                   title="Preguntar a la IA sobre este curso"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[#ff5722]/15 hover:bg-[#ff5722]/25 border border-[#ff5722]/20 text-[#ff7043] hover:text-[#ff8a65] transition active:scale-95 shrink-0"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--badge-orange-bg)] hover:bg-[#381e18] border border-[var(--badge-orange-border)] text-[var(--badge-orange-text)] transition active:scale-95 shrink-0 shadow-none"
                 >
                   <Sparkles className="h-4 w-4" />
                 </button>
@@ -174,6 +173,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
           );
         })}
       </div>
+
 
       {/* Modal de Sílabo */}
       <SyllabusModal

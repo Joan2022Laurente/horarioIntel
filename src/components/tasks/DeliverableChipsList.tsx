@@ -8,7 +8,6 @@ import {
   Video, 
   Code2, 
   ExternalLink, 
-  CheckCircle2, 
   Paperclip 
 } from 'lucide-react';
 
@@ -27,38 +26,38 @@ export const DeliverableChipsList: React.FC<DeliverableChipsListProps> = ({
     switch (item.type) {
       case 'slides':
         return {
-          icon: <Presentation className="h-4 w-4 text-[#3a86ff] shrink-0" />,
-          bg: 'bg-[#3a86ff]/15 text-[#60a5fa]',
+          icon: <Presentation className="h-4 w-4 text-[var(--badge-blue-text)] shrink-0" />,
+          bg: 'bg-[var(--badge-blue-bg)] border border-[var(--badge-blue-border)] text-[var(--badge-blue-text)]',
           tag: 'Diapositivas PPTX'
         };
       case 'doc':
         return {
-          icon: <FileText className="h-4 w-4 text-[#ff5722] shrink-0" />,
-          bg: 'bg-[#ff5722]/15 text-[#ff7043]',
+          icon: <FileText className="h-4 w-4 text-[var(--badge-orange-text)] shrink-0" />,
+          bg: 'bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] text-[var(--badge-orange-text)]',
           tag: 'Documento / Informe'
         };
       case 'video':
         return {
-          icon: <Video className="h-4 w-4 text-[#e63946] shrink-0" />,
-          bg: 'bg-[#e63946]/15 text-[#ff6b6b]',
+          icon: <Video className="h-4 w-4 text-[var(--badge-red-text)] shrink-0" />,
+          bg: 'bg-[var(--badge-red-bg)] border border-[var(--badge-red-border)] text-[var(--badge-red-text)]',
           tag: 'Video / Grabación'
         };
       case 'code':
         return {
-          icon: <Code2 className="h-4 w-4 text-[#bbf451] shrink-0" />,
-          bg: 'bg-[#bbf451]/15 text-[#bbf451]',
+          icon: <Code2 className="h-4 w-4 text-[var(--badge-lime-text)] shrink-0" />,
+          bg: 'bg-[var(--badge-lime-bg)] border border-[var(--badge-lime-border)] text-[var(--badge-lime-text)]',
           tag: 'Código / Repositorio'
         };
       case 'link':
         return {
-          icon: <ExternalLink className="h-4 w-4 text-[#7075ff] shrink-0" />,
-          bg: 'bg-[#7075ff]/15 text-[#a594fd]',
+          icon: <ExternalLink className="h-4 w-4 text-[var(--badge-purple-text)] shrink-0" />,
+          bg: 'bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] text-[var(--badge-purple-text)]',
           tag: 'Enlace / URL'
         };
       default:
         return {
-          icon: <Paperclip className="h-4 w-4 text-[#ffb703] shrink-0" />,
-          bg: 'bg-white/10 text-white',
+          icon: <Paperclip className="h-4 w-4 text-[var(--badge-yellow-text)] shrink-0" />,
+          bg: 'bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] text-[var(--badge-yellow-text)]',
           tag: 'Archivo Requerido'
         };
     }
@@ -67,7 +66,7 @@ export const DeliverableChipsList: React.FC<DeliverableChipsListProps> = ({
   return (
     <div className="space-y-2.5">
       <div className="flex items-center gap-2">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#bbf451] text-[#0a0a0c] font-black text-[11px]">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--accent-lime)] text-[#0a0a0c] font-black text-[11px]">
           ✓
         </span>
         <span className="text-[11px] font-black uppercase tracking-wider text-white">
@@ -81,7 +80,7 @@ export const DeliverableChipsList: React.FC<DeliverableChipsListProps> = ({
           return (
             <div
               key={item.id}
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl ${badge.bg} transition-transform hover:scale-[1.02] shadow-sm`}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl ${badge.bg} transition-transform hover:scale-[1.02] shadow-none`}
             >
               {badge.icon}
               <span className="text-xs font-black tracking-tight">{item.label}</span>

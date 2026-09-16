@@ -22,7 +22,7 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
   minutesRemainingCurrent,
   minutesToNext,
   currentWeek,
-  totalWeeks,
+  totalWeeks: _totalWeeks,
   onAskAi,
 }) => {
   const parsedBanner = parseEventTitle(bannerClass.title);
@@ -41,21 +41,21 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
   };
 
   return (
-    <div className={`rounded-2xl p-5 sm:p-6 transition-all shadow-md ${
+    <div className={`rounded-2xl p-5 sm:p-6 transition-all shadow-none bg-[var(--surface-card)] border ${
       isLiveNow 
-        ? 'bg-gradient-to-r from-emerald-950/40 via-[#141417] to-[#141417]' 
-        : 'bg-[#141417]'
+        ? 'border-[var(--badge-emerald-border)]' 
+        : 'border-[var(--border-subtle)]'
     }`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2 min-w-0">
           <div className="flex items-center gap-2">
             {isLiveNow ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--badge-emerald-text)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)] animate-pulse" />
                 En vivo ahora • Quedan {minutesRemainingCurrent}m
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ff5722]/15 px-3 py-1 text-xs font-black uppercase tracking-wider text-[#ff7043]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-3 py-1 text-xs font-black uppercase tracking-wider text-[var(--badge-orange-text)]">
                 <Flame className="h-3 w-3" />
                 {minutesToNext !== null && minutesToNext <= 120 
                   ? `Próxima clase en ${minutesToNext} min` 
@@ -84,7 +84,7 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
               href={bannerClass.metadata.zoomLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-neutral-200 px-4 py-2 text-xs font-black text-black shadow transition active:scale-95"
+              className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-neutral-200 px-4 py-2 text-xs font-black text-black shadow-none transition active:scale-95"
             >
               <Video className="h-3.5 w-3.5 text-black" />
               <span>Unirse a Zoom</span>
@@ -92,9 +92,9 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
           )}
           <button
             onClick={() => onAskAi(`¿Qué temas tocan hoy en ${parsedBanner.cleanTitle} y qué preguntas clave debería hacer en clase?`)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-white/5 hover:bg-white/10 px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white transition"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
           >
-            <Sparkles className="h-3.5 w-3.5 text-[#ff5722]" />
+            <Sparkles className="h-3.5 w-3.5 text-[var(--accent-orange)]" />
             <span>Consultar IA</span>
           </button>
         </div>

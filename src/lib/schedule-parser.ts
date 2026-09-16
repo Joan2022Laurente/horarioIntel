@@ -9,6 +9,36 @@ export interface ParsedEventInfo {
   dayInTitle?: string;
 }
 
+export function formatCourseName(rawName: string): string {
+  if (!rawName) return '';
+  const text = rawName.trim();
+
+  // Acrónimos específicos que deben permanecer en mayúsculas
+  const acronyms = new Set([
+    'TI', 'TDD', 'API', 'AWS', 'IA', 'UTP', 'JWT', 'JPA', 'SQL', 
+    'REST', 'VPC', 'EC2', 'S3', 'ALB', 'CI/CD', 'ITIL', 'RSL', 
+    'PICO', 'PRISMA', 'CMDB', 'SLA', 'IAM', 'IT'
+  ]);
+  
+  // Conectores y preposiciones en español en minúsculas
+  const lowerWords = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'en', 'para', 'por', 'con', 'y', 'e', 'o', 'u', 'a', 'al']);
+
+  const words = text.split(/\s+/);
+  const formatted = words.map((word, index) => {
+    const cleanWord = word.replace(/[^a-záéíóúüñ0-9/]/gi, '').toUpperCase();
+    if (acronyms.has(cleanWord)) {
+      return word.replace(new RegExp(`\\b${cleanWord}\\b`, 'i'), cleanWord);
+    }
+    const lowerWord = word.toLowerCase();
+    if (index > 0 && lowerWords.has(lowerWord)) {
+      return lowerWord;
+    }
+    return lowerWord.charAt(0).toUpperCase() + lowerWord.slice(1);
+  }).join(' ');
+
+  return formatted.replace(/-\s*([a-záéíóúñ])/gi, (_, p1) => `- ${p1.toUpperCase()}`);
+}
+
 export function parseEventTitle(rawTitle: string): ParsedEventInfo {
   // Ejemplos:
   // "DESARROLLO WEB INTEGRADO (34374) (Semana 10) - Jueves"
@@ -39,6 +69,8 @@ export function parseEventTitle(rawTitle: string): ParsedEventInfo {
     sectionCode = sectionMatch[1];
     cleanTitle = cleanTitle.replace(/\(\s*\d+\s*\)/, '').trim();
   }
+
+  cleanTitle = formatCourseName(cleanTitle);
 
   return {
     cleanTitle,
@@ -165,7 +197,7 @@ export function getProcessedCourses(events: UTPEvent[]): ProcessedCourse[] {
     if (!isAlreadyPresent) {
       courseMap.set(knownId, {
         courseId: knownId,
-        name: knownData.name.toUpperCase(),
+        name: formatCourseName(knownData.name),
         sectionCode: '54262',
         modalities: new Set(['VT']),
         sessions: [],

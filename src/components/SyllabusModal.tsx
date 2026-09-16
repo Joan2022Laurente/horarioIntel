@@ -39,7 +39,7 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000ST61',
     code: '100000ST61',
-    name: 'DESARROLLO WEB INTEGRADO',
+    name: 'Desarrollo Web Integrado',
     short: 'Desarrollo Web',
     modality: 'Presencial',
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/presencial/100000ST61_DesarrolloWebIntegrado.pdf'
@@ -47,7 +47,7 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000SI12',
     code: '100000SI12',
-    name: 'GESTIÓN DEL SERVICIO TI',
+    name: 'Gestión del Servicio TI',
     short: 'Gestión TI',
     modality: 'Virtual',
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/virtual/100000SI12_GestionDelServicioTI.pdf'
@@ -55,7 +55,7 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000SI82',
     code: '100000SI82',
-    name: 'FORMACIÓN PARA LA INVESTIGACIÓN - SISTEMAS',
+    name: 'Formación para la Investigación - Sistemas',
     short: 'Investigación',
     modality: 'Virtual',
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/virtual/100000SI34_FormacionInvestigacionSistemas.pdf'
@@ -63,7 +63,7 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000ST62',
     code: '100000ST62',
-    name: 'SERVICIOS CLOUD',
+    name: 'Servicios Cloud',
     short: 'Servicios Cloud',
     modality: 'Presencial',
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/presencial/100000ST62_ServiciosCloud.pdf'
@@ -71,7 +71,7 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000CO01',
     code: '100000CO01',
-    name: 'HERRAMIENTAS PARA LA COMUNICACIÓN EFECTIVA',
+    name: 'Herramientas para la Comunicación Efectiva',
     short: 'Comunicación',
     modality: 'Virtual',
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/virtual/100000CO01_HerramientasComunicacionEfectiva.pdf'
@@ -79,7 +79,7 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000SI23',
     code: '100000SI23',
-    name: 'LENGUAJES DE PROGRAMACIÓN',
+    name: 'Lenguajes de Programación',
     short: 'Lenguajes Prog.',
     modality: 'Presencial',
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/presencial/100000SI23_LenguajesDeProgramacion.pdf'
@@ -489,7 +489,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 {/* Fórmula Oficial */}
                 <div className="md:col-span-2 rounded-2xl bg-[#1b1b22] p-4 space-y-2.5 shadow-md">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black tracking-wider uppercase text-white flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
                       <Award className="h-4 w-4 text-[#ff5722]" />
                       <span>Fórmula Oficial de Evaluación</span>
                     </span>
@@ -502,14 +502,14 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                     </button>
                   </div>
                   
-                  <div className="rounded-xl bg-[#141417] px-4 py-3 font-mono text-xs sm:text-sm font-black text-[#bbf451] text-center tracking-wider shadow-inner">
+                  <div className="rounded-xl bg-[#141417] px-4 py-3 font-mono text-xs sm:text-sm font-bold text-[#bbf451] text-center tracking-wider shadow-inner">
                     {currentSyllabus.formula}
                   </div>
                 </div>
 
                 {/* Datos Académicos */}
                 <div className="rounded-2xl bg-[#1b1b22] p-4 space-y-2 text-xs shadow-md">
-                  <span className="text-[11px] font-black text-neutral-400 uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-neutral-400">
                     Ficha Curricular
                   </span>
                   <div className="space-y-1.5 text-neutral-300 pt-1">
@@ -556,7 +556,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
               {/* Logro General */}
               {currentSyllabus.learningGoal && (
                 <div className="rounded-2xl bg-[#1b1b22] p-4 space-y-2 shadow-md">
-                  <div className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wider">
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4 text-[#ff5722]" />
                     <span>Logro General de Aprendizaje</span>
                   </div>

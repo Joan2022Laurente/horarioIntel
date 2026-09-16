@@ -6,6 +6,7 @@ import {
   getEventsByWeek, 
   formatScheduleTimeRange, 
   parseEventTitle, 
+  formatCourseName,
   DAYS_OF_WEEK, 
   parseDate,
   getProcessedCourses
@@ -203,13 +204,13 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
               {/* Header Minimalista del Día (Sin conteo redundante de clases) */}
               <div className="pb-2 flex items-center justify-between border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-xs font-black uppercase tracking-wider ${
+                  <span className={`text-xs font-bold tracking-tight ${
                     isToday ? 'text-white' : 'text-neutral-400'
                   }`}>
                     {dayName}
                   </span>
                   {isToday && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase bg-white text-black leading-none">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-white text-black leading-none">
                       Hoy
                     </span>
                   )}
@@ -312,7 +313,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
         <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-black tracking-tight text-white uppercase">
+              <h3 className="text-sm font-bold tracking-tight text-white">
                 Asignaturas Virtuales 24/7 (Acceso Permanente)
               </h3>
               <p className="text-xs text-neutral-400 mt-0.5">
@@ -342,7 +343,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                   </div>
 
                   <h4 className="text-xs font-bold text-white leading-snug line-clamp-2">
-                    {course.name}
+                    {formatCourseName(course.name)}
                   </h4>
 
                   <p className="text-[11px] text-neutral-400 leading-relaxed">

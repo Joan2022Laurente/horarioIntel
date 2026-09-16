@@ -69,7 +69,7 @@ export const DeliverableChipsList: React.FC<DeliverableChipsListProps> = ({
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--accent-lime)] text-[#0a0a0c] font-black text-[11px]">
           ✓
         </span>
-        <span className="text-[11px] font-black uppercase tracking-wider text-white">
+        <span className="text-xs font-bold text-white">
           {title} ({items.length})
         </span>
       </div>
@@ -83,9 +83,9 @@ export const DeliverableChipsList: React.FC<DeliverableChipsListProps> = ({
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl ${badge.bg} transition-transform hover:scale-[1.02] shadow-none`}
             >
               {badge.icon}
-              <span className="text-xs font-black tracking-tight">{item.label}</span>
-              <span className="text-[10px] font-mono opacity-60 uppercase ml-0.5">
-                {badge.tag}
+              <span className="text-xs font-bold tracking-tight">{item.label}</span>
+              <span className="text-[10px] font-mono opacity-75 ml-0.5">
+                • {badge.tag}
               </span>
             </div>
           );

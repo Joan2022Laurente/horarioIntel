@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { StudentProfile } from '@/types/utp';
 import { GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
+import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { 
   Lock, 
   User, 
@@ -115,9 +116,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
       {/* Top Simple Bar */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff5722] text-[#0a0a0c] font-black text-xl shadow-lg select-none">
-            U
-          </div>
+          <AsciiMatrixOrb size={36} state="idle" colorMode="monochrome" />
           <div className="flex flex-col text-left">
             <span className="text-sm font-black tracking-wide text-white">UTP Class Assistant</span>
             <span className="text-[10px] font-mono text-neutral-400">Plataforma Académica Estudiantil</span>
@@ -189,9 +188,16 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
           <div className="lg:col-span-5 w-full">
             <div className="rounded-3xl bg-[#141417] p-6 sm:p-8 shadow-2xl space-y-6">
               
-              <div className="space-y-1 text-left">
-                <h3 className="text-lg font-black text-white">Iniciar Sesión</h3>
-                <p className="text-xs text-neutral-400">Ingresa tus credenciales oficiales de UTP Class</p>
+              <div className="flex flex-col items-center text-center space-y-3 pb-1">
+                <AsciiMatrixOrb 
+                  size={56} 
+                  state={isLoading ? 'thinking' : 'idle'} 
+                  colorMode="monochrome" 
+                />
+                <div className="space-y-0.5">
+                  <h3 className="text-lg font-black text-white">Iniciar Sesión</h3>
+                  <p className="text-xs text-neutral-400">Ingresa tus credenciales oficiales de UTP Class</p>
+                </div>
               </div>
 
               {/* Feedback Alerts */}

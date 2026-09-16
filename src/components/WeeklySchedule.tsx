@@ -208,53 +208,70 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                     Sin clases
                   </div>
                 ) : (
-                  dayEvents.map((evt) => {
-                    const parsed = parseEventTitle(evt.title);
-                    const isRemoteZoom = evt.modality === 'R';
-                    const isPresencial = evt.modality === 'P';
-                    const location = getClassroomLocation(parsed.cleanTitle, parsed.sectionCode);
-                    
-                    const startDate = parseDate(evt.startAt);
-                    const finishDate = parseDate(evt.finishAt);
-                    const isLiveNow = isToday && now >= startDate && now <= finishDate;
+                  (() => {
+                    const nextOrLiveEvt = isToday ? (dayEvents.find(e => parseDate(e.finishAt) >= now) || dayEvents[0]) : null;
 
-                    return (
-                      <div
-                        key={evt.id}
-                        onClick={() => setSelectedEventForModal(evt)}
-                        className={`group relative rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border p-3.5 transition-all duration-200 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
-                          isLiveNow
-                            ? 'border-[var(--accent-emerald)]'
-                            : 'border-[var(--border-subtle)] hover:border-neutral-500'
-                        }`}
-                      >
-                        {/* Top: Modalidad & Estado */}
-                        <div className="flex items-center justify-between gap-1">
-                          <div className="flex items-center gap-1.5">
-                            {isPresencial ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
-                                <MapPin className="h-2.5 w-2.5" />
-                                Presencial
-                              </span>
-                            ) : isRemoteZoom ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
-                                <Video className="h-2.5 w-2.5" />
-                                Zoom
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
-                                <Radio className="h-2.5 w-2.5" />
-                                Virtual
-                              </span>
-                            )}
+                    return dayEvents.map((evt) => {
+                      const parsed = parseEventTitle(evt.title);
+                      const isRemoteZoom = evt.modality === 'R';
+                      const isPresencial = evt.modality === 'P';
+                      const location = getClassroomLocation(parsed.cleanTitle, parsed.sectionCode);
+                      
+                      const startDate = parseDate(evt.startAt);
+                      const finishDate = parseDate(evt.finishAt);
+                      const isLiveNow = isToday && now >= startDate && now <= finishDate;
+                      const isNextToday = isToday && !isLiveNow && evt.id === nextOrLiveEvt?.id && now < startDate;
+                      const isActiveCard = isLiveNow || isNextToday;
 
-                            {isLiveNow && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-black bg-[var(--accent-lime)] px-1.5 py-0.5 rounded-md">
-                                <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse" />
-                                En vivo
-                              </span>
-                            )}
-                          </div>
+                      return (
+                        <div
+                          key={evt.id}
+                          onClick={() => setSelectedEventForModal(evt)}
+                          className={`group relative rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border p-3.5 transition-all duration-300 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
+                            isActiveCard
+                              ? 'animate-card-loop border-[var(--border-medium)]'
+                              : 'border-[var(--border-subtle)] hover:border-neutral-500'
+                          }`}
+                        >
+                          {/* Left Accent indicator for active/next class */}
+                          {isActiveCard && (
+                            <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full ${
+                              isLiveNow ? 'bg-[var(--accent-lime)]' : 'bg-[var(--accent-orange)]'
+                            }`} />
+                          )}
+
+                          {/* Top: Modalidad & Estado */}
+                          <div className="flex items-center justify-between gap-1">
+                            <div className="flex items-center gap-1.5">
+                              {isPresencial ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
+                                  <MapPin className="h-2.5 w-2.5" />
+                                  Presencial
+                                </span>
+                              ) : isRemoteZoom ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
+                                  <Video className="h-2.5 w-2.5" />
+                                  Zoom
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
+                                  <Radio className="h-2.5 w-2.5" />
+                                  Virtual
+                                </span>
+                              )}
+
+                              {isLiveNow ? (
+                                <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-black bg-[var(--accent-lime)] px-2 py-0.5 rounded-full">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-black animate-live-pulse" />
+                                  En vivo
+                                </span>
+                              ) : isNextToday ? (
+                                <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--badge-orange-text)] animate-live-pulse" />
+                                  Próxima
+                                </span>
+                              ) : null}
+                            </div>
 
                           {isRemoteZoom && evt.metadata?.zoomLink ? (
                             <button
@@ -291,8 +308,9 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                         </div>
                       </div>
                     );
-                  })
-                )}
+                  });
+                })()
+              )}
               </div>
             </div>
           );

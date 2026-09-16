@@ -181,3 +181,39 @@
   text-decoration: underline;
   font-weight: 700;
 }
+
+/* Minimalist Loop Animations for Schedule Cards */
+@keyframes schedule-card-breathe {
+  0%, 100% {
+    border-color: #27272a;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    border-color: #52525b;
+    box-shadow: 0 0 0 1px #52525b inset;
+  }
+}
+
+@keyframes live-ping-slow {
+  0% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
+.animate-card-loop {
+  animation: schedule-card-breathe 2.8s ease-in-out infinite;
+}
+
+.animate-live-pulse {
+  animation: live-ping-slow 2s ease-in-out infinite;
+}
+

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { TaskWithSyllabusContext, AssignmentRubric, CourseAssignment } from '@/types/utp';
 import { TaskSyllabusSyncRow } from '@/components/tasks/TaskSyllabusSyncRow';
-import { FileCheck2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sparkles } from 'lucide-react';
 
 interface TodayTasksSectionProps {
   tasks: TaskWithSyllabusContext[];
@@ -31,66 +31,70 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-black text-white flex items-center gap-2">
-            <FileCheck2 className="h-5 w-5 text-[#00c853]" />
-            <span>Actividades Oficiales UTP (Sincronizadas con Sílabo)</span>
+      {/* Clean Header with Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-[#bbf451]" />
+            <span>Entregables y Tareas</span>
           </h3>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            Extraídas en vivo desde el PAO UTP. Vinculadas automáticamente a temas de semana y rúbricas.
-          </p>
+          <span className="text-xs text-neutral-500 font-medium">
+            ({filteredTasks.length} de {tasks.length})
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-xl bg-[#141417] p-1 text-xs shadow-md">
-            <button
-              onClick={() => setTaskFilter('all')}
-              className={`px-3 py-1 rounded-lg transition-all font-semibold ${
-                taskFilter === 'all' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              Todas ({tasks.length})
-            </button>
-            <button
-              onClick={() => setTaskFilter('graded')}
-              className={`px-3 py-1 rounded-lg transition-all font-semibold ${
-                taskFilter === 'graded' ? 'bg-[#ff5722] text-white font-bold' : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              Calificadas ({gradedCount})
-            </button>
-            <button
-              onClick={() => setTaskFilter('practice')}
-              className={`px-3 py-1 rounded-lg transition-all font-semibold ${
-                taskFilter === 'practice' ? 'bg-white/15 text-white' : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              Formativas y Foros ({practiceCount})
-            </button>
-          </div>
-
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 bg-[#141417] p-1 rounded-xl text-xs">
           <button
-            onClick={() => onAskAi('Haz una matriz de estudio para mis tareas de las semanas 4 y 5 vinculadas al sílabo')}
-            className="hidden md:inline-flex items-center gap-1.5 text-xs text-[#ff5722] hover:text-[#ff7043] font-bold"
+            onClick={() => setTaskFilter('all')}
+            className={`px-3 py-1 rounded-lg transition font-medium ${
+              taskFilter === 'all' 
+                ? 'bg-white text-black font-bold shadow-sm' 
+                : 'text-neutral-400 hover:text-white'
+            }`}
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Estrategia IA</span>
+            Todas ({tasks.length})
+          </button>
+          <button
+            onClick={() => setTaskFilter('graded')}
+            className={`px-3 py-1 rounded-lg transition font-medium ${
+              taskFilter === 'graded' 
+                ? 'bg-[#ff5722] text-white font-bold shadow-sm' 
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            Calificadas ({gradedCount})
+          </button>
+          <button
+            onClick={() => setTaskFilter('practice')}
+            className={`px-3 py-1 rounded-lg transition font-medium ${
+              taskFilter === 'practice' 
+                ? 'bg-white/15 text-white font-bold' 
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            Prácticas ({practiceCount})
           </button>
         </div>
       </div>
 
-      {/* List of Tasks */}
-      <div className="space-y-3">
-        {filteredTasks.map((item) => (
-          <TaskSyllabusSyncRow
-            key={item.task.id}
-            item={item}
-            onOpenRubric={onOpenRubric}
-            onOpenInstructions={onOpenInstructions}
-            onAskAi={onAskAi}
-          />
-        ))}
+      {/* Task List */}
+      <div className="space-y-2.5">
+        {filteredTasks.length === 0 ? (
+          <div className="p-8 text-center rounded-2xl bg-[#131317] text-xs text-neutral-400">
+            No hay actividades en esta categoría.
+          </div>
+        ) : (
+          filteredTasks.map((item) => (
+            <TaskSyllabusSyncRow
+              key={item.task.id}
+              item={item}
+              onOpenRubric={onOpenRubric}
+              onOpenInstructions={onOpenInstructions}
+              onAskAi={onAskAi}
+            />
+          ))
+        )}
       </div>
     </div>
   );

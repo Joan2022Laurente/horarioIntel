@@ -126,7 +126,7 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-6 pb-12">
         
         {/* Banner de Sincronización en vivo */}
         {isRefreshing && (

@@ -42,7 +42,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
 
   // Active view section
-  const [activeSection, setActiveSection] = useState<TodayTabSection>('tasks');
+  const [activeSection, setActiveSection] = useState<TodayTabSection>('todayClasses');
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);

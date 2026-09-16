@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { ChatMessageBubble } from '@/components/ai/ChatMessageBubble';
 import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
+import { getAllCachedSyllabi } from '@/lib/syllabus/client-storage';
 
 interface AiAssistantModalProps {
   isOpen: boolean;
@@ -21,18 +22,18 @@ interface AiAssistantModalProps {
 const DEFAULT_WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
-  content: `¡Hola! Soy tu **Copiloto Académico UTP**. Conozco tus 6 asignaturas, los enlaces directos a Zoom, el calendario de 18 semanas y el **sílabo oficial con sus rúbricas y criterios de evaluación**.
+  content: `¡Hola! Soy tu **Copiloto Académico UTP**. Conozco tus asignaturas, los enlaces directos a Zoom, el calendario del ciclo y los **sílabos oficiales con sus rúbricas y criterios de evaluación**.
 
 ¿En qué te puedo asesorar hoy?
 - "¿Qué temas tocan en mi próxima clase?"
 - "¿Cuáles son las evaluaciones y rúbricas de la semana actual?"
-- "¿Cómo estructurar el 1er entregable APF1 de Desarrollo Web Integrado?"
-- "¿Cómo formular la ecuación PICO y no pasar el 20% de similitud en Investigación?"`,
+- "¿Qué recomiendas en concreto estudiar para el examen?"
+- "¿Cómo estructurar el entregable para sacar la máxima nota?"`,
   timestamp: 'Ahora',
   suggestedActions: [
     '¿Qué temas tocan esta semana en mis cursos?',
-    'Explícame la rúbrica de APF1 de Desarrollo Web Integrado',
-    '¿Cuáles son las reglas y fórmula de Formación para la Investigación?',
+    '¿Qué recomiendas en concreto estudiar?',
+    '¿Cuáles son las reglas y fórmulas de evaluación?',
     'Estrategia de estudio para sacar 20'
   ]
 };
@@ -100,14 +101,17 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
     }
 
     try {
+      const allSyllabi = getAllCachedSyllabi();
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: query,
           calendarData: interval ? { data: { current_interval: interval } } : undefined,
+          syllabiData: allSyllabi,
         }),
       });
+
 
       const resData = await response.json();
 

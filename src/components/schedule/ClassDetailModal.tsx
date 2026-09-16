@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UTPEvent, UTPCurrentInterval, ChatMessage } from '@/types/utp';
 import { parseEventTitle, formatTime, parseDate, DAYS_OF_WEEK } from '@/lib/schedule-parser';
-import { getSyllabusForCourse } from '@/lib/syllabus/official-registry';
+import { getCachedSyllabus, getAllCachedSyllabi } from '@/lib/syllabus/client-storage';
 import { getClassroomLocation } from '@/lib/classroom-helper';
 import { ChatMessageBubble } from '@/components/ai/ChatMessageBubble';
 import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
@@ -44,7 +44,7 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
 
   const parsed = event ? parseEventTitle(event.title) : { cleanTitle: '', sectionCode: '', weekInTitle: weekNumber };
   const effectiveWeek = parsed.weekInTitle || weekNumber;
-  const courseSyllabus = event ? getSyllabusForCourse(parsed.cleanTitle) : null;
+  const courseSyllabus = event ? getCachedSyllabus(parsed.cleanTitle) : null;
   
   const syllabusWeekSession = courseSyllabus?.weeklySchedule.find(s => s.week === effectiveWeek) || null;
   const evaluationInWeek = courseSyllabus?.evaluations.find(e => e.week === effectiveWeek) || null;
@@ -123,14 +123,17 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     }
 
     try {
+      const allSyllabi = getAllCachedSyllabi();
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: `Para el curso "${parsed.cleanTitle}" en la Semana ${effectiveWeek} (${syllabusWeekSession?.unit || 'Unidad de Aprendizaje'}): ${text}`,
           calendarData: interval ? { data: { current_interval: interval } } : undefined,
+          syllabiData: allSyllabi,
         }),
       });
+
 
       const resData = await response.json();
       if (resData.success && resData.data?.answer) {

@@ -15,13 +15,15 @@ import {
   ChevronRight,
   ChevronDown
 } from 'lucide-react';
-import { ParsedSyllabus, getSyllabusForCourse, parseSyllabusMarkdown } from '@/lib/syllabus-parser';
+import { ParsedSyllabus, parseSyllabusMarkdown } from '@/lib/syllabus-parser';
+import { getCachedSyllabus, saveCachedSyllabus } from '@/lib/syllabus/client-storage';
 import { SyllabusModalHeader } from '@/components/syllabus/SyllabusModalHeader';
 import { SyllabusImportView } from '@/components/syllabus/SyllabusImportView';
 import { SyllabusEvaluationsGrid } from '@/components/syllabus/SyllabusEvaluationsGrid';
 import { SyllabusPoliciesView } from '@/components/syllabus/SyllabusPoliciesView';
 import { SyllabusWeeklySchedule } from '@/components/syllabus/SyllabusWeeklySchedule';
 import { KNOWN_SYLLABUS_MAP } from '@/lib/mock-data';
+import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
 
 interface EnrolledCourseOption {
   id: string;
@@ -32,7 +34,7 @@ interface EnrolledCourseOption {
   pdfUrl?: string;
 }
 
-const ENROLLED_COURSES: EnrolledCourseOption[] = [
+const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
   {
     id: '100000ST61',
     code: '100000ST61',
@@ -85,6 +87,8 @@ const ENROLLED_COURSES: EnrolledCourseOption[] = [
 
 interface SyllabusModalProps {
   courseIdentifier?: string | null;
+  courses?: ProcessedCourse[];
+  interval?: UTPCurrentInterval;
   isOpen: boolean;
   onClose: () => void;
   onAskAi: (prompt: string) => void;
@@ -92,11 +96,13 @@ interface SyllabusModalProps {
 
 export const SyllabusModal: React.FC<SyllabusModalProps> = ({
   courseIdentifier,
+  courses,
+  interval,
   isOpen,
   onClose,
   onAskAi,
 }) => {
-  const [selectedCourseId, setSelectedCourseId] = useState<string>('100000ST61');
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'official' | 'custom'>('official');
   const [customMarkdown, setCustomMarkdown] = useState('');
   const [parsedCustom, setParsedCustom] = useState<ParsedSyllabus | null>(null);
@@ -112,6 +118,23 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
   const selectedBtnRef = useRef<HTMLButtonElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Lista dinámica de cursos enrolled
+  const enrolledCourses: EnrolledCourseOption[] = (courses && courses.length > 0)
+    ? courses.map((c) => {
+        const words = c.name.split(' ');
+        const short = words.length <= 2 ? c.name : `${words[0]} ${words[1]}`;
+        const known = KNOWN_SYLLABUS_MAP[c.courseId] || KNOWN_SYLLABUS_MAP[c.name];
+        return {
+          id: c.courseId || c.name,
+          code: c.sectionCode ? `Sec. ${c.sectionCode}` : (c.courseId || 'UTP'),
+          name: c.name,
+          short,
+          modality: c.modalities.includes('P') ? 'Presencial' : 'Virtual',
+          pdfUrl: c.syllabusUrl || known?.syllabusUrl,
+        };
+      })
+    : DEFAULT_ENROLLED_COURSES;
 
   const checkScrollButtons = () => {
     const el = scrollContainerRef.current;
@@ -170,21 +193,23 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
   // Resolver curso inicial al abrir el modal
   useEffect(() => {
     if (isOpen) {
+      const defaultId = enrolledCourses[0]?.id || '100000ST61';
       if (courseIdentifier) {
-        const found = ENROLLED_COURSES.find(c => 
+        const found = enrolledCourses.find(c => 
           c.id === courseIdentifier || 
           c.code === courseIdentifier || 
           courseIdentifier.toUpperCase().includes(c.short.toUpperCase()) ||
-          c.name.includes(courseIdentifier.toUpperCase())
+          c.name.toUpperCase().includes(courseIdentifier.toUpperCase()) ||
+          courseIdentifier.toUpperCase().includes(c.name.toUpperCase())
         );
         if (found) {
           triggerSync(found.id);
           return;
         }
       }
-      triggerSync(selectedCourseId || '100000ST61');
+      triggerSync(selectedCourseId || defaultId);
     }
-  }, [isOpen, courseIdentifier]);
+  }, [isOpen, courseIdentifier, courses?.length]);
 
   const triggerSync = async (courseId: string) => {
     setSelectedCourseId(courseId);
@@ -194,24 +219,20 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
       return;
     }
 
-    // Verificar en caché local persistente
-    try {
-      const cached = localStorage.getItem(`utp_syllabus_live_${courseId}`);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        setDynamicSyllabusMap(prev => ({ ...prev, [courseId]: parsed }));
-        return;
-      }
-    } catch {}
+    // Verificar en LocalStorage
+    const cached = getCachedSyllabus(courseId);
+    if (cached) {
+      setDynamicSyllabusMap(prev => ({ ...prev, [courseId]: cached }));
+      return;
+    }
 
-    const courseOpt = ENROLLED_COURSES.find(c => c.id === courseId || c.code === courseId);
+    const courseOpt = enrolledCourses.find(c => c.id === courseId || c.code === courseId || c.name === courseId);
     if (!courseOpt) return;
 
     setIsSyncing(true);
-    setSyncStep('Conectando con repositorio oficial Silbia UTP (Amazon S3)...');
+    setSyncStep('Conectando con repositorio oficial Silbia UTP...');
 
     try {
-      // Obtener credenciales de sesión activa si existen
       let headers: Record<string, string> = {};
       try {
         const studentRaw = localStorage.getItem('utp_student_profile');
@@ -244,9 +265,10 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
         if (data.parsedSyllabus) {
           setSyncStep('Analizando ponderaciones, rúbricas y cronograma...');
           setDynamicSyllabusMap(prev => ({ ...prev, [courseId]: data.parsedSyllabus }));
-          try {
-            localStorage.setItem(`utp_syllabus_live_${courseId}`, JSON.stringify(data.parsedSyllabus));
-          } catch {}
+          saveCachedSyllabus(courseId, data.parsedSyllabus);
+          if (courseOpt.name) {
+            saveCachedSyllabus(courseOpt.name, data.parsedSyllabus);
+          }
         }
       }
     } catch (err) {
@@ -258,8 +280,8 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
 
   if (!isOpen) return null;
 
-  const currentCourseOption = ENROLLED_COURSES.find(c => c.id === selectedCourseId) || ENROLLED_COURSES[0];
-  const officialSyllabus = dynamicSyllabusMap[selectedCourseId] || getSyllabusForCourse(selectedCourseId);
+  const currentCourseOption = enrolledCourses.find(c => c.id === selectedCourseId || c.name === selectedCourseId) || enrolledCourses[0];
+  const officialSyllabus = dynamicSyllabusMap[selectedCourseId] || (currentCourseOption ? getCachedSyllabus(currentCourseOption.name) : null);
   const currentSyllabus = activeTab === 'custom' && parsedCustom ? parsedCustom : officialSyllabus;
 
   const handleParseCustom = () => {
@@ -267,9 +289,12 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
     try {
       const parsed = parseSyllabusMarkdown(customMarkdown);
       setParsedCustom(parsed);
-    } catch {
-      // fallback
-    }
+      if (selectedCourseId || parsed.generalInfo?.courseName) {
+        const saveKey = selectedCourseId || parsed.generalInfo?.courseName || 'CUSTOM';
+        saveCachedSyllabus(saveKey, parsed);
+        setDynamicSyllabusMap(prev => ({ ...prev, [saveKey]: parsed }));
+      }
+    } catch {}
   };
 
   const handleCopyFormula = (formula: string) => {
@@ -277,6 +302,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
     setCopiedFormula(true);
     setTimeout(() => setCopiedFormula(false), 2000);
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150 text-white">
@@ -304,7 +330,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                   Cursos
                 </span>
                 <span className="text-[10px] font-mono font-black px-1.5 py-0.5 rounded-full bg-white/10 text-neutral-300">
-                  {ENROLLED_COURSES.length}
+                  {enrolledCourses.length}
                 </span>
               </div>
 
@@ -341,7 +367,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                     scrollbarColor: 'rgba(255, 255, 255, 0.15) transparent',
                   }}
                 >
-                  {ENROLLED_COURSES.map((course) => {
+                  {enrolledCourses.map((course) => {
                     const isSelected = course.id === selectedCourseId;
                     return (
                       <button
@@ -407,7 +433,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                     title="Ir directo a un curso"
                     className="appearance-none bg-[#141417] hover:bg-[#1c1c22] text-neutral-200 text-xs font-semibold py-1.5 pl-2.5 pr-7 rounded-xl cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#bbf451] transition"
                   >
-                    {ENROLLED_COURSES.map((c) => (
+                    {enrolledCourses.map((c) => (
                       <option key={c.id} value={c.id} className="bg-[#141417] text-white">
                         {c.short} ({c.code})
                       </option>
@@ -419,6 +445,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
             </div>
           </div>
         )}
+
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">

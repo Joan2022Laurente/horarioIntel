@@ -14,6 +14,13 @@ import {
   EMPTY_CALENDAR_RESPONSE
 } from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
+import { 
+  getCachedStudentProfile, 
+  saveCachedStudentProfile, 
+  getCachedCalendarData, 
+  saveCachedCalendarData, 
+  clearAllLocalUserData 
+} from '@/lib/syllabus/client-storage';
 import { StudentProfile, UTPCalendarResponse } from '@/types/utp';
 import { RefreshCw } from 'lucide-react';
 
@@ -28,21 +35,27 @@ export default function HomePage() {
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Cargar sesión guardada de localStorage al iniciar
+  // Cargar sesión y calendario guardados de localStorage al iniciar
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('utp_student_profile');
-      if (saved) {
-        const parsed: StudentProfile = JSON.parse(saved);
-        if (parsed.token) {
-          setStudent(parsed);
-          refreshCalendar(parsed);
-          return;
-        }
+      const savedProfile = getCachedStudentProfile();
+      const savedCalendar = getCachedCalendarData();
+
+      if (savedCalendar) {
+        setCalendarResponse(savedCalendar);
       }
+
+      if (savedProfile && savedProfile.token) {
+        setStudent(savedProfile);
+        refreshCalendar(savedProfile);
+        return;
+      }
+
       // Sin sesión activa
       setStudent(GUEST_STUDENT_PROFILE);
-      setCalendarResponse(EMPTY_CALENDAR_RESPONSE);
+      if (!savedCalendar) {
+        setCalendarResponse(EMPTY_CALENDAR_RESPONSE);
+      }
     } catch (e) {
       console.warn('Error leyendo localStorage:', e);
     }
@@ -51,17 +64,11 @@ export default function HomePage() {
   const handleSaveProfile = (newProfile: StudentProfile) => {
     setStudent(newProfile);
     if (newProfile.token) {
-      try {
-        localStorage.setItem('utp_student_profile', JSON.stringify(newProfile));
-      } catch (e) {
-        console.warn('Error guardando en localStorage:', e);
-      }
+      saveCachedStudentProfile(newProfile);
       refreshCalendar(newProfile);
     } else {
       // Cierre de sesión
-      try {
-        localStorage.removeItem('utp_student_profile');
-      } catch (e) {}
+      clearAllLocalUserData();
       setCalendarResponse(EMPTY_CALENDAR_RESPONSE);
     }
   };
@@ -83,6 +90,7 @@ export default function HomePage() {
         const data = await res.json();
         if (data.data?.current_interval) {
           setCalendarResponse(data);
+          saveCachedCalendarData(data);
         }
       }
     } catch (err) {
@@ -213,8 +221,11 @@ export default function HomePage() {
         }}
         onAskAi={handleAskAi}
         courseIdentifier={selectedCourseForSyllabus}
+        courses={processedCourses}
+        interval={currentInterval}
       />
 
     </div>
   );
 }
+

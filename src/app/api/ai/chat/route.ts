@@ -4,6 +4,7 @@ import { queryAssistant } from '@/lib/ai-assistant';
 import { EMPTY_CALENDAR_RESPONSE } from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
 import { UTPCalendarResponse } from '@/types/utp';
+import { ParsedSyllabus } from '@/lib/syllabus/types';
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,7 @@ export async function POST(req: NextRequest) {
     const message: string = body.message || '';
     const rawData = (body.calendarData || EMPTY_CALENDAR_RESPONSE) as unknown as UTPCalendarResponse;
     const interval = rawData.data?.current_interval;
+    const syllabiData = (body.syllabiData || {}) as Record<string, ParsedSyllabus>;
 
     if (!interval) {
       return NextResponse.json(
@@ -26,6 +28,7 @@ export async function POST(req: NextRequest) {
       const openRouterResult = await queryOpenRouterWithFallback(message, {
         interval,
         courses,
+        syllabiData,
       });
 
       return NextResponse.json({
@@ -40,7 +43,7 @@ export async function POST(req: NextRequest) {
     } catch (openRouterErr) {
       console.warn('[AI Chat Route] OpenRouter no disponible, recurriendo al motor local de respaldo:', openRouterErr);
 
-      // 2. Fallback al motor local con conocimiento estructurado de sílabos
+      // 2. Fallback al motor local
       const localResponse = queryAssistant(message, {
         interval,
         courses,
@@ -59,4 +62,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
+
 

@@ -1,6 +1,6 @@
 /**
  * Selección dinámica de modelos gratuitos de OpenRouter con ordenamiento por baja latencia y caché en memoria.
- * Inspirado en la arquitectura de portfolio con resiliencia y fallback multicapa.
+ * Filtrado estricto para modelos conversacionales de alta velocidad sin leaks de reasoning.
  */
 
 const MODEL_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora de caché en memoria
@@ -24,21 +24,21 @@ interface ModelCache {
 
 let cache: ModelCache | null = null;
 
-// Lista de respaldo optimizada en caso de fallo de red o API no disponible
+// Lista de modelos gratuitos verificados y activos en OpenRouter
 export const FALLBACK_FREE_MODELS = [
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'google/gemini-2.0-flash-exp:free',
-  'qwen/qwen-2.5-72b-instruct:free',
-  'mistralai/mistral-small-3.1:free',
-  'google/gemma-2-9b-it:free',
-  'nvidia/nemotron-3-nano-30b-a3b:free',
-  'openrouter/free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'liquid/lfm-2.5-2.6b:free',
+  'nvidia/nemotron-3-ultra-550b-a55b:free',
+  'nex-agi/nex-n2.5-pro:free',
+  'nex-agi/nex-n2.5-mini:free',
+  'poolside/laguna-s-2.1:free',
+  'z-ai/glm-5.2:free',
 ];
 
 /**
  * Obtiene los mejores modelos gratuitos de texto en OpenRouter ordenados por menor latencia.
  */
-export async function getTopFreeTextModels(limit = 10, apiKey?: string): Promise<string[]> {
+export async function getTopFreeTextModels(limit = 8, apiKey?: string): Promise<string[]> {
   const ahora = Date.now();
 
   // Usar caché si está vigente
@@ -53,12 +53,12 @@ export async function getTopFreeTextModels(limit = 10, apiKey?: string): Promise
     process.env.OPENROUTER_API_KEYS?.split(',')[0] ??
     '';
 
-  if (!key || key === 'your_openrouter_api_key_here') {
+  if (!key || key.length < 15) {
     return FALLBACK_FREE_MODELS.slice(0, limit);
   }
 
   try {
-    const res = await fetch('https://openrouter.ai/api/v1/models?sort=latency-low-to-high', {
+    const res = await fetch('https://openrouter.ai/api/v1/models', {
       headers: { Authorization: `Bearer ${key}` },
       cache: 'no-store',
     });
@@ -72,22 +72,23 @@ export async function getTopFreeTextModels(limit = 10, apiKey?: string): Promise
     const rawModels: OpenRouterModel[] = json.data ?? [];
 
     const filtrados = rawModels.filter((m) => {
-      const prompt = parseFloat(m.pricing?.prompt ?? '1');
-      const completion = parseFloat(m.pricing?.completion ?? '1');
-      const outputMods = m.architecture?.output_modalities ?? [];
+      const isFree = m.id.endsWith(':free') || (parseFloat(m.pricing?.prompt ?? '1') === 0 && parseFloat(m.pricing?.completion ?? '1') === 0);
+      const isConversational = !/(safety|guard|rerank|embed|reward|reasoning|thinking|deepseek-r1|nano-omni.*reasoning)/i.test(m.id);
 
-      const isFree = prompt === 0 && completion === 0;
-      const isTextOut = outputMods.length === 1 && outputMods[0] === 'text';
-      const isConversational = !/(safety|moderation|guard|rerank|embedding|embed|reward|reasoning|thinking|deepseek-r1|nano-omni.*reasoning)/i.test(m.id);
-
-      return isFree && isTextOut && isConversational;
+      return isFree && isConversational;
     });
 
     const ids = filtrados.map((m) => m.id);
 
-    if (ids.length > 0) {
-      cache = { models: ids, fetchedAt: ahora };
-      return ids.slice(0, limit);
+    // Priorizar modelos con soporte demostrado de español fluido y baja latencia
+    const prioritized = [
+      ...FALLBACK_FREE_MODELS.filter((id) => ids.includes(id)),
+      ...ids.filter((id) => !FALLBACK_FREE_MODELS.includes(id)),
+    ];
+
+    if (prioritized.length > 0) {
+      cache = { models: prioritized, fetchedAt: ahora };
+      return prioritized.slice(0, limit);
     }
 
     return FALLBACK_FREE_MODELS.slice(0, limit);
@@ -96,3 +97,4 @@ export async function getTopFreeTextModels(limit = 10, apiKey?: string): Promise
     return cache?.models.slice(0, limit) ?? FALLBACK_FREE_MODELS.slice(0, limit);
   }
 }
+

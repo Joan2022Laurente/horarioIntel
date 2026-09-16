@@ -1,6 +1,8 @@
 import { getTopFreeTextModels, FALLBACK_FREE_MODELS } from './model-selector';
 import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
+import { ParsedSyllabus } from '@/lib/syllabus/types';
 import { getSyllabusForCourse } from '@/lib/syllabus/official-registry';
+import { getCurrentAndNextClass, parseEventTitle, formatTime } from '@/lib/schedule-parser';
 
 export interface OpenRouterChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -20,15 +22,12 @@ export interface OpenRouterResponse {
 }
 
 /**
- * Obtiene todas las claves disponibles en orden de prioridad:
- * 1. OPENROUTER_API_KEYS (separadas por coma)
- * 2. OPENROUTER_API_KEY_1, OPENROUTER_API_KEY_2, etc.
- * 3. OPENROUTER_API_KEY
+ * Obtiene todas las claves disponibles en orden de prioridad
  */
 export function getAvailableApiKeys(): string[] {
   const keys: string[] = [];
 
-  // 1. OPENROUTER_API_KEYS
+  // 1. OPENROUTER_API_KEYS (separadas por coma)
   if (process.env.OPENROUTER_API_KEYS) {
     const split = process.env.OPENROUTER_API_KEYS.split(',').map((k) => k.trim()).filter(Boolean);
     keys.push(...split);
@@ -48,14 +47,13 @@ export function getAvailableApiKeys(): string[] {
   return keys.filter((k) => k.startsWith('sk-or-v1-') || k.length > 20);
 }
 
-import { getCurrentAndNextClass, parseEventTitle, formatTime } from '@/lib/schedule-parser';
-
 /**
- * Construye el prompt de sistema del Copiloto Académico UTP con contexto en vivo
+ * Construye el prompt de sistema del Copiloto Académico UTP con contexto dinámico y sílabos de localStorage
  */
 export function buildAcademicSystemPrompt(context?: {
   interval?: UTPCurrentInterval;
   courses?: ProcessedCourse[];
+  syllabiData?: Record<string, ParsedSyllabus>;
 }): string {
   const weekNumber = context?.interval?.week_number || 5;
   const totalWeeks = context?.interval?.total_weeks || 18;
@@ -77,7 +75,14 @@ export function buildAcademicSystemPrompt(context?: {
   if (context?.courses && context.courses.length > 0) {
     coursesSummary = context.courses
       .map((c) => {
-        const official = getSyllabusForCourse(c.name);
+        const normalizedName = c.name.toUpperCase().trim();
+        // 1. Buscar en sílabos dinámicos enviados por el cliente desde LocalStorage
+        const clientSyllabus = context?.syllabiData?.[normalizedName] ||
+          context?.syllabiData?.[c.name] ||
+          (c.courseId ? context?.syllabiData?.[c.courseId] : undefined);
+
+        // 2. Fallback al registro oficial
+        const official = clientSyllabus || getSyllabusForCourse(c.name);
         const formula = official?.formula || 'Evaluación continua';
         const zoom = c.zoomLink ? ` • Zoom: ${c.zoomLink}` : '';
 
@@ -85,11 +90,11 @@ export function buildAcademicSystemPrompt(context?: {
         let weeklyTopics = '';
         if (official?.weeklySchedule && official.weeklySchedule.length > 0) {
           weeklyTopics = official.weeklySchedule
-            .map((w) => `    • Sem ${w.week}${w.evaluation ? ` [Eval: ${w.evaluation}]` : ''}: ${w.topic}`)
+            .map((w) => `    • Sem ${w.week}${w.evaluation ? ` [Eval: ${w.evaluation}]` : ''}: ${w.topic || w.topics?.join(', ')}`)
             .join('\n');
         }
 
-        return `### ${c.name} (Sección: ${c.sectionCode})${zoom}\n- Fórmula oficial: \`${formula}\`\n- Temario semanal oficial del sílabo:\n${weeklyTopics}`;
+        return `### ${c.name} (Sección: ${c.sectionCode})${zoom}\n- Fórmula de notas: \`${formula}\`\n- Temario semanal oficial del sílabo:\n${weeklyTopics || '    • Temario por clases disponible en el ciclo'}`;
       })
       .join('\n\n');
   }
@@ -100,15 +105,16 @@ CONTEXTO EN TIEMPO REAL:
 - Ciclo: ${periodName} • Semana Actual: Semana ${weekNumber} de ${totalWeeks}
 - PRÓXIMA CLASE PROGRAMADA: ${nextClassText}
 
-CURSOS Y SÍLABOS OFICIALES DEL ESTUDIANTE:
+CURSOS Y SÍLABOS DEL ESTUDIANTE:
 ${coursesSummary}
 
 REGLAS DE RESPUESTA (CRÍTICO: SÉ CONCISO Y DIRECTO):
-1. PROPORCIONALIDAD: Responde exactamente a lo que se pregunta, sin rodeos ni "testamentos".
+1. PROPORCIONALIDAD: Responde exactamente a lo que se pregunta, sin rodeos ni textos genéricos prefabricados.
    - Si preguntan "¿qué tocará en la clase?", "¿qué temas tocan esta semana?" o similar:
      • Identifica el curso y la semana correspondiente.
-     • Responde en 2 a 4 líneas con el tema central exacto del sílabo y 2 viñetas breves.
-     • NUNCA digas que los temas "no están disponibles". Utiliza el temario oficial del sílabo provisto en el contexto.
+     • Responde en 2 a 4 líneas con el tema central exacto y 2 viñetas breves.
+     • Utiliza el temario provisto en el contexto.
+   - Si preguntan por recomendaciones de estudio, da consejos específicos sobre los temas de la semana, no un temario repetido.
    - Si preguntan por evaluaciones o tareas, menciona la semana, código y peso (ej. 20% PC1).
 2. FORMATO: Markdown limpio y legible (negritas, viñetas simples). NUNCA uses etiquetas HTML como <br>.
 3. TONO: Directo, ágil y útil, como un copiloto de alta precisión.`;
@@ -143,6 +149,21 @@ function cleanAiResponse(text: string): string {
   // Eliminar bloques <thought>...</thought> o <think>...</think>
   cleaned = cleaned.replace(/<(?:thought|think)>[\s\S]*?<\/(?:thought|think)>/gi, '').trim();
   
+  // Eliminar preámbulos de pensamiento en inglés como "Here's a thinking process:..."
+  if (cleaned.includes("Here's a thinking process:") || cleaned.includes("Thinking Process:")) {
+    const split = cleaned.split(/\n\s*\n/);
+    const nonThinking = split.filter(p => 
+      !p.includes("Here's a thinking process:") && 
+      !p.includes("Thinking Process:") &&
+      !p.startsWith("1.  **Analyze") &&
+      !p.startsWith("2.  **Identify") &&
+      !p.startsWith("3.  **Determine")
+    );
+    if (nonThinking.length > 0) {
+      cleaned = nonThinking.join('\n\n').trim();
+    }
+  }
+
   // Eliminar prefijos de meta-razonamiento en inglés
   if (cleaned.startsWith('We need to answer:') || cleaned.startsWith('The user is asking:') || cleaned.startsWith('Analysis:')) {
     const lines = cleaned.split('\n');
@@ -166,6 +187,7 @@ export async function queryOpenRouterWithFallback(
   context?: {
     interval?: UTPCurrentInterval;
     courses?: ProcessedCourse[];
+    syllabiData?: Record<string, ParsedSyllabus>;
     conversationHistory?: OpenRouterChatMessage[];
   }
 ): Promise<OpenRouterResponse> {
@@ -208,14 +230,13 @@ export async function queryOpenRouterWithFallback(
           body: JSON.stringify({
             model: currentModel,
             messages,
-            temperature: 0.4,
+            temperature: 0.35,
             max_tokens: 1500,
           }),
         });
 
         if (response.status === 429 || response.status === 402) {
           console.warn(`[OpenRouter] Clave ${keyIdx + 1} agotada o rate-limit (HTTP ${response.status}). Pasando a la siguiente clave.`);
-          // Rompe el bucle de modelos para saltar a la siguiente clave API
           break;
         }
 
@@ -248,3 +269,4 @@ export async function queryOpenRouterWithFallback(
 
   throw lastError || new Error('Todos los modelos y claves de OpenRouter fallaron.');
 }
+

@@ -1,28 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ShieldCheck, 
   Star, 
-  Clock, 
-  CheckCircle2, 
+  MapPin, 
   Plus, 
-  ArrowUpRight, 
+  Search, 
+  MessageCircle, 
   Lock, 
   CreditCard,
-  Loader2
+  Loader2,
+  Sparkles,
+  Utensils,
+  GraduationCap,
+  Laptop,
+  PackageCheck
 } from 'lucide-react';
-import { AcademicServiceRow } from '@/types/economy';
+import { AcademicServiceRow, MarketplaceCategory, DeliveryMethod } from '@/types/economy';
 import { ProcessedCourse } from '@/types/utp';
 import { useAgent } from '@/context/AgentContext';
-import { 
-  fetchAcademicServices, 
-  createEscrowOrderInDb, 
-  createServiceInDb 
-} from '@/lib/supabase/marketplace-service';
+import { fetchAcademicServices } from '@/lib/supabase/marketplace-service';
+import { OrderModal } from './OrderModal';
+import { PublishListingModal } from './PublishListingModal';
 
 interface AcademicMarketplaceProps {
-  courses: ProcessedCourse[];
+  courses?: ProcessedCourse[];
   onAskAi?: (prompt: string) => void;
 }
 
@@ -30,16 +33,22 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
   courses,
   onAskAi,
 }) => {
-  const { executeIntent, askAgent } = useAgent();
+  const { askAgent } = useAgent();
   const handleAsk = onAskAi || askAgent;
+
   const [services, setServices] = useState<AcademicServiceRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState<string>('ALL');
-  const [walletBalance] = useState<number>(4500); // S/ 45.00 en centavos
-  const [lockedEscrow] = useState<number>(2000);  // S/ 20.00 en centavos
-  const [selectedServiceForOrder, setSelectedServiceForOrder] = useState<AcademicServiceRow | null>(null);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [isOrdering, setIsOrdering] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<MarketplaceCategory>('ALL');
+  const [deliveryFilter, setDeliveryFilter] = useState<'ALL' | DeliveryMethod>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Modals state
+  const [isPublishOpen, setIsPublishOpen] = useState(false);
+  const [selectedListingForOrder, setSelectedListingForOrder] = useState<AcademicServiceRow | null>(null);
+
+  // Wallet
+  const [walletBalance] = useState<number>(4500); // S/ 45.00
+  const [lockedEscrow] = useState<number>(2000);  // S/ 20.00
 
   useEffect(() => {
     async function loadServices() {
@@ -51,32 +60,68 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
     loadServices();
   }, []);
 
-  const handleOrderService = (srv: AcademicServiceRow) => {
-    setSelectedServiceForOrder(srv);
-    setOrderSuccess(false);
+  const handleListingCreated = (newListing: AcademicServiceRow) => {
+    setServices(prev => [newListing, ...prev]);
   };
 
-  const handleConfirmOrder = async () => {
-    if (!selectedServiceForOrder) return;
-    setIsOrdering(true);
-
-    await createEscrowOrderInDb({
-      serviceId: selectedServiceForOrder.id,
-      amountCents: selectedServiceForOrder.price_cents,
-      paymentMethod: 'YAPE',
+  const filteredListings = useMemo(() => {
+    return services.filter((item) => {
+      // Category filter
+      if (selectedCategory !== 'ALL' && item.category !== selectedCategory) {
+        return false;
+      }
+      // Delivery filter
+      if (deliveryFilter !== 'ALL' && item.delivery_method !== deliveryFilter) {
+        return false;
+      }
+      // Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = item.title.toLowerCase().includes(q);
+        const matchDesc = item.description.toLowerCase().includes(q);
+        const matchSeller = item.mentor?.full_name.toLowerCase().includes(q);
+        const matchTags = item.tags?.some(t => t.toLowerCase().includes(q));
+        const matchLocation = item.campus_location?.toLowerCase().includes(q);
+        return matchTitle || matchDesc || matchSeller || matchTags || matchLocation;
+      }
+      return true;
     });
+  }, [services, selectedCategory, deliveryFilter, searchQuery]);
 
-    setIsOrdering(false);
-    setOrderSuccess(true);
-    setTimeout(() => {
-      setSelectedServiceForOrder(null);
-      setOrderSuccess(false);
-    }, 2500);
+  const getCategoryBadge = (cat?: MarketplaceCategory) => {
+    switch (cat) {
+      case 'FOOD':
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2.5 py-0.5 rounded-full">
+            <Utensils className="h-3 w-3" />
+            Comida & Snacks
+          </span>
+        );
+      case 'ACADEMIC':
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-yellow-text)] bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] px-2.5 py-0.5 rounded-full">
+            <GraduationCap className="h-3 w-3" />
+            Asesoría Académica
+          </span>
+        );
+      case 'TECH_DESIGN':
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2.5 py-0.5 rounded-full">
+            <Laptop className="h-3 w-3" />
+            Tech & Diseño
+          </span>
+        );
+      case 'SECOND_HAND':
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-cyan-text)] bg-[var(--badge-cyan-bg)] border border-[var(--badge-cyan-border)] px-2.5 py-0.5 rounded-full">
+            <PackageCheck className="h-3 w-3" />
+            Segunda Mano
+          </span>
+        );
+      default:
+        return null;
+    }
   };
-
-  const filteredServices = selectedType === 'ALL'
-    ? services
-    : services.filter(s => s.service_type === selectedType);
 
   return (
     <div className="space-y-6 text-white animate-in fade-in duration-150">
@@ -85,31 +130,33 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-subtle)]">
         <div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            Marketplace Académico & Mentorías
+            Marketplace Universitario
           </h2>
           <p className="text-xs text-neutral-400 mt-1">
-            Contrata asesorías 1 a 1, simulacros de sustentación y auditorías de código con garantía Escrow.
+            Economía entre estudiantes: snacks caseros, mentorías 1 a 1, diseño de diapositivas y materiales de estudio.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => handleAsk('¿Cómo puedo ofrecer mis propios servicios de mentoría o asesoría académica en la plataforma?')}
+            onClick={() => setIsPublishOpen(true)}
             className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] px-4 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
           >
             <Plus className="h-4 w-4" />
-            <span>Ofrecer Servicio</span>
+            <span>Publicar Anuncio</span>
           </button>
         </div>
       </div>
 
-      {/* Wallet Card - Solid Matte Surfaces */}
+      {/* Wallet & Escrow Strip (Flat Matte, Zero Card-ception) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="sm:col-span-2 rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)]" />
-              <span className="text-xs font-black uppercase tracking-wider text-neutral-300">Billetera Estudiantil (Escrow)</span>
+              <span className="text-xs font-black uppercase tracking-wider text-neutral-300">
+                Billetera Estudiantil (Escrow UTP)
+              </span>
             </div>
             <span className="text-[10px] text-neutral-500 font-mono">UTP Pay ID: #WAL-9021</span>
           </div>
@@ -131,14 +178,14 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
           </div>
         </div>
 
-        {/* Retiro Yape / Plin */}
+        {/* Retiros Inmediatos */}
         <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col justify-between space-y-3">
           <div className="space-y-1">
             <p className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
               <CreditCard className="h-4 w-4 text-[var(--accent-orange)]" />
-              <span>Retiros Inmediatos</span>
+              <span>Pagos & Cobros</span>
             </p>
-            <p className="text-[11px] text-neutral-400">Retira tus ganancias directamente a tu cuenta:</p>
+            <p className="text-[11px] text-neutral-400">Acepta o paga al instante vía Yape o Plin:</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -151,84 +198,159 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
           </div>
 
           <button 
-            onClick={() => handleAsk('¿Cuáles son los pasos para vincular mi cuenta de Yape/Plin y retirar mis ganancias?')}
-            className="w-full py-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
+            onClick={() => handleAsk('¿Cómo funciona el pago seguro con Yape/Plin y la entrega en campus en el Marketplace?')}
+            className="w-full py-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
           >
-            Configurar Cobro
+            ¿Cómo funciona?
           </button>
         </div>
       </div>
 
-      {/* Filtros de Tipos de Servicio */}
-      <div className="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar text-xs">
-        <button
-          onClick={() => setSelectedType('ALL')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedType === 'ALL' 
-              ? 'bg-white text-black' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Todos los Servicios
-        </button>
-        <button
-          onClick={() => setSelectedType('MOCK_DEFENSE')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedType === 'MOCK_DEFENSE' 
-              ? 'bg-[var(--accent-orange)] text-white' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Simulacros de Sustentación
-        </button>
-        <button
-          onClick={() => setSelectedType('TUTORING_1ON1')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedType === 'TUTORING_1ON1' 
-              ? 'bg-[var(--accent-yellow)] text-black' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Asesorías 1 a 1
-        </button>
-        <button
-          onClick={() => setSelectedType('CODE_REVIEW')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedType === 'CODE_REVIEW' 
-              ? 'bg-[var(--accent-emerald)] text-black' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Revisión de Código & Labs
-        </button>
+      {/* Categorías Principales (Pills) & Búsqueda */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
+          
+          {/* Category Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar text-xs">
+            <button
+              onClick={() => setSelectedCategory('ALL')}
+              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+                selectedCategory === 'ALL' 
+                  ? 'bg-white text-black' 
+                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setSelectedCategory('FOOD')}
+              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+                selectedCategory === 'FOOD' 
+                  ? 'bg-[var(--accent-orange)] text-white' 
+                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
+              }`}
+            >
+              🥟 Comida & Snacks
+            </button>
+            <button
+              onClick={() => setSelectedCategory('ACADEMIC')}
+              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+                selectedCategory === 'ACADEMIC' 
+                  ? 'bg-[var(--accent-yellow)] text-black' 
+                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
+              }`}
+            >
+              🎓 Asesorías & Labs
+            </button>
+            <button
+              onClick={() => setSelectedCategory('TECH_DESIGN')}
+              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+                selectedCategory === 'TECH_DESIGN' 
+                  ? 'bg-[var(--badge-purple-bg)] text-[var(--badge-purple-text)] border border-[var(--badge-purple-border)]' 
+                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
+              }`}
+            >
+              💻 Tech & Freelance
+            </button>
+            <button
+              onClick={() => setSelectedCategory('SECOND_HAND')}
+              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
+                selectedCategory === 'SECOND_HAND' 
+                  ? 'bg-[var(--badge-cyan-bg)] text-[var(--badge-cyan-text)] border border-[var(--badge-cyan-border)]' 
+                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
+              }`}
+            >
+              📦 Segunda Mano
+            </button>
+          </div>
+
+          {/* Modality Filter */}
+          <div className="flex items-center gap-1.5 text-xs self-end sm:self-auto">
+            <button
+              onClick={() => setDeliveryFilter('ALL')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                deliveryFilter === 'ALL'
+                  ? 'bg-[var(--surface-muted)] text-white'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Todas
+            </button>
+            <button
+              onClick={() => setDeliveryFilter('CAMPUS_MEET')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                deliveryFilter === 'CAMPUS_MEET'
+                  ? 'bg-[var(--surface-muted)] text-[var(--accent-orange)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              En Campus
+            </button>
+            <button
+              onClick={() => setDeliveryFilter('VIRTUAL')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                deliveryFilter === 'VIRTUAL'
+                  ? 'bg-[var(--surface-muted)] text-[var(--badge-cyan-text)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Virtual
+            </button>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-neutral-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por comida (empanadas, brownies), curso, asesoría, calculadora o vendedor..."
+            className="w-full rounded-2xl bg-[var(--surface-card)] pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[var(--accent-yellow)]"
+          />
+        </div>
       </div>
 
-      {/* Grid de Servicios */}
+      {/* Grid de Productos & Servicios (Flat, Zero Card-ception) */}
       {isLoading ? (
-        <div className="py-12 flex flex-col items-center justify-center text-neutral-400 space-y-2">
+        <div className="py-16 flex flex-col items-center justify-center text-neutral-400 space-y-2">
           <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-yellow)]" />
-          <p className="text-xs">Cargando mentores y servicios activos desde Supabase...</p>
+          <p className="text-xs">Cargando publicaciones activas del campus...</p>
+        </div>
+      ) : filteredListings.length === 0 ? (
+        <div className="py-16 text-center space-y-3 rounded-3xl bg-[var(--surface-card)] p-8">
+          <p className="text-sm font-bold text-white">No se encontraron publicaciones con estos filtros</p>
+          <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+            ¿Tienes algo para vender o enseñar? Sé el primero en publicar un snack, asesoría o material.
+          </p>
+          <button
+            onClick={() => setIsPublishOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--accent-yellow)] px-4 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Crear Publicación</span>
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {filteredServices.map((srv) => (
+          {filteredListings.map((srv) => (
             <div
               key={srv.id}
-              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] p-5 space-y-4 shadow-none transition-all group"
+              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] p-5 space-y-4 shadow-none transition-all group"
             >
               <div className="space-y-3">
+                {/* Category badge & Rating */}
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-yellow-text)] bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] px-2.5 py-0.5 rounded-full">
-                    <Star className="h-3 w-3 fill-current" />
-                    {srv.rating_avg} ({srv.total_reviews} reviews)
-                  </span>
+                  {getCategoryBadge(srv.category)}
 
-                  <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {srv.duration_minutes} min
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--badge-yellow-text)] bg-[var(--badge-yellow-bg)] border border-[var(--badge-yellow-border)] px-2 py-0.5 rounded-full">
+                    <Star className="h-3 w-3 fill-current" />
+                    {srv.rating_avg}
                   </span>
                 </div>
 
+                {/* Title & Description */}
                 <div>
                   <h3 className="text-base font-bold text-white group-hover:text-[var(--accent-yellow)] transition-colors leading-snug">
                     {srv.title}
@@ -237,8 +359,31 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                     {srv.description}
                   </p>
                 </div>
+
+                {/* Tags */}
+                {srv.tags && srv.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {srv.tags.slice(0, 3).map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[10px] font-medium text-neutral-300 bg-[var(--surface-subtle)] px-2 py-0.5 rounded-md"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Location / Modality info */}
+                {srv.campus_location && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 pt-1">
+                    <MapPin className="h-3 w-3 text-[var(--accent-orange)] shrink-0" />
+                    <span className="truncate">{srv.campus_location}</span>
+                  </div>
+                )}
               </div>
 
+              {/* Bottom Strip: Seller, Price & Action */}
               <div className="space-y-3 pt-3 border-t border-[var(--border-subtle)]">
                 <div className="flex items-center justify-between">
                   <div>
@@ -246,91 +391,51 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                     <p className="text-[10px] text-neutral-400">{srv.mentor?.career}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-black text-[var(--accent-lime)]">S/ {(srv.price_cents / 100).toFixed(2)}</p>
+                    <p className="text-lg font-black text-[var(--accent-lime)]">
+                      S/ {(srv.price_cents / 100).toFixed(2)}
+                    </p>
+                    {srv.unit_label && (
+                      <p className="text-[10px] text-neutral-500 font-medium">{srv.unit_label}</p>
+                    )}
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleOrderService(srv)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2.5 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-white transition active:scale-95 shadow-none"
-                >
-                  <span>Solicitar Asesoría</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedListingForOrder(srv)}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--badge-yellow-bg)] hover:bg-[#382b0d] border border-[var(--badge-yellow-border)] py-2 text-xs font-bold text-[var(--badge-yellow-text)] hover:text-white transition active:scale-95 shadow-none"
+                  >
+                    <span>Pedir / Coordinar</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedListingForOrder(srv)}
+                    className="p-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] text-neutral-300 hover:text-white transition"
+                    title="WhatsApp Directo"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal de Confirmación Escrow */}
-      {selectedServiceForOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-3xl bg-[var(--surface-card)] border border-[var(--border-strong)] p-6 space-y-5 shadow-2xl text-white">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-[var(--accent-yellow)] uppercase tracking-wider flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4" />
-                <span>Garantía de Pago Escrow</span>
-              </span>
-              <button 
-                onClick={() => setSelectedServiceForOrder(null)}
-                className="text-neutral-400 hover:text-white text-xs"
-              >
-                Cerrar
-              </button>
-            </div>
+      {/* Modal: Publicar Anuncio */}
+      <PublishListingModal
+        isOpen={isPublishOpen}
+        onClose={() => setIsPublishOpen(false)}
+        onListingCreated={handleListingCreated}
+      />
 
-            {orderSuccess ? (
-              <div className="py-8 text-center space-y-3 animate-in zoom-in-95">
-                <CheckCircle2 className="h-12 w-12 text-[var(--accent-emerald)] mx-auto" />
-                <h3 className="text-base font-bold text-white">¡Sesión Solicitada con Éxito!</h3>
-                <p className="text-xs text-neutral-400">
-                  Los fondos están protegidos en Escrow (registrado en Supabase). Se liberarán una vez finalices la sesión con tu mentor.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <h3 className="text-base font-bold text-white">{selectedServiceForOrder.title}</h3>
-                  <p className="text-xs text-neutral-400">Mentor: <strong className="text-white">{selectedServiceForOrder.mentor?.full_name}</strong> ({selectedServiceForOrder.mentor?.career})</p>
-                </div>
-
-                <div className="rounded-2xl bg-[var(--surface-subtle)] border border-[var(--border-subtle)] p-4 space-y-2 text-xs">
-                  <div className="flex justify-between text-neutral-300">
-                    <span>Monto del servicio:</span>
-                    <span className="font-bold text-white">S/ {(selectedServiceForOrder.price_cents / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-neutral-300">
-                    <span>Duración estimada:</span>
-                    <span className="font-bold text-white">{selectedServiceForOrder.duration_minutes} minutos</span>
-                  </div>
-                  <div className="flex justify-between text-[var(--badge-emerald-text)] font-semibold pt-1 border-t border-[var(--border-subtle)]">
-                    <span>Comisión de protección:</span>
-                    <span>S/ 0.00 (Gratis)</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setSelectedServiceForOrder(null)}
-                    disabled={isOrdering}
-                    className="flex-1 py-2.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleConfirmOrder}
-                    disabled={isOrdering}
-                    className="flex-1 py-2.5 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] text-xs font-black text-black transition active:scale-95 shadow-none flex items-center justify-center gap-1.5"
-                  >
-                    {isOrdering && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                    <span>{isOrdering ? 'Procesando...' : 'Confirmar con Yape'}</span>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+      {/* Modal: Coordinar Pedido / WhatsApp / Escrow */}
+      {selectedListingForOrder && (
+        <OrderModal
+          listing={selectedListingForOrder}
+          isOpen={Boolean(selectedListingForOrder)}
+          onClose={() => setSelectedListingForOrder(null)}
+        />
       )}
 
     </div>

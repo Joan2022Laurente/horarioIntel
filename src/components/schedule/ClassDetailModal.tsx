@@ -117,7 +117,17 @@ export const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
     setIsLoading(true);
 
     if (text.toLowerCase() === '/piensa' || text.toLowerCase().startsWith('/piensa')) {
-      // Modo de prueba de animación: pensar indefinidamente
+      // Simulación de prueba: pensar durante 10 segundos
+      setTimeout(() => {
+        const simMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `⚡ **Simulación de pensamiento completada (10s)** para **${parsed.cleanTitle}** (Semana ${effectiveWeek}). Las ondas 3D y la matriz de micro-números operaron a 60 FPS.`,
+          timestamp: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages(prev => [...prev, simMsg]);
+        setIsLoading(false);
+      }, 10000);
       return;
     }
 

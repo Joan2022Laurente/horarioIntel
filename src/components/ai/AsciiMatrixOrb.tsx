@@ -87,8 +87,8 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
     );
     observer.observe(canvas);
 
-    // Soporte Hi-DPI nítido
-    const dpr = Math.max(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2);
+    // Soporte Hi-DPI ultra nítido con super-sampling calibrado
+    const dpr = Math.max(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2.5);
     canvas.width = Math.round(size * dpr);
     canvas.height = Math.round(size * dpr);
 
@@ -195,7 +195,7 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
 
         // Profundidad normalizada: 0 a 1 con realce en crestas de olas
         const depthNorm = Math.max(0, Math.min(1, (z2 + 1) / 2));
-        let alpha = Math.max(0.12, Math.min(1.0, Math.pow(depthNorm, 1.9)));
+        let alpha = Math.max(0.18, Math.min(1.0, Math.pow(depthNorm, 1.6)));
         
         if (intensity > 0.1 && waveFactor > 1.04) {
           alpha = Math.min(1.0, alpha * (1.0 + 0.3 * intensity));
@@ -214,45 +214,46 @@ export const AsciiMatrixOrb: React.FC<AsciiMatrixOrbProps> = ({
       // Ordenar por eje Z (Painter's algorithm para oclusión nítida)
       pointsToDraw.sort((a, b) => a.z - b.z);
 
-      // Renderizar números en Canvas con nitidez
+      // Renderizar números en Canvas con máxima nitidez tipográfica
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Micro-dígitos reducidos un 50% para máxima finura y elegancia
-      const minFont = Math.max(1.8 * dpr, size * dpr * 0.028);
-      const maxFont = Math.max(3.0 * dpr, size * dpr * 0.052);
+      // Micro-dígitos calibrados para nitidez óptima
+      const baseCssFont = Math.max(4.5, Math.min(8.0, size * 0.165));
+      const minFont = Math.round(baseCssFont * 0.85 * dpr);
+      const maxFont = Math.round(baseCssFont * 1.30 * dpr);
 
       for (let i = 0; i < pointsToDraw.length; i++) {
         const pt = pointsToDraw[i];
         const fontSize = Math.round(minFont + (maxFont - minFont) * pt.depth);
 
-        ctx.font = `500 ${fontSize}px "JetBrains Mono", "Courier New", monospace`;
+        ctx.font = `700 ${fontSize}px "JetBrains Mono", "SF Mono", Monaco, Consolas, "Courier New", monospace`;
 
         // Colores nítidos de alto contraste estilo Matrix / Referencia
         if (colorMode === 'lime') {
           if (pt.depth > 0.65) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, pt.alpha * 1.15)})`;
           } else if (pt.depth > 0.35) {
-            ctx.fillStyle = `rgba(187, 244, 81, ${pt.alpha * 0.9})`;
+            ctx.fillStyle = `rgba(187, 244, 81, ${Math.min(1, pt.alpha * 1.05)})`;
           } else {
-            ctx.fillStyle = `rgba(100, 140, 50, ${pt.alpha * 0.5})`;
+            ctx.fillStyle = `rgba(100, 155, 55, ${pt.alpha * 0.65})`;
           }
         } else if (colorMode === 'orange') {
           if (pt.depth > 0.65) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, pt.alpha * 1.15)})`;
           } else if (pt.depth > 0.35) {
-            ctx.fillStyle = `rgba(255, 112, 67, ${pt.alpha * 0.9})`;
+            ctx.fillStyle = `rgba(255, 112, 67, ${Math.min(1, pt.alpha * 1.05)})`;
           } else {
-            ctx.fillStyle = `rgba(160, 60, 30, ${pt.alpha * 0.5})`;
+            ctx.fillStyle = `rgba(175, 75, 45, ${pt.alpha * 0.65})`;
           }
         } else {
-          // Monocromo de alta fidelidad (exacto al render blanco/gris de referencia)
-          if (pt.depth > 0.7) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${pt.alpha})`;
-          } else if (pt.depth > 0.4) {
-            ctx.fillStyle = `rgba(210, 215, 225, ${pt.alpha * 0.85})`;
+          // Monocromo de ultra-alta fidelidad (blanco nítido y plata)
+          if (pt.depth > 0.65) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, pt.alpha * 1.2)})`;
+          } else if (pt.depth > 0.35) {
+            ctx.fillStyle = `rgba(225, 230, 240, ${Math.min(1, pt.alpha * 1.0)})`;
           } else {
-            ctx.fillStyle = `rgba(110, 115, 130, ${pt.alpha * 0.45})`;
+            ctx.fillStyle = `rgba(135, 145, 160, ${pt.alpha * 0.6})`;
           }
         }
 

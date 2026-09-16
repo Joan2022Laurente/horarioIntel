@@ -85,7 +85,17 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
     setIsLoading(true);
 
     if (query.toLowerCase() === '/piensa' || query.toLowerCase().startsWith('/piensa')) {
-      // Modo de prueba de animación: pensar indefinidamente
+      // Simulación de prueba: pensar durante 10 segundos y luego volver a reposo
+      setTimeout(() => {
+        const simMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '⚡ **Simulación de pensamiento completada (10s)**.\n\nEl avatar orbital 3D ejecutó la transición harmónica con ondas matriciales y retornó al estado inactivo de forma fluida.',
+          timestamp: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages(prev => [...prev, simMsg]);
+        setIsLoading(false);
+      }, 10000);
       return;
     }
 

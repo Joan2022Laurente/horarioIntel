@@ -16,9 +16,11 @@ import { TodayTasksSection } from '@/components/today/TodayTasksSection';
 import { TodayClassesSection } from '@/components/today/TodayClassesSection';
 import { TodayEvaluationsSection } from '@/components/today/TodayEvaluationsSection';
 
+import { useAgent } from '@/context/AgentContext';
+
 interface TodayViewProps {
   interval: UTPCurrentInterval;
-  onAskAi: (prompt: string) => void;
+  onAskAi?: (prompt: string) => void;
   onNavigateToWeekly: () => void;
 }
 
@@ -27,6 +29,8 @@ export const TodayView: React.FC<TodayViewProps> = ({
   onAskAi,
   onNavigateToWeekly,
 }) => {
+  const { askAgent } = useAgent();
+  const handleAsk = onAskAi || askAgent;
   const [now, setNow] = useState<Date>(new Date());
   const currentWeek = interval.week_number || 4;
   const events = interval.events || [];
@@ -78,7 +82,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
           minutesToNext={minutesToNext}
           currentWeek={currentWeek}
           totalWeeks={interval.total_weeks || 18}
-          onAskAi={onAskAi}
+          onAskAi={handleAsk}
         />
       )}
 
@@ -99,7 +103,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
           tasks={synchronizedTasks}
           onOpenRubric={handleOpenRubric}
           onOpenInstructions={(task) => setSelectedTaskForInstructions(task)}
-          onAskAi={onAskAi}
+          onAskAi={handleAsk}
         />
       )}
 
@@ -110,7 +114,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
           interval={interval}
           onNavigateToWeekly={onNavigateToWeekly}
           onOpenSyllabus={handleOpenSyllabus}
-          onAskAi={onAskAi}
+          onAskAi={handleAsk}
         />
       )}
 
@@ -118,7 +122,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         <TodayEvaluationsSection
           currentWeek={currentWeek}
           onOpenSyllabus={handleOpenSyllabus}
-          onAskAi={onAskAi}
+          onAskAi={handleAsk}
         />
       )}
 
@@ -129,7 +133,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         assignmentTitle={activeRubric?.taskTitle}
         courseName={activeRubric?.courseName}
         onClose={() => setActiveRubric(null)}
-        onAskAi={onAskAi}
+        onAskAi={handleAsk}
       />
 
       {/* Indicaciones y Consigna Oficial de Tarea Modal */}
@@ -137,7 +141,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         isOpen={!!selectedTaskForInstructions}
         task={selectedTaskForInstructions}
         onClose={() => setSelectedTaskForInstructions(null)}
-        onAskAi={onAskAi}
+        onAskAi={handleAsk}
       />
 
       {/* Sílabo Modal */}
@@ -145,7 +149,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         isOpen={isSyllabusModalOpen}
         courseIdentifier={selectedCourseForSyllabus}
         onClose={() => setIsSyllabusModalOpen(false)}
-        onAskAi={onAskAi}
+        onAskAi={handleAsk}
       />
 
     </div>

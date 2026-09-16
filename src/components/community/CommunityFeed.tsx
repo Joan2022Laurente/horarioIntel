@@ -11,10 +11,11 @@ import {
 } from 'lucide-react';
 import { PostRow, PostCategory } from '@/types/community';
 import { ProcessedCourse } from '@/types/utp';
+import { useAgent } from '@/context/AgentContext';
 
 interface CommunityFeedProps {
   courses: ProcessedCourse[];
-  onAskAi: (prompt: string) => void;
+  onAskAi?: (prompt: string) => void;
 }
 
 const INITIAL_POSTS: PostRow[] = [
@@ -76,6 +77,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   courses,
   onAskAi,
 }) => {
+  const { askAgent } = useAgent();
+  const handleAsk = onAskAi || askAgent;
   const [posts, setPosts] = useState<PostRow[]>(INITIAL_POSTS);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [isCreatingPost, setIsCreatingPost] = useState(false);
@@ -331,7 +334,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                 </button>
 
                 <button 
-                  onClick={() => onAskAi(`Analiza este post de la comunidad y dame la mejor respuesta académica: "${post.title} - ${post.content}"`)}
+                  onClick={() => handleAsk(`Analiza este post de la comunidad y dame la mejor respuesta académica: "${post.title} - ${post.content}"`)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white transition shadow-none"
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
@@ -340,7 +343,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               </div>
 
               <button 
-                onClick={() => onAskAi(`¿Qué recomendaciones darías para este post de la comunidad: "${post.title}"?`)}
+                onClick={() => handleAsk(`¿Qué recomendaciones darías para este post de la comunidad: "${post.title}"?`)}
                 className="inline-flex items-center gap-1 text-neutral-400 hover:text-[var(--accent-lime)] transition"
               >
                 <Sparkles className="h-3.5 w-3.5" />

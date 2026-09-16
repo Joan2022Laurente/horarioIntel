@@ -5,6 +5,7 @@ import { EMPTY_CALENDAR_RESPONSE } from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
 import { UTPCalendarResponse } from '@/types/utp';
 import { ParsedSyllabus } from '@/lib/syllabus/types';
+import { AgentLiveContext } from '@/types/agent';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest) {
     const rawData = (body.calendarData || EMPTY_CALENDAR_RESPONSE) as unknown as UTPCalendarResponse;
     const interval = rawData.data?.current_interval;
     const syllabiData = (body.syllabiData || {}) as Record<string, ParsedSyllabus>;
+    const liveContext = body.liveContext as AgentLiveContext | undefined;
 
     if (!interval) {
       return NextResponse.json(
@@ -23,12 +25,13 @@ export async function POST(req: NextRequest) {
 
     const courses = getProcessedCourses(interval.events || []);
 
-    // 1. Intentar responder mediante OpenRouter con fallback de claves y modelos dinámicos
+    // 1. Responder mediante OpenRouter con soporte para herramientas y Live Context
     try {
       const openRouterResult = await queryOpenRouterWithFallback(message, {
         interval,
         courses,
         syllabiData,
+        liveContext,
       });
 
       return NextResponse.json({
@@ -36,12 +39,13 @@ export async function POST(req: NextRequest) {
         data: {
           answer: openRouterResult.answer,
           suggestedActions: openRouterResult.suggestedActions,
+          action: openRouterResult.action,
           modelUsed: openRouterResult.modelUsed,
           keyIndexUsed: openRouterResult.keyIndexUsed,
         },
       });
     } catch (openRouterErr) {
-      console.warn('[AI Chat Route] OpenRouter no disponible, recurriendo al motor local de respaldo:', openRouterErr);
+      console.warn('[AI Chat Route] Fallback a motor local:', openRouterErr);
 
       // 2. Fallback al motor local
       const localResponse = queryAssistant(message, {
@@ -62,5 +66,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
-
-

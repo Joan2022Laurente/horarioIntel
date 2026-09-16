@@ -22,15 +22,19 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import { useAgent } from '@/context/AgentContext';
+
 interface WeeklyScheduleProps {
   interval: UTPCurrentInterval;
-  onAskAi: (prompt: string) => void;
+  onAskAi?: (prompt: string) => void;
 }
 
 export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
   interval,
   onAskAi,
 }) => {
+  const { askAgent } = useAgent();
+  const handleAsk = onAskAi || askAgent;
   const currentWeek = interval.week_number || 5;
   const totalWeeks = interval.total_weeks || 18;
   const [selectedWeek, setSelectedWeek] = useState<number>(currentWeek);
@@ -288,7 +292,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
         weekNumber={selectedWeek}
         interval={interval}
         onClose={() => setSelectedEventForModal(null)}
-        onOpenGlobalAi={onAskAi}
+        onOpenGlobalAi={handleAsk}
       />
 
     </div>

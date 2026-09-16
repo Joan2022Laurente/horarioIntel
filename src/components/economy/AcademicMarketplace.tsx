@@ -13,10 +13,11 @@ import {
 } from 'lucide-react';
 import { AcademicServiceRow } from '@/types/economy';
 import { ProcessedCourse } from '@/types/utp';
+import { useAgent } from '@/context/AgentContext';
 
 interface AcademicMarketplaceProps {
   courses: ProcessedCourse[];
-  onAskAi: (prompt: string) => void;
+  onAskAi?: (prompt: string) => void;
 }
 
 const INITIAL_SERVICES: AcademicServiceRow[] = [
@@ -104,6 +105,8 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
   courses: _courses,
   onAskAi,
 }) => {
+  const { executeIntent, askAgent } = useAgent();
+  const handleAsk = onAskAi || askAgent;
   const [services] = useState<AcademicServiceRow[]>(INITIAL_SERVICES);
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [walletBalance] = useState<number>(0); // En centavos
@@ -144,7 +147,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => onAskAi('¿Cómo puedo ofrecer mis propios servicios de mentoría o asesoría académica en la plataforma?')}
+            onClick={() => handleAsk('¿Cómo puedo ofrecer mis propios servicios de mentoría o asesoría académica en la plataforma?')}
             className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-yellow)] hover:bg-[var(--accent-yellow-hover)] px-4 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
           >
             <Plus className="h-4 w-4" />
@@ -201,7 +204,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
           </div>
 
           <button 
-            onClick={() => onAskAi('¿Cuáles son los pasos para vincular mi cuenta de Yape/Plin y retirar mis ganancias?')}
+            onClick={() => handleAsk('¿Cuáles son los pasos para vincular mi cuenta de Yape/Plin y retirar mis ganancias?')}
             className="w-full py-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
           >
             Configurar Cobro

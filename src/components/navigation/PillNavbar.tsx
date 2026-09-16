@@ -5,7 +5,7 @@ import { StudentProfile, UTPCurrentInterval } from '@/types/utp';
 import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { KeyRound } from 'lucide-react';
 
-export type NavigationTab = 'today' | 'weekly' | 'courses' | 'radar' | 'community' | 'marketplace' | 'ai';
+export type NavigationTab = 'today' | 'weekly' | 'courses' | 'networking' | 'community' | 'marketplace' | 'ai';
 
 interface PillNavbarProps {
   student: StudentProfile;
@@ -81,15 +81,15 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
           </button>
 
           <button
-            onClick={() => onTabChange('radar')}
+            onClick={() => onTabChange('networking')}
             className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5 shadow-none ${
-              activeTab === 'radar'
+              activeTab === 'networking'
                 ? 'bg-[var(--surface-muted)] text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-emerald)]" />
-            <span>Radar</span>
+            <span>Networking</span>
           </button>
 
           <button

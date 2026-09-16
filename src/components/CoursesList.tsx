@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
 import { 
-  BookOpen, 
   FileText, 
   Video, 
   MapPin, 
@@ -15,18 +14,19 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { SyllabusModal } from './SyllabusModal';
+import { useAgent } from '@/context/AgentContext';
 
 interface CoursesListProps {
   courses: ProcessedCourse[];
   interval: UTPCurrentInterval;
-  onAskAi: (prompt: string) => void;
+  onAskAi?: (prompt: string) => void;
 }
 
 export const CoursesList: React.FC<CoursesListProps> = ({
   courses,
   interval,
-  onAskAi,
 }) => {
+  const { executeIntent } = useAgent();
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<string | null>(null);
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
 
@@ -72,7 +72,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
           </button>
 
           <button
-            onClick={() => onAskAi('Haz un resumen comparativo de todos mis cursos, sus exigencias y fechas de exámenes')}
+            onClick={() => executeIntent({ type: 'FREE_QUERY', query: 'Haz un resumen comparativo de todos mis cursos, sus exigencias y fechas de exámenes clave' })}
             className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-lime)] hover:bg-[var(--accent-lime-hover)] px-3.5 py-2 text-xs font-black text-black transition active:scale-95 shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5" />
@@ -85,12 +85,12 @@ export const CoursesList: React.FC<CoursesListProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((course) => {
           const isZoom = !!course.zoomLink || course.modalities.includes('R');
-          const isPresential = course.modalities.includes('P');
+          const isPresencial = course.modalities.includes('P');
 
           return (
             <div
               key={course.courseId}
-              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] transition-all p-5 sm:p-6 space-y-5 group"
+              className="flex flex-col justify-between rounded-3xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] transition-all p-5 sm:p-6 space-y-5 group shadow-none"
             >
               {/* Parte Superior: Modalidad + Sesiones */}
               <div className="space-y-3">
@@ -114,7 +114,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
                 <p className="text-xs text-neutral-400 line-clamp-1">
                   {isZoom 
                     ? 'Clases remotas en vivo vía Zoom' 
-                    : isPresential 
+                    : isPresencial 
                     ? 'Clases presenciales en campus universitario' 
                     : 'Sesiones de autoaprendizaje virtual'}
                 </p>
@@ -160,8 +160,8 @@ export const CoursesList: React.FC<CoursesListProps> = ({
 
                 {/* Botón Consultar IA (Solid Orange Fill) */}
                 <button
-                  onClick={() => onAskAi(`¿Qué temas tocan en ${course.name}, qué viene en los exámenes y cómo aprobar con 20?`)}
-                  title="Preguntar a la IA sobre este curso"
+                  onClick={() => executeIntent({ type: 'ANALYZE_COURSE', courseName: course.name })}
+                  title="Consultar al Agente sobre este curso"
                   className="inline-flex items-center justify-center h-9 w-9 rounded-xl bg-[var(--accent-orange)] hover:bg-[var(--accent-orange-hover)] text-white transition active:scale-95 shrink-0 shadow-none"
                 >
                   <Sparkles className="h-4 w-4" />
@@ -174,13 +174,11 @@ export const CoursesList: React.FC<CoursesListProps> = ({
         })}
       </div>
 
-
       {/* Modal de Sílabo */}
       <SyllabusModal
         isOpen={isSyllabusModalOpen}
         courseIdentifier={selectedCourseForSyllabus}
         onClose={() => setIsSyllabusModalOpen(false)}
-        onAskAi={onAskAi}
       />
 
     </div>

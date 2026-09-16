@@ -24,6 +24,7 @@ import { SyllabusPoliciesView } from '@/components/syllabus/SyllabusPoliciesView
 import { SyllabusWeeklySchedule } from '@/components/syllabus/SyllabusWeeklySchedule';
 import { KNOWN_SYLLABUS_MAP } from '@/lib/mock-data';
 import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
+import { useAgent } from '@/context/AgentContext';
 
 interface EnrolledCourseOption {
   id: string;
@@ -91,7 +92,7 @@ interface SyllabusModalProps {
   interval?: UTPCurrentInterval;
   isOpen: boolean;
   onClose: () => void;
-  onAskAi: (prompt: string) => void;
+  onAskAi?: (prompt: string) => void;
 }
 
 export const SyllabusModal: React.FC<SyllabusModalProps> = ({
@@ -102,6 +103,8 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
   onClose,
   onAskAi,
 }) => {
+  const { askAgent } = useAgent();
+  const handleAsk = onAskAi || askAgent;
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'official' | 'custom'>('official');
   const [customMarkdown, setCustomMarkdown] = useState('');
@@ -567,7 +570,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
               <SyllabusEvaluationsGrid
                 evaluations={currentSyllabus.evaluations}
                 courseName={currentSyllabus.generalInfo.courseName}
-                onAskAi={onAskAi}
+                onAskAi={handleAsk}
                 onClose={onClose}
               />
 

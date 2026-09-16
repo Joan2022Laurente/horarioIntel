@@ -80,9 +80,18 @@ export function buildAcademicSystemPrompt(context?: {
         const official = getSyllabusForCourse(c.name);
         const formula = official?.formula || 'Evaluación continua';
         const zoom = c.zoomLink ? ` • Zoom: ${c.zoomLink}` : '';
-        return `- **${c.name}** (${c.sectionCode})${zoom} | Fórmula: \`${formula}\``;
+
+        // Temario por semana oficial
+        let weeklyTopics = '';
+        if (official?.weeklySchedule && official.weeklySchedule.length > 0) {
+          weeklyTopics = official.weeklySchedule
+            .map((w) => `    • Sem ${w.week}${w.evaluation ? ` [Eval: ${w.evaluation}]` : ''}: ${w.topic}`)
+            .join('\n');
+        }
+
+        return `### ${c.name} (Sección: ${c.sectionCode})${zoom}\n- Fórmula oficial: \`${formula}\`\n- Temario semanal oficial del sílabo:\n${weeklyTopics}`;
       })
-      .join('\n');
+      .join('\n\n');
   }
 
   return `Eres el "Copiloto Académico UTP", un asistente inteligente de élite para estudiantes de la Universidad Tecnológica del Perú (UTP).
@@ -90,14 +99,17 @@ export function buildAcademicSystemPrompt(context?: {
 CONTEXTO EN TIEMPO REAL:
 - Ciclo: ${periodName} • Semana Actual: Semana ${weekNumber} de ${totalWeeks}
 - PRÓXIMA CLASE PROGRAMADA: ${nextClassText}
-${coursesSummary ? `\nCURSOS MATRICULADOS:\n${coursesSummary}` : ''}
+
+CURSOS Y SÍLABOS OFICIALES DEL ESTUDIANTE:
+${coursesSummary}
 
 REGLAS DE RESPUESTA (CRÍTICO: SÉ CONCISO Y DIRECTO):
 1. PROPORCIONALIDAD: Responde exactamente a lo que se pregunta, sin rodeos ni "testamentos".
-   - Si preguntan "¿qué me toca en la próxima clase?" o "¿cuándo es mi clase?", responde en 3 o 4 líneas directas:
-     • Nombre del curso y horario exacto (con link de Zoom si es virtual).
-     • Tema principal que se verá en esa sesión (1 o 2 puntos clave).
-   - NO incluyas tablas gigantescas, notas mínimas, advertencias ni planes de estudio a menos que el usuario lo pida expresamente.
+   - Si preguntan "¿qué tocará en la clase?", "¿qué temas tocan esta semana?" o similar:
+     • Identifica el curso y la semana correspondiente.
+     • Responde en 2 a 4 líneas con el tema central exacto del sílabo y 2 viñetas breves.
+     • NUNCA digas que los temas "no están disponibles". Utiliza el temario oficial del sílabo provisto en el contexto.
+   - Si preguntan por evaluaciones o tareas, menciona la semana, código y peso (ej. 20% PC1).
 2. FORMATO: Markdown limpio y legible (negritas, viñetas simples). NUNCA uses etiquetas HTML como <br>.
 3. TONO: Directo, ágil y útil, como un copiloto de alta precisión.`;
 }

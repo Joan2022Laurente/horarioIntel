@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Horario Inteligente UTP • Copiloto de Clases & Exámenes",
-  description: "Visualizador de horarios universitarios, enlaces directos a Zoom, descarga de sílabos oficiales y Asistente IA estilo Claude para preparación de clases y exámenes de la UTP.",
+  description: "Visualizador de horarios universitarios, enlaces directos a Zoom, descarga de sílabos oficiales y Asistente IA para preparación de clases y exámenes de la UTP.",
 };
 
 export default function RootLayout({
@@ -25,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[#0d0d10] text-[#f3f3f6] antialiased`}
+        className={`${jakartaSans.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-[#0a0a0c] text-[#f3f3f6] antialiased tracking-[-0.015em]`}
       >
         {children}
       </body>

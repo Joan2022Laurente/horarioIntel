@@ -70,8 +70,6 @@ export const TodayBanner: React.FC<TodayBannerProps> = ({
           </h3>
 
           <p className="text-xs text-neutral-400 flex items-center gap-2 font-mono">
-            <span>Semana {parsedBanner.weekInTitle || currentWeek}</span>
-            <span>•</span>
             <span className="text-neutral-300 font-bold">
               {formatTime(bannerClass.startAt)} – {formatTime(bannerClass.finishAt)}
             </span>

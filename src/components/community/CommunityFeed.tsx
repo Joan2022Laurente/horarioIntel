@@ -271,20 +271,19 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               {/* Post Header */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-white text-xs">
-                    {post.author?.full_name.charAt(0)}
+                  <div className="h-8 w-8 rounded-full bg-[var(--surface-subtle)] flex items-center justify-center font-bold text-white text-xs">
+                    {post.author?.full_name.charAt(0) || 'U'}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white">{post.author?.full_name}</span>
-                      <span className="text-[10px] text-neutral-500 font-mono">({post.author?.career})</span>
-                    </div>
-                    <span className="text-[11px] text-neutral-400">{post.created_at}</span>
+                    <span className="text-xs font-bold text-white leading-tight block">
+                      {post.author?.full_name}
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-mono">{post.created_at}</span>
                   </div>
                 </div>
 
                 {post.course_id && (
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-neutral-300 bg-[var(--surface-subtle)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-300 bg-[var(--surface-subtle)] px-2.5 py-1 rounded-full">
                     <BookOpen className="h-3 w-3 text-[var(--accent-yellow)]" />
                     <span>{post.course_id}</span>
                   </span>
@@ -292,8 +291,8 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
               </div>
 
               {/* Post Body */}
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-white hover:text-[var(--badge-purple-text)] transition-colors cursor-pointer">
+              <div className="space-y-1.5">
+                <h3 className="text-base font-bold text-white hover:text-[var(--badge-purple-text)] transition-colors cursor-pointer leading-snug">
                   {post.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
@@ -309,7 +308,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition active:scale-90 shadow-none ${
                       post.has_user_upvoted
                         ? 'bg-[var(--accent-purple)] text-white'
-                        : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
+                        : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
                     }`}
                   >
                     <ThumbsUp className="h-3.5 w-3.5" />
@@ -318,7 +317,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
                   <button 
                     onClick={() => handleAsk(`Analiza este post de la comunidad y dame la mejor respuesta académica: "${post.title} - ${post.content}"`)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white transition shadow-none"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] text-neutral-300 hover:text-white transition shadow-none"
                   >
                     <MessageSquare className="h-3.5 w-3.5" />
                     <span>{post.comments_count} respuestas</span>
@@ -327,10 +326,10 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
                 <button 
                   onClick={() => handleAsk(`¿Qué recomendaciones darías para este post de la comunidad: "${post.title}"?`)}
-                  className="inline-flex items-center gap-1 text-neutral-400 hover:text-[var(--accent-lime)] transition"
+                  title="Responder con Copiloto IA"
+                  className="p-1.5 rounded-lg bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] text-neutral-400 hover:text-[var(--accent-lime)] transition"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Responder con IA</span>
+                  <Sparkles className="h-4 w-4" />
                 </button>
               </div>
             </div>

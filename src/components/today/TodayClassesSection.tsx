@@ -6,7 +6,7 @@ import { formatTime, parseEventTitle } from '@/lib/schedule-parser';
 import { Badge } from '@/components/ui/Badge';
 import { getClassroomLocation } from '@/lib/classroom-helper';
 import { ClassDetailModal } from '@/components/schedule/ClassDetailModal';
-import { Calendar, Video, MapPin, Radio, Sparkles, ChevronRight } from 'lucide-react';
+import { Calendar, Video, MapPin, Radio, ChevronRight } from 'lucide-react';
 
 interface TodayClassesSectionProps {
   todayEvents: UTPEvent[];
@@ -43,7 +43,7 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black text-white">
+        <h3 className="text-base sm:text-lg font-bold text-white">
           Horario del Día: {todayDate.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}
         </h3>
         <button
@@ -72,7 +72,7 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
               <div 
                 key={ev.id} 
                 onClick={() => setSelectedEventForModal(ev)}
-                className="group p-4 sm:p-5 rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] flex items-center justify-between gap-4 transition shadow-none cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                className="group p-4 sm:p-5 rounded-2xl bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] hover:border-[var(--border-medium)] flex items-center justify-between gap-4 transition shadow-none cursor-pointer"
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
@@ -106,11 +106,7 @@ export const TodayClassesSection: React.FC<TodayClassesSectionProps> = ({
                     </button>
                   )}
 
-                  <div className="flex items-center gap-1 text-xs text-neutral-400 group-hover:text-white font-bold pl-2">
-                    <Sparkles className="h-3.5 w-3.5 text-[var(--accent-orange)]" />
-                    <span className="hidden sm:inline">Detalles & IA</span>
-                    <ChevronRight className="h-3.5 w-3.5 text-neutral-500 group-hover:text-white" />
-                  </div>
+                  <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-white transition-colors" />
                 </div>
               </div>
             );

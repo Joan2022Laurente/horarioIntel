@@ -11,7 +11,6 @@ import {
   Lock, 
   CreditCard,
   Loader2,
-  Sparkles,
   Utensils,
   GraduationCap,
   Laptop,
@@ -30,7 +29,7 @@ interface AcademicMarketplaceProps {
 }
 
 export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
-  courses,
+  courses: _courses,
   onAskAi,
 }) => {
   const { askAgent } = useAgent();
@@ -148,7 +147,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
         </div>
       </div>
 
-      {/* Wallet & Escrow Strip (Flat Matte, Zero Card-ception) */}
+      {/* Wallet & Escrow Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="sm:col-span-2 rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
@@ -158,7 +157,6 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
                 Billetera Estudiantil (Escrow UTP)
               </span>
             </div>
-            <span className="text-[10px] text-neutral-500 font-mono">UTP Pay ID: #WAL-9021</span>
           </div>
 
           <div className="flex items-baseline gap-2">
@@ -178,14 +176,14 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
           </div>
         </div>
 
-        {/* Retiros Inmediatos */}
+        {/* Pagos & Cobros */}
         <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5 shadow-none flex flex-col justify-between space-y-3">
           <div className="space-y-1">
             <p className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
               <CreditCard className="h-4 w-4 text-[var(--accent-orange)]" />
-              <span>Pagos & Cobros</span>
+              <span>Pagos Inmediatos</span>
             </p>
-            <p className="text-[11px] text-neutral-400">Acepta o paga al instante vía Yape o Plin:</p>
+            <p className="text-[11px] text-neutral-400">Transacciones directas vía Yape o Plin en campus:</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -201,7 +199,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
             onClick={() => handleAsk('¿Cómo funciona el pago seguro con Yape/Plin y la entrega en campus en el Marketplace?')}
             className="w-full py-2 rounded-xl bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] text-xs font-bold text-neutral-300 hover:text-white transition shadow-none"
           >
-            ¿Cómo funciona?
+            Guía de Intercambio
           </button>
         </div>
       </div>
@@ -312,7 +310,7 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
         </div>
       </div>
 
-      {/* Grid de Productos & Servicios (Flat, Zero Card-ception) */}
+      {/* Grid de Productos & Servicios */}
       {isLoading ? (
         <div className="py-16 flex flex-col items-center justify-center text-neutral-400 space-y-2">
           <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-yellow)]" />

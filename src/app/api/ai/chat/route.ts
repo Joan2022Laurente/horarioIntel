@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { queryOpenRouterWithFallback } from '@/lib/openrouter/client';
 import { queryAssistant } from '@/lib/ai-assistant';
 import { EMPTY_CALENDAR_RESPONSE } from '@/lib/mock-data';
 import { getProcessedCourses } from '@/lib/schedule-parser';
@@ -19,17 +20,43 @@ export async function POST(req: NextRequest) {
     }
 
     const courses = getProcessedCourses(interval.events || []);
-    const aiResponse = queryAssistant(message, {
-      interval,
-      courses,
-    });
 
-    return NextResponse.json({
-      success: true,
-      data: aiResponse,
-    });
+    // 1. Intentar responder mediante OpenRouter con fallback de claves y modelos dinámicos
+    try {
+      const openRouterResult = await queryOpenRouterWithFallback(message, {
+        interval,
+        courses,
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          answer: openRouterResult.answer,
+          suggestedActions: openRouterResult.suggestedActions,
+          modelUsed: openRouterResult.modelUsed,
+          keyIndexUsed: openRouterResult.keyIndexUsed,
+        },
+      });
+    } catch (openRouterErr) {
+      console.warn('[AI Chat Route] OpenRouter no disponible, recurriendo al motor local de respaldo:', openRouterErr);
+
+      // 2. Fallback al motor local con conocimiento estructurado de sílabos
+      const localResponse = queryAssistant(message, {
+        interval,
+        courses,
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          ...localResponse,
+          modelUsed: 'local-utp-engine',
+        },
+      });
+    }
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Error procesando solicitud IA';
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
+

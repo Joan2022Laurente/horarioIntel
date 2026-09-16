@@ -103,7 +103,10 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: query }),
+        body: JSON.stringify({
+          message: query,
+          calendarData: interval ? { data: { current_interval: interval } } : undefined,
+        }),
       });
 
       const resData = await response.json();

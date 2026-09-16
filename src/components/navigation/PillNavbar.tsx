@@ -5,11 +5,13 @@ import { StudentProfile, UTPCurrentInterval } from '@/types/utp';
 import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { KeyRound } from 'lucide-react';
 
+export type NavigationTab = 'today' | 'weekly' | 'courses' | 'radar' | 'community' | 'marketplace' | 'ai';
+
 interface PillNavbarProps {
   student: StudentProfile;
   interval: UTPCurrentInterval;
-  activeTab: 'today' | 'weekly' | 'courses' | 'ai';
-  onTabChange: (tab: 'today' | 'weekly' | 'courses' | 'ai') => void;
+  activeTab: NavigationTab;
+  onTabChange: (tab: NavigationTab) => void;
   onOpenSettings: () => void;
   onOpenAi: () => void;
 }
@@ -26,28 +28,28 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
   return (
     <header className="sticky top-4 z-50 w-full flex justify-center px-4 pointer-events-none mb-6">
-      <div className="pointer-events-auto flex items-center justify-between gap-3 sm:gap-6 bg-[#141417]/95 backdrop-blur-2xl rounded-full px-3 sm:px-5 py-2 shadow-2xl max-w-4xl w-full">
+      <div className="pointer-events-auto flex items-center justify-between gap-2 sm:gap-4 bg-[#141417]/95 backdrop-blur-2xl rounded-full px-3 sm:px-5 py-2 shadow-2xl max-w-5xl w-full border border-white/5">
         
         {/* Brand Square Badge */}
         <button
           onClick={onOpenSettings}
           title="Ajustes de cuenta y perfil"
-          className="flex items-center gap-2.5 text-left transition focus:outline-none group"
+          className="flex items-center gap-2.5 text-left transition focus:outline-none group shrink-0"
         >
           <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-[#ff5722] text-[#0a0a0c] font-black text-lg shadow-md select-none transition-transform group-hover:scale-105">
             U
           </div>
-          <div className="hidden sm:flex flex-col text-left">
+          <div className="hidden lg:flex flex-col text-left">
             <span className="text-xs font-black tracking-wider text-white uppercase group-hover:text-[#bbf451] transition">UTP Class</span>
             <span className="text-[10px] font-mono text-neutral-400">{student.username}</span>
           </div>
         </button>
 
         {/* Center Nav Links */}
-        <nav className="flex items-center gap-1 sm:gap-2 text-xs font-semibold">
+        <nav className="flex items-center gap-1 text-xs font-semibold overflow-x-auto no-scrollbar py-0.5">
           <button
             onClick={() => onTabChange('today')}
-            className={`px-3 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
               activeTab === 'today'
                 ? 'bg-white/15 text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
@@ -58,7 +60,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={() => onTabChange('weekly')}
-            className={`px-3 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
               activeTab === 'weekly'
                 ? 'bg-white/15 text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
@@ -69,7 +71,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
 
           <button
             onClick={() => onTabChange('courses')}
-            className={`px-3 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
               activeTab === 'courses'
                 ? 'bg-white/15 text-white font-bold'
                 : 'text-neutral-400 hover:text-white'
@@ -79,13 +81,48 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
           </button>
 
           <button
+            onClick={() => onTabChange('radar')}
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'radar'
+                ? 'bg-[#00e676]/20 text-[#00e676] font-bold ring-1 ring-[#00e676]/30'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[#00e676] animate-pulse" />
+            <span>Radar</span>
+          </button>
+
+          <button
+            onClick={() => onTabChange('community')}
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+              activeTab === 'community'
+                ? 'bg-[#7075ff]/20 text-[#9195ff] font-bold ring-1 ring-[#7075ff]/30'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            Comunidad
+          </button>
+
+          <button
+            onClick={() => onTabChange('marketplace')}
+            className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+              activeTab === 'marketplace'
+                ? 'bg-[#ffb703]/20 text-[#ffb703] font-bold ring-1 ring-[#ffb703]/30'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            Servicios
+          </button>
+
+          <button
             onClick={onOpenAi}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white/90 hover:text-white font-bold hover:bg-white/10 transition group"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white/90 hover:text-white font-bold hover:bg-white/10 transition group whitespace-nowrap"
           >
             <AsciiMatrixOrb size={18} state="idle" colorMode="monochrome" />
-            <span>Copiloto</span>
+            <span className="hidden sm:inline">Copiloto</span>
           </button>
         </nav>
+
 
         {/* Right CTA Action: Lime pill matching "Sign Up" from reference */}
         <div className="flex items-center gap-2">

@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PillNavbar } from '@/components/navigation/PillNavbar';
+import { PillNavbar, NavigationTab } from '@/components/navigation/PillNavbar';
 import { TodayView } from '@/components/TodayView';
 import { WeeklySchedule } from '@/components/WeeklySchedule';
 import { CoursesList } from '@/components/CoursesList';
+import { CampusRadarView } from '@/components/matching/CampusRadarView';
+import { CommunityFeed } from '@/components/community/CommunityFeed';
+import { AcademicMarketplace } from '@/components/economy/AcademicMarketplace';
 import { AiAssistantModal } from '@/components/AiAssistantModal';
 import { SessionSettingsModal } from '@/components/SessionSettingsModal';
 import { SyllabusModal } from '@/components/SyllabusModal';
@@ -27,7 +30,7 @@ import { RefreshCw } from 'lucide-react';
 export default function HomePage() {
   const [student, setStudent] = useState<StudentProfile>(GUEST_STUDENT_PROFILE);
   const [calendarResponse, setCalendarResponse] = useState<UTPCalendarResponse>(EMPTY_CALENDAR_RESPONSE);
-  const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'courses' | 'ai'>('weekly');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('weekly');
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -168,9 +171,32 @@ export default function HomePage() {
               onAskAi={handleAskAi}
             />
           )}
+
+          {activeTab === 'radar' && (
+            <CampusRadarView
+              courses={processedCourses}
+              interval={currentInterval}
+              onAskAi={handleAskAi}
+            />
+          )}
+
+          {activeTab === 'community' && (
+            <CommunityFeed
+              courses={processedCourses}
+              onAskAi={handleAskAi}
+            />
+          )}
+
+          {activeTab === 'marketplace' && (
+            <AcademicMarketplace
+              courses={processedCourses}
+              onAskAi={handleAskAi}
+            />
+          )}
         </div>
 
       </main>
+
 
       {/* Minimal Sleek Footer */}
       <footer className="bg-[#0a0a0c] py-8 text-center text-xs text-neutral-500">

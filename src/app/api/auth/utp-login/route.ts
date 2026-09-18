@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase/client';
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,6 +78,21 @@ export async function POST(req: NextRequest) {
         } catch (jwtErr) {
           console.warn('Fallo decodificando JWT de Keycloak:', jwtErr);
         }
+      }
+
+      // Registrar / actualizar estudiante en Supabase con telemetría de acceso
+      try {
+        await supabase.from('students').upsert({
+          student_code: studentCode,
+          full_name: studentName,
+          email: studentEmail,
+          career: 'Ingeniería de Software',
+          campus: 'Campus Digital',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'student_code' });
+        console.log(`[UTP Auth] Alumno registrado con éxito en Supabase: ${studentCode} (${studentName})`);
+      } catch (dbErr) {
+        console.warn('[UTP Auth] Error no fatal sincronizando alumno en Supabase:', dbErr);
       }
 
       return NextResponse.json({

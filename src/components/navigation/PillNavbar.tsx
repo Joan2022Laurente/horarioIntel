@@ -33,7 +33,7 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#070709]/90 backdrop-blur-xl border-b border-white/10 select-none">
+    <header className="sticky top-0 z-40 w-full bg-gradient-to-b from-[#070709]/80 via-[#070709]/30 to-transparent backdrop-blur-md border-none select-none">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-4">
         
         {/* Left: Minimalist Dot & Brand Logo Only */}

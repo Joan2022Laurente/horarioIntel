@@ -6,7 +6,6 @@ import {
   X, 
   ShieldCheck, 
   Check, 
-  RotateCcw, 
   GraduationCap, 
   MapPin, 
   Lock, 
@@ -17,11 +16,8 @@ import {
   ChevronDown, 
   ChevronUp,
   LogOut,
-  Mail,
   RefreshCw,
-  Sparkles,
-  Server,
-  CalendarCheck
+  Server
 } from 'lucide-react';
 import { GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
 
@@ -68,10 +64,9 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
       if (onRefreshSchedule) {
         await onRefreshSchedule();
       } else {
-        // Simulación de sync si no hay callback
         await new Promise(r => setTimeout(r, 800));
       }
-      setSuccessMessage('¡Horario, asignaturas y tareas sincronizadas exitosamente desde la API de UTP!');
+      setSuccessMessage('Horario y asignaturas sincronizadas desde la UTP.');
       setTimeout(() => setSuccessMessage(null), 3500);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error sincronizando con la API de UTP.';
@@ -109,7 +104,6 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
         throw new Error(data.error || 'Credenciales no válidas en UTP.');
       }
 
-      // Guardar el perfil auténtico obtenido de Keycloak
       onSaveProfile({
         ...currentStudent,
         ...data.user,
@@ -178,28 +172,29 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-150 text-white">
-      <div className="relative flex flex-col w-full max-w-lg max-h-[92vh] rounded-3xl bg-[#0e0e13] border border-white/10 shadow-2xl shadow-black/90 overflow-hidden">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xl animate-in fade-in duration-150 text-white font-sans"
+      onClick={onClose}
+    >
+      <div 
+        className="relative flex flex-col w-full max-w-lg max-h-[90vh] rounded-3xl bg-[#09090c]/95 backdrop-blur-2xl border border-white/[0.08] shadow-[0_25px_70px_rgba(0,0,0,0.85)] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#14141a] border-b border-white/5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--accent-lime)] text-[#0a0a0c] font-black text-sm shadow-md shadow-[var(--accent-lime)]/20">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white">
-                {isCurrentLoggedIn ? 'Perfil Académico y Sesión' : 'Iniciar Sesión UTP'}
-              </h3>
-              <p className="text-[11px] text-neutral-400">
-                {isCurrentLoggedIn ? 'Conexión oficial activa con servidores UTP' : 'Acceso oficial con tu cuenta institucional'}
-              </p>
-            </div>
+        {/* Header - Sin líneas divisorias rígidas */}
+        <div className="flex items-start justify-between px-7 pt-7 pb-2">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-white uppercase tracking-wide">
+              {isCurrentLoggedIn ? 'Perfil y Sincronización' : 'Iniciar Sesión'}
+            </h3>
+            <p className="text-xs text-neutral-400">
+              {isCurrentLoggedIn ? 'Gestión de cuenta y estado en vivo con la UTP' : 'Acceso oficial con tu cuenta institucional'}
+            </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-neutral-400 hover:bg-white/10 hover:text-white transition"
+            className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
             aria-label="Cerrar modal"
           >
             <X className="h-4 w-4" />
@@ -207,45 +202,42 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto px-7 py-4 space-y-5">
 
-          {/* Tarjeta de estado de cuenta actual */}
-          <div className="rounded-2xl bg-[#16161f] border border-white/5 p-4 flex items-center gap-4 shadow-lg">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-lime)] text-[#0a0a0c] font-black text-2xl shadow-md shrink-0 select-none">
+          {/* Tarjeta de perfil minimalista */}
+          <div className="rounded-2xl bg-white/[0.02] border border-white/5 p-4 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-lime)] text-[#0a0a0c] font-bold text-xl shadow-md shrink-0 select-none">
               {currentStudent.name.charAt(0) || 'U'}
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                  isCurrentLoggedIn ? 'bg-[var(--accent-lime)]/15 text-[var(--accent-lime)] border border-[var(--accent-lime)]/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
-                }`}>
-                  <ShieldCheck className="h-3 w-3" />
-                  {isCurrentLoggedIn ? 'Sesión Activa Oficial' : 'Modo Demostración'}
-                </span>
                 <span className="font-mono text-xs font-bold text-[var(--accent-lime)]">
                   {currentStudent.username.toUpperCase()}
                 </span>
+                <span className="text-[10px] text-neutral-400">
+                  {isCurrentLoggedIn ? '• Sesión Activa' : '• Demo'}
+                </span>
               </div>
 
-              <h4 className="text-sm font-black text-white mt-1 truncate">
+              <h4 className="text-sm font-bold text-white mt-0.5 truncate">
                 {currentStudent.name}
               </h4>
 
               <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-[11px] text-neutral-400 mt-1">
                 <span className="flex items-center gap-1 text-neutral-300">
-                  <GraduationCap className="h-3 w-3 text-[var(--accent-lime)]" />
+                  <GraduationCap className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
                   {currentStudent.career || 'Ingeniería de Sistemas e Informática'}
                 </span>
                 <span className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3 text-neutral-400" />
+                  <MapPin className="h-3.5 w-3.5 text-neutral-400" />
                   {currentStudent.campus || 'Lima Centro'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Feedback Alerts */}
+          {/* Mensajes de Alerta */}
           {errorMessage && (
             <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-3.5 flex items-start gap-2.5 text-xs text-rose-300">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
@@ -260,169 +252,145 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
             </div>
           )}
 
-          {/* VISTA 1: USUARIO YA AUTENTICADO -> Panel de Sincronización en Vivo */}
+          {/* VISTA 1: USUARIO AUTENTICADO */}
           {isCurrentLoggedIn ? (
             <div className="space-y-4">
               
-              {/* Panel de Sincronización en Tiempo Real */}
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-white">
-                    <Server className="h-4 w-4 text-[var(--accent-lime)]" />
-                    <span>Sincronización con API Oficial UTP</span>
+                  <div className="flex items-center gap-2 text-xs font-bold text-white uppercase">
+                    <Server className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
+                    <span>Sincronización en Vivo</span>
                   </div>
-                  <span className="text-[10px] font-mono text-[var(--accent-lime)] bg-[var(--accent-lime)]/10 px-2 py-0.5 rounded-full border border-[var(--accent-lime)]/20">
-                    En Vivo
-                  </span>
                 </div>
 
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Tus horarios de clase, aulas, docentes y nuevas tareas publicadas se sincronizan automáticamente cada vez que abres o recargas la aplicación.
+                  Tus horarios de clase, aulas, docentes y tareas se sincronizan de forma directa y segura con la UTP.
                 </p>
 
                 <button
                   type="button"
                   onClick={handleForceSync}
                   disabled={isSyncingLive}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] py-3 text-xs font-black text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] py-3 text-xs font-bold text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer uppercase tracking-wider"
                 >
                   {isSyncingLive ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin text-[#0a0a0c]" />
-                      <span>Sincronizando tareas y horarios...</span>
+                      <span>Sincronizando tareas y horario...</span>
                     </>
                   ) : (
                     <>
                       <RefreshCw className="h-4 w-4 text-[#0a0a0c]" />
-                      <span>Forzar Sincronización en Vivo Ahora</span>
+                      <span>Forzar Sincronización Ahora</span>
                     </>
                   )}
                 </button>
               </div>
 
-              {/* Información de Seguridad & Sesión */}
-              <div className="p-3.5 rounded-2xl bg-black/30 border border-white/5 space-y-1.5 text-[11px] text-neutral-400">
-                <div className="flex items-center gap-1.5 text-neutral-200 font-semibold">
-                  <Lock className="h-3.5 w-3.5 text-blue-400" />
-                  <span>Seguridad de Sesión Activa</span>
-                </div>
-                <p className="text-[10.5px] leading-normal text-neutral-500">
-                  Tu token de acceso se encuentra resguardado localmente mediante cifrado AES-256. No requerimos tu contraseña para mantener tus asignaturas al día.
-                </p>
-              </div>
-
               {/* Botón de Cerrar Sesión */}
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 py-2.5 text-xs font-bold text-rose-400 hover:text-rose-300 transition cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 py-2.5 text-xs font-bold text-rose-400 hover:text-rose-300 transition cursor-pointer uppercase"
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span>Cerrar Sesión en este Dispositivo</span>
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Cerrar Sesión</span>
                 </button>
               </div>
 
             </div>
           ) : (
-            /* VISTA 2: USUARIO SIN SESIÓN -> Formulario de Login Inicial */
+            /* VISTA 2: FORMULARIO DE INICIO DE SESIÓN */
             <div className="space-y-4">
               <form onSubmit={handleDirectLogin} className="space-y-3.5">
                 <div>
                   <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                    Código de Alumno o Correo UTP
+                    Código de Alumno
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
                       <User className="h-4 w-4" />
                     </div>
                     <input
                       type="text"
                       value={usernameInput}
-                      onChange={(e) => setUsernameInput(e.target.value)}
-                      placeholder="Ej: uXXXXXXX o tu correo @utp.edu.pe"
+                      onChange={(e) => setUsernameInput(e.target.value.toLowerCase().trim())}
+                      placeholder="u123456789"
                       disabled={isLoading}
                       required
-                      className="w-full rounded-2xl bg-[#1b1b22] pl-9 pr-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:ring-2 focus:ring-[var(--accent-lime)] focus:outline-none transition border border-white/5"
+                      className="w-full rounded-2xl bg-black/40 border border-white/10 pl-10 pr-3 py-2.5 text-xs text-white placeholder-neutral-500 font-mono focus:border-[var(--accent-lime)] focus:outline-none transition"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                    Contraseña institucional UTP
+                    Contraseña Institucional
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
                       <Lock className="h-4 w-4" />
                     </div>
                     <input
                       type="password"
                       value={passwordInput}
                       onChange={(e) => setPasswordInput(e.target.value)}
-                      placeholder="Tu contraseña de UTP Class / Portal"
+                      placeholder="Tu contraseña de UTP Class"
                       disabled={isLoading}
                       required
-                      className="w-full rounded-2xl bg-[#1b1b22] pl-9 pr-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:ring-2 focus:ring-[var(--accent-lime)] focus:outline-none transition border border-white/5"
+                      className="w-full rounded-2xl bg-black/40 border border-white/10 pl-10 pr-3 py-2.5 text-xs text-white placeholder-neutral-500 focus:border-[var(--accent-lime)] focus:outline-none transition"
                     />
                   </div>
-                  <p className="text-[10px] text-neutral-500 mt-1">
-                    Autenticación directa contra Keycloak SSO oficial (sso.utp.edu.pe). No guardamos tu clave.
-                  </p>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] py-3 text-xs font-black text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] py-3 text-xs font-bold text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer uppercase tracking-wider"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin text-[#0a0a0c]" />
-                      <span>Conectando con servidores UTP...</span>
+                      <span>Validando con UTP...</span>
                     </>
                   ) : (
-                    <span>Iniciar Sesión y Sincronizar Horario</span>
+                    <span>Iniciar Sesión</span>
                   )}
                 </button>
               </form>
 
-              {/* Acordeón Opciones Avanzadas (Token manual) */}
-              <div className="pt-2">
+              {/* Opciones Avanzadas */}
+              <div className="pt-1">
                 <button
                   type="button"
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="flex items-center justify-between w-full text-[11px] text-neutral-400 hover:text-white transition py-1 cursor-pointer"
+                  className="flex items-center justify-between w-full text-xs text-neutral-400 hover:text-white transition py-1 cursor-pointer font-medium"
                 >
-                  <span className="flex items-center gap-1.5 font-semibold">
+                  <span className="flex items-center gap-1.5">
                     <KeyRound className="h-3.5 w-3.5" />
-                    Opciones avanzadas (Token manual)
+                    Token Manual (Avanzado)
                   </span>
                   {showAdvanced ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                 </button>
 
                 {showAdvanced && (
-                  <div className="mt-3 p-4 rounded-2xl bg-[#1b1b22] space-y-3 animate-in fade-in duration-100 border border-white/5">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-neutral-300 mb-1">
-                        Bearer Token JWT Manual
-                      </label>
-                      <textarea
-                        value={token}
-                        onChange={(e) => setToken(e.target.value)}
-                        placeholder="eyJhbGciOiJSUzI1NiIs..."
-                        rows={2}
-                        className="w-full rounded-xl bg-[#141417] p-2.5 text-[11px] font-mono text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-[var(--accent-lime)]"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-end pt-1">
+                  <div className="mt-2 p-3 rounded-2xl bg-black/40 space-y-2 border border-white/5">
+                    <textarea
+                      value={token}
+                      onChange={(e) => setToken(e.target.value)}
+                      placeholder="Bearer eyJhbGci..."
+                      rows={2}
+                      className="w-full rounded-xl bg-black/50 p-2 text-[10px] font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-[var(--accent-lime)] border border-white/5"
+                    />
+                    <div className="flex justify-end">
                       <button
                         type="button"
                         onClick={handleSaveAdvanced}
-                        className="rounded-full bg-white/10 hover:bg-white/20 px-4 py-1.5 text-[11px] font-bold text-white transition cursor-pointer"
+                        className="rounded-xl bg-white/10 hover:bg-white/20 px-3 py-1 text-xs font-bold text-white transition cursor-pointer uppercase"
                       >
-                        {savedSuccess ? '¡Guardado!' : 'Guardar Token'}
+                        {savedSuccess ? 'Guardado' : 'Guardar Token'}
                       </button>
                     </div>
                   </div>
@@ -433,12 +401,12 @@ export const SessionSettingsModal: React.FC<SessionSettingsModalProps> = ({
 
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end px-6 py-3 bg-[#14141a] border-t border-white/5">
+        {/* Footer simple integrado */}
+        <div className="px-7 pb-6 pt-2 flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl bg-white/10 hover:bg-white/15 px-5 py-2 text-xs font-semibold text-neutral-300 hover:text-white transition cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold uppercase transition cursor-pointer"
           >
             Cerrar
           </button>

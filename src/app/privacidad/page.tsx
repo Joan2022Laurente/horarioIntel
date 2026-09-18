@@ -1,18 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { 
-  ShieldCheck, 
-  Lock, 
-  Server, 
-  Database, 
-  Key, 
-  FileText, 
-  CheckCircle2, 
   ArrowLeft,
+  ShieldCheck,
+  Lock,
+  Database,
   Cpu,
   Layers,
-  Sparkles,
-  ExternalLink
+  FileText,
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 
 export const metadata = {
@@ -22,199 +19,181 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#070709] text-neutral-200 selection:bg-[var(--accent-lime)] selection:text-black">
-      {/* Background glow effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--accent-lime)]/5 blur-[140px] rounded-full" />
-        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-blue-500/5 blur-[160px] rounded-full" />
+    <div className="min-h-screen bg-[#070709] text-neutral-200 selection:bg-[var(--accent-lime)] selection:text-black font-sans flex flex-col justify-between">
+      
+      {/* Luces de Fondo Volumétricas Sutiles */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[44rem] h-[22rem] bg-[var(--accent-lime)]/[0.04] rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -right-40 w-[28rem] h-[28rem] bg-blue-500/[0.03] rounded-full blur-[160px]" />
+        <div className="absolute -bottom-40 left-10 w-[30rem] h-[30rem] bg-[var(--accent-lime)]/[0.04] rounded-full blur-[140px]" />
       </div>
 
-      {/* Top Navbar */}
-      <header className="relative z-20 border-b border-white/10 bg-[#0c0c10]/80 backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link 
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-white transition group"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            <span>Volver al inicio de sesión</span>
-          </Link>
+      {/* Top Navbar Global (Glassmorphism Gradual sin corte sólido) */}
+      <header className="sticky top-0 z-40 w-full px-4 sm:px-8 lg:px-12 h-14 sm:h-16 flex items-center justify-between gap-4 bg-gradient-to-b from-black/60 via-black/20 to-transparent backdrop-blur-md border-none select-none shrink-0">
+        <Link 
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-300 hover:text-white transition group uppercase tracking-wider"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Volver al inicio</span>
+        </Link>
 
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)] animate-pulse" />
-            <span className="text-xs font-mono text-neutral-400">Security Directive v2.4</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-lime)] animate-pulse" />
+          <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+            Seguridad & Privacidad
+          </span>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative z-10 max-w-4xl mx-auto px-6 py-12 space-y-10">
+      {/* Contenido Principal Minimalista (Zero Card-ception, Diseño Editorial Serio) */}
+      <main className="relative z-10 max-w-3xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 w-full space-y-10 text-left">
         
-        {/* Hero Header */}
-        <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20 text-[var(--accent-lime)] text-xs font-mono font-medium">
+        {/* Cabecera Editorial */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[var(--accent-lime)] text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="h-4 w-4" />
-            <span>Transparencia y Seguridad 100%</span>
+            <span>Transparencia y Seguridad</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Políticas de Privacidad & Arquitectura de Seguridad
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight uppercase leading-tight">
+            Políticas de Privacidad & Seguridad
           </h1>
-          <p className="text-sm text-neutral-400 max-w-2xl leading-relaxed">
-            Conoce cómo protegemos tus datos, el funcionamiento de la autenticación oficial SSO de UTP y nuestro principio inquebrantable de cero almacenamiento de contraseñas.
+
+          <p className="text-sm sm:text-base text-neutral-400 leading-relaxed max-w-2xl">
+            Detalles técnicos sobre el tratamiento de credenciales, arquitectura Zero-Knowledge y el funcionamiento de la autenticación directa con los servidores de la UTP.
           </p>
         </div>
 
-        {/* Highlight Card */}
-        <div className="p-6 rounded-3xl bg-[var(--accent-lime)]/5 border border-[var(--accent-lime)]/20 backdrop-blur-xl flex flex-col sm:flex-row items-start gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/30 flex items-center justify-center text-[var(--accent-lime)] shrink-0">
-            <CheckCircle2 className="h-6 w-6" />
+        {/* Principio Fundamental (Destacado sutil sin cajas pesadas) */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-[var(--accent-lime)]/[0.04] border border-[var(--accent-lime)]/20 space-y-2">
+          <div className="flex items-center gap-2.5 text-white font-bold text-sm sm:text-base">
+            <CheckCircle2 className="h-5 w-5 text-[var(--accent-lime)] shrink-0" />
+            <span>Garantía Fundamental: Cero Almacenamiento de Contraseñas</span>
           </div>
-          <div className="space-y-2">
-            <h2 className="text-base font-bold text-white">
-              Garantía Zero-Storage: Tus contraseñas nunca se guardan
-            </h2>
-            <p className="text-xs text-neutral-300 leading-relaxed">
-              La plataforma <strong>jamás almacena, registra ni persiste contraseñas</strong> en ninguna base de datos, archivo o log. Las credenciales viajan exclusivamente mediante un canal encriptado TLS 1.3 / SSL hacia los servidores de Keycloak de la UTP para la emisión de tokens de acceso efímeros.
-            </p>
-          </div>
+          <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed pl-7.5">
+            Esta plataforma <strong>nunca almacena, registra ni persiste tu contraseña institucional</strong> en ninguna base de datos, archivo ni servidor intermedio. Tus credenciales viajan de forma cifrada mediante HTTPS/TLS 1.3 exclusivamente hacia el proveedor oficial de identidad de la universidad.
+          </p>
         </div>
 
-        {/* Detailed Sections */}
-        <div className="space-y-8">
+        {/* Secciones Estructuradas (Tipografía fluida sin anidamientos innecesarios) */}
+        <div className="space-y-8 divide-y divide-white/[0.06]">
           
-          {/* Section 1 */}
-          <section className="p-6 rounded-3xl bg-[#0e0e14] border border-white/10 space-y-4">
-            <div className="flex items-center gap-3 text-white font-bold text-base border-b border-white/5 pb-3">
-              <Server className="h-5 w-5 text-[var(--accent-lime)]" />
-              <h2>1. Autenticación Directa Institucional (UTP SSO)</h2>
+          {/* Sección 01 */}
+          <section className="pt-8 first:pt-0 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-[var(--accent-lime)] tracking-wider">01</span>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                Mecanismo de Autenticación Oficial (UTP SSO)
+              </h2>
             </div>
             
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              El proceso de inicio de sesión se realiza en tiempo real contra el servidor central de autenticación de la universidad:
+            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+              El proceso de validación se realiza en tiempo real contra el servidor central de identidad Keycloak de la universidad (<code className="text-white/90 bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono">sso.utp.edu.pe</code>).
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                  <Lock className="h-4 w-4 text-blue-400" />
-                  Protocolo OAuth 2.0 / OIDC
-                </div>
-                <p className="text-[11px] text-neutral-400">
-                  La comunicación se realiza directamente contra <code className="text-white bg-white/10 px-1 py-0.5 rounded">https://sso.utp.edu.pe</code> utilizando el client oficial de estudiantes.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                  <Key className="h-4 w-4 text-amber-400" />
-                  Tokens JWT Efímeros
-                </div>
-                <p className="text-[11px] text-neutral-400">
-                  El servidor de UTP responde con un Bearer Token con tiempo de vida limitado. Una vez emitido el token, la contraseña es purgada de la memoria inmediatamente.
-                </p>
-              </div>
-            </div>
+            <ul className="space-y-2 text-xs sm:text-sm text-neutral-300 pl-4 list-disc list-outside marker:text-[var(--accent-lime)]">
+              <li>
+                <strong>Cifrado TLS 1.3:</strong> La transmisión de datos se realiza a través de un canal seguro HTTPS de extremo a extremo.
+              </li>
+              <li>
+                <strong>Tokens JWT Efímeros:</strong> Tras una autenticación exitosa, la universidad emite un token de acceso temporal (Bearer JWT) con tiempo de vida limitado. La contraseña se descarta de la memoria de inmediato.
+              </li>
+            </ul>
           </section>
 
-          {/* Section 2 */}
-          <section className="p-6 rounded-3xl bg-[#0e0e14] border border-white/10 space-y-4">
-            <div className="flex items-center gap-3 text-white font-bold text-base border-b border-white/5 pb-3">
-              <Database className="h-5 w-5 text-[var(--accent-lime)]" />
-              <h2>2. Datos Persistidos y Finalidad Específica</h2>
+          {/* Sección 02 */}
+          <section className="pt-8 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-[var(--accent-lime)] tracking-wider">02</span>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                Datos Sincronizados y su Finalidad
+              </h2>
             </div>
 
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Para sincronizar tus cursos, horario y rúbricas de evaluación sin necesidad de que inicies sesión continuamente, se persisten los siguientes datos públicos del perfil:
+            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+              Para estructurar tu horario, asignaturas y facilitarte el contacto con compañeros de tu misma carrera, se sincronizan exclusivamente los siguientes datos académicos públicos:
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)] mt-1 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-white">Código Institucional</div>
-                  <div className="text-[11px] text-neutral-400">Para asociar tu horario y tus entregables de manera única.</div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)] mt-1 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-white">Nombre y Correo Institucional</div>
-                  <div className="text-[11px] text-neutral-400">Para personalizar tu experiencia y reportes académicos.</div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)] mt-1 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-white">Carrera y Campus</div>
-                  <div className="text-[11px] text-neutral-400">Para contextualizar recomendaciones de estudio del copiloto.</div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-start gap-3">
-                <span className="h-2 w-2 rounded-full bg-[var(--accent-lime)] mt-1 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold text-white">Horario y Cronograma de Clases</div>
-                  <div className="text-[11px] text-neutral-400">Estructura de cursos, aulas, docentes y evaluaciones.</div>
-                </div>
-              </div>
-            </div>
+            <ul className="space-y-2 text-xs sm:text-sm text-neutral-300 pl-4 list-disc list-outside marker:text-[var(--accent-lime)]">
+              <li><strong>Código de Alumno</strong> (ej. U23307609) y Nombre completo.</li>
+              <li><strong>Correo Institucional</strong> asignado por la universidad.</li>
+              <li><strong>Carrera y Campus</strong> asignado para contextualizar recursos y grupos.</li>
+              <li><strong>Horarios y Docentes</strong> inscritos en el periodo académico vigente.</li>
+            </ul>
           </section>
 
-          {/* Section 3 */}
-          <section className="p-6 rounded-3xl bg-[#0e0e14] border border-white/10 space-y-4">
-            <div className="flex items-center gap-3 text-white font-bold text-base border-b border-white/5 pb-3">
-              <Cpu className="h-5 w-5 text-[var(--accent-lime)]" />
-              <h2>3. Cifrado Local y Control de Sesión</h2>
+          {/* Sección 03 */}
+          <section className="pt-8 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-[var(--accent-lime)] tracking-wider">03</span>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                Cifrado Local y Purga de Sesión
+              </h2>
             </div>
 
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              En tu navegador, los datos de sesión se almacenan de forma local en <code className="text-white bg-white/10 px-1 py-0.5 rounded">localStorage</code>. Puedes purgar toda la información local en cualquier momento haciendo clic en <strong>&quot;Cerrar Sesión&quot;</strong>, lo que eliminará inmediatamente todos los tokens y datos de tu dispositivo.
+            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+              La sesión en tu navegador se mantiene de forma local en <code className="text-white/90 bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono">localStorage</code>. Al presionar <strong>&quot;Cerrar Sesión&quot;</strong>, todos los tokens de acceso y registros temporales son purgados de forma irreversible e inmediata de tu dispositivo.
             </p>
           </section>
 
-          {/* Section 4 */}
-          <section className="p-6 rounded-3xl bg-[#0e0e14] border border-white/10 space-y-4">
-            <div className="flex items-center gap-3 text-white font-bold text-base border-b border-white/5 pb-3">
-              <Layers className="h-5 w-5 text-[var(--accent-lime)]" />
-              <h2>4. Cuota Responsable del Asistente de IA</h2>
+          {/* Sección 04 */}
+          <section className="pt-8 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-[var(--accent-lime)] tracking-wider">04</span>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                Cuota Responsable del Copiloto Académico IA
+              </h2>
             </div>
 
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Para garantizar que los recursos de cómputo y modelos de lenguaje de última generación permanezcan disponibles y gratuitos para todos los estudiantes, se aplica un límite de <strong>6 consultas diarias por alumno</strong> que se restablece automáticamente a las 00:00 horas cada día.
+            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+              Con el objetivo de garantizar la disponibilidad equitativa de los modelos de inteligencia artificial para toda la comunidad estudiantil, se asigna una cuota diaria de consultas por estudiante que se renueva automáticamente a las 00:00 horas.
             </p>
           </section>
 
-          {/* Section 5 */}
-          <section className="p-6 rounded-3xl bg-neutral-900/50 border border-white/10 space-y-3">
-            <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <FileText className="h-4 w-4 text-neutral-400" />
-              <h2>5. Declaración de Independencia y Propiedad Intelectual</h2>
+          {/* Sección 05 */}
+          <section className="pt-8 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-[var(--accent-lime)] tracking-wider">05</span>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                Declaración de Independencia y Propiedad Intelectual
+              </h2>
             </div>
 
-            <p className="text-xs text-neutral-400 leading-relaxed">
-              Esta plataforma es un proyecto académico y tecnológico autónomo, creado con el fin de optimizar el aprendizaje, la organización y el rendimiento de los estudiantes. No constituye un servicio oficial operado ni administrado directamente por la Universidad Tecnológica del Perú (UTP). Las marcas registradas y logotipos institucionales pertenecen a sus respectivos propietarios.
+            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+              Esta plataforma es una herramienta tecnológica independiente desarrollada por y para estudiantes. No constituye un servicio oficial operado ni administrado directamente por la administración de la Universidad Tecnológica del Perú (UTP). Todos los nombres de marcas e instituciones pertenecen a sus respectivos titulares.
             </p>
           </section>
 
         </div>
 
-        {/* Bottom Action */}
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-xs text-neutral-500">
-            © 2026 Plataforma Académica Estudiantil UTP. Todos los derechos reservados.
-          </span>
+        {/* Botón de Retorno */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link
             href="/"
-            className="px-6 py-2.5 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] text-[#0a0a0c] font-black text-xs transition active:scale-95 shadow-lg shadow-[var(--accent-lime)]/20"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] text-[#0a0a0c] font-bold text-xs uppercase tracking-wider transition active:scale-95 shadow-lg shadow-[var(--accent-lime)]/20"
           >
-            Volver a la Plataforma
+            <span>Volver a la Plataforma</span>
+            <ArrowRight className="h-4 w-4 text-[#0a0a0c]" />
           </Link>
+
+          <span className="text-xs text-neutral-500">
+            Última actualización: Septiembre 2026
+          </span>
         </div>
 
       </main>
+
+      {/* Footer Global Transparente */}
+      <footer className="relative z-10 w-full px-4 sm:px-8 lg:px-12 h-14 sm:h-16 flex items-center justify-between gap-3 text-xs text-neutral-500 bg-gradient-to-t from-black/60 via-black/20 to-transparent backdrop-blur-md border-none shrink-0">
+        <div className="text-xs">
+          © 2026 UTP.HORARIO / Políticas de Seguridad
+        </div>
+        <div className="text-xs font-medium uppercase tracking-wider text-neutral-500">
+          HECHO PARA ESTUDIANTES
+        </div>
+      </footer>
+
     </div>
   );
 }

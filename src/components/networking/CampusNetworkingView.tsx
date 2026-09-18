@@ -28,6 +28,7 @@ import { StudyBuddyCard } from './StudyBuddyCard';
 import { DirectConnectModal } from './DirectConnectModal';
 import { PersonalBeaconCard } from './PersonalBeaconCard';
 import { formatCourseName } from '@/lib/schedule-parser';
+import { ScrollablePillTabs, PillTabItem } from '@/components/ui/ScrollablePillTabs';
 
 interface CampusNetworkingViewProps {
   courses: ProcessedCourse[];
@@ -279,31 +280,27 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-2 rounded-2xl bg-[var(--surface-card)]">
         
         {/* Toggle de Modos: Parejas 1 a 1 vs Mesas Grupales */}
-        <div className="flex items-center gap-1 bg-[var(--surface-input)] p-1 rounded-xl text-xs">
-          <button
-            onClick={() => setActiveTab('buddies')}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition font-bold shadow-none ${
-              activeTab === 'buddies'
-                ? 'bg-white text-black'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <UserCheck className="h-3.5 w-3.5" />
-            <span>Match 1 a 1 ({filteredBuddies.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('beacons')}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition font-bold shadow-none ${
-              activeTab === 'beacons'
-                ? 'bg-[var(--accent-emerald)] text-black'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Users className="h-3.5 w-3.5" />
-            <span>Mesas Grupales ({filteredBeacons.length})</span>
-          </button>
-        </div>
+        <ScrollablePillTabs<'buddies' | 'beacons'>
+          tabs={[
+            {
+              value: 'buddies',
+              label: 'Match 1 a 1',
+              count: filteredBuddies.length,
+              icon: <UserCheck className="h-3.5 w-3.5" />,
+            },
+            {
+              value: 'beacons',
+              label: 'Mesas Grupales',
+              count: filteredBeacons.length,
+              icon: <Users className="h-3.5 w-3.5" />,
+              activeColor: 'var(--accent-emerald)',
+              activeText: '#000',
+            },
+          ]}
+          activeValue={activeTab}
+          onSelect={setActiveTab}
+          variant="segmented"
+        />
 
         {/* Controles de Filtro: Asignatura + Modalidad + Búsqueda */}
         <div className="flex flex-wrap items-center gap-2 text-xs">

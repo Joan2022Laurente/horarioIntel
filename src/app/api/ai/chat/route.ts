@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
           answer: openRouterResult.answer,
           suggestedActions: openRouterResult.suggestedActions,
           action: openRouterResult.action,
+          contextInfo: openRouterResult.contextInfo,
           modelUsed: openRouterResult.modelUsed,
           keyIndexUsed: openRouterResult.keyIndexUsed,
         },
@@ -47,10 +48,11 @@ export async function POST(req: NextRequest) {
     } catch (openRouterErr) {
       console.warn('[AI Chat Route] Fallback a motor local:', openRouterErr);
 
-      // 2. Fallback al motor local
+      // 2. Fallback al motor local dinámico
       const localResponse = queryAssistant(message, {
         interval,
         courses,
+        syllabiData,
       });
 
       return NextResponse.json({

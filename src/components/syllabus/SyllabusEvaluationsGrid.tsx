@@ -22,7 +22,7 @@ export const SyllabusEvaluationsGrid: React.FC<SyllabusEvaluationsGridProps> = (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-2 uppercase tracking-wide">
-          <Layers className="h-4 w-4 text-[#ff5722]" />
+          <Layers className="h-4 w-4 text-[var(--accent-orange)]" />
           <span>Desglose Oficial de Evaluaciones ({evaluations.length})</span>
         </h3>
         <button
@@ -30,9 +30,9 @@ export const SyllabusEvaluationsGrid: React.FC<SyllabusEvaluationsGridProps> = (
             onAskAi(`Explícame a detalle las evaluaciones de ${courseName} y cómo asegurar la nota máxima en cada una.`);
             onClose();
           }}
-          className="inline-flex items-center gap-1.5 text-xs text-[#bbf451] hover:text-white font-bold transition"
+          className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-lime)] hover:text-white font-bold transition"
         >
-          <Sparkles className="h-3 w-3 text-[#ff5722]" />
+          <Sparkles className="h-3 w-3 text-[var(--accent-orange)]" />
           <span>Consultar rúbricas con IA</span>
         </button>
       </div>
@@ -41,13 +41,13 @@ export const SyllabusEvaluationsGrid: React.FC<SyllabusEvaluationsGridProps> = (
         {evaluations.map((ev) => (
           <div
             key={ev.id}
-            className="rounded-2xl bg-[#1b1b22] hover:bg-[#202028] p-4 space-y-2.5 transition-all shadow-md"
+            className="rounded-2xl bg-[#181820] hover:bg-[#20202c] border border-white/10 hover:border-white/20 p-4 space-y-2.5 transition-all"
           >
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-black text-white bg-white/10 px-2.5 py-1 rounded-lg">
+              <span className="font-mono text-xs font-black text-white bg-[#101014] border border-white/10 px-2.5 py-1 rounded-lg">
                 {ev.type}
               </span>
-              <span className="font-mono text-xs font-black text-[#bbf451] bg-[#bbf451]/15 px-2.5 py-0.5 rounded-full">
+              <span className="font-mono text-xs font-black text-[var(--accent-lime)] bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20 px-2.5 py-0.5 rounded-full">
                 {ev.weightPercent}% del Promedio
               </span>
             </div>
@@ -61,9 +61,9 @@ export const SyllabusEvaluationsGrid: React.FC<SyllabusEvaluationsGridProps> = (
               </p>
             </div>
 
-            <div className="flex items-center justify-between pt-2 text-[11px] text-neutral-400 font-mono">
+            <div className="flex items-center justify-between pt-2 text-[11px] text-neutral-400 font-mono border-t border-white/10">
               <span>Semana {ev.week}</span>
-              <span className="text-neutral-500">•</span>
+              <span className="text-neutral-600">•</span>
               <span>{ev.modality}</span>
             </div>
           </div>

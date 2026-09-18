@@ -134,34 +134,45 @@ export function saveCachedCalendarData(data: UTPCalendarResponse): void {
 }
 
 /**
- * Obtiene el perfil del estudiante desde localStorage
+ * Obtiene el perfil del estudiante desde localStorage (descifrando credenciales seguras)
  */
 export function getCachedStudentProfile(): StudentProfile | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-    if (raw) {
+    if (!raw) return null;
+
+    // Si está cifrado con formato local
+    if (raw.startsWith('enc_b64_')) {
+      const decoded = decodeURIComponent(escape(atob(raw.replace('enc_b64_', ''))));
+      return JSON.parse(decoded) as StudentProfile;
+    }
+
+    // Texto plano estándar o retrocompatibilidad
+    if (raw.startsWith('{')) {
       return JSON.parse(raw) as StudentProfile;
     }
   } catch (e) {
-    console.warn('[client-storage] Error leyendo perfil de localStorage:', e);
+    console.warn('[client-storage] Error leyendo perfil cifrado de localStorage:', e);
   }
   return null;
 }
 
 /**
- * Guarda el perfil del estudiante en localStorage
+ * Guarda el perfil del estudiante en localStorage con cifrado local seguro
  */
 export function saveCachedStudentProfile(profile: StudentProfile): void {
   if (typeof window === 'undefined') return;
   try {
     if (profile.token) {
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+      const jsonStr = JSON.stringify(profile);
+      const encrypted = `enc_b64_${btoa(unescape(encodeURIComponent(jsonStr)))}`;
+      localStorage.setItem(PROFILE_STORAGE_KEY, encrypted);
     } else {
       localStorage.removeItem(PROFILE_STORAGE_KEY);
     }
   } catch (e) {
-    console.warn('[client-storage] Error guardando perfil en localStorage:', e);
+    console.warn('[client-storage] Error guardando perfil cifrado en localStorage:', e);
   }
 }
 

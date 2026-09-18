@@ -21,42 +21,42 @@
     --border-medium: transparent;
     --border-strong: transparent;
 
-    /* Solid Semantic Badges & Pills (100% Solid Vibrant Fill, Zero Dark Tint / Zero Transparency) */
-    --badge-orange-bg: #ff5722;
-    --badge-orange-text: #ffffff;
-    --badge-orange-border: #ff5722;
+    /* Minimalist Translucent Glassmorphic Badges & Pills */
+    --badge-orange-bg: rgba(255, 87, 34, 0.14);
+    --badge-orange-text: #ff7043;
+    --badge-orange-border: rgba(255, 87, 34, 0.32);
 
-    --badge-emerald-bg: #00c853;
-    --badge-emerald-text: #000000;
-    --badge-emerald-border: #00c853;
+    --badge-emerald-bg: rgba(0, 200, 83, 0.14);
+    --badge-emerald-text: #00e676;
+    --badge-emerald-border: rgba(0, 200, 83, 0.32);
 
-    --badge-purple-bg: #7075ff;
-    --badge-purple-text: #ffffff;
-    --badge-purple-border: #7075ff;
+    --badge-purple-bg: rgba(112, 117, 255, 0.14);
+    --badge-purple-text: #a5a8ff;
+    --badge-purple-border: rgba(112, 117, 255, 0.32);
 
-    --badge-yellow-bg: #ffb703;
-    --badge-yellow-text: #000000;
-    --badge-yellow-border: #ffb703;
+    --badge-yellow-bg: rgba(255, 183, 3, 0.14);
+    --badge-yellow-text: #ffb703;
+    --badge-yellow-border: rgba(255, 183, 3, 0.32);
 
-    --badge-blue-bg: #3a86ff;
-    --badge-blue-text: #ffffff;
-    --badge-blue-border: #3a86ff;
+    --badge-blue-bg: rgba(58, 134, 255, 0.14);
+    --badge-blue-text: #60a5fa;
+    --badge-blue-border: rgba(58, 134, 255, 0.32);
 
-    --badge-lime-bg: #bbf451;
-    --badge-lime-text: #000000;
-    --badge-lime-border: #bbf451;
+    --badge-lime-bg: rgba(187, 244, 81, 0.14);
+    --badge-lime-text: #bbf451;
+    --badge-lime-border: rgba(187, 244, 81, 0.32);
 
-    --badge-neutral-bg: #24242c;
-    --badge-neutral-text: #ffffff;
-    --badge-neutral-border: #383844;
+    --badge-neutral-bg: rgba(255, 255, 255, 0.06);
+    --badge-neutral-text: #d4d4d8;
+    --badge-neutral-border: rgba(255, 255, 255, 0.12);
 
-    --badge-cyan-bg: #00bcd4;
-    --badge-cyan-text: #000000;
-    --badge-cyan-border: #00bcd4;
+    --badge-cyan-bg: rgba(0, 188, 212, 0.14);
+    --badge-cyan-text: #22d3ee;
+    --badge-cyan-border: rgba(0, 188, 212, 0.32);
 
-    --badge-red-bg: #e63946;
-    --badge-red-text: #ffffff;
-    --badge-red-border: #e63946;
+    --badge-red-bg: rgba(230, 57, 70, 0.14);
+    --badge-red-text: #f87171;
+    --badge-red-border: rgba(230, 57, 70, 0.32);
 
     /* Solid Action Colors */
     --accent-orange: #ff5722;
@@ -112,6 +112,17 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* UTP Task Instructions Dark-mode Normalizer */
@@ -202,99 +213,165 @@
   font-weight: 700;
 }
 
-/* Mathematically Non-Monotonous Harmonic Aurora Mesh (Lissajous & Phase Superposition) */
+/* ─── Volumetric Isotropic Polymorphic Aurora (No Aspect-Ratio Distortion) ─── */
+
 @keyframes aurora-harmonic-orbit-1 {
   0% {
-    transform: translate3d(0%, 0%, 0) scale(1) rotate(0deg);
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(0deg) scale(1, 1);
+    border-radius: 45% 55% 65% 35% / 40% 50% 50% 60%;
     opacity: 0.85;
   }
-
   25% {
-    transform: translate3d(22%, -16%, 0) scale(1.12) rotate(14deg);
+    transform: translate3d(calc(-50% + 15%), calc(-50% - 12%), 0) rotate(70deg) scale(1.15, 0.9);
+    border-radius: 65% 35% 45% 55% / 55% 35% 65% 45%;
     opacity: 1;
   }
-
   50% {
-    transform: translate3d(-18%, 20%, 0) scale(0.92) rotate(-10deg);
-    opacity: 0.78;
+    transform: translate3d(calc(-50% - 14%), calc(-50% + 14%), 0) rotate(160deg) scale(0.9, 1.15);
+    border-radius: 35% 65% 55% 45% / 45% 65% 35% 55%;
+    opacity: 0.8;
   }
-
   75% {
-    transform: translate3d(14%, 18%, 0) scale(1.06) rotate(18deg);
-    opacity: 0.92;
+    transform: translate3d(calc(-50% + 10%), calc(-50% + 10%), 0) rotate(260deg) scale(1.08, 0.95);
+    border-radius: 55% 45% 35% 65% / 60% 40% 60% 40%;
+    opacity: 0.95;
   }
-
   100% {
-    transform: translate3d(0%, 0%, 0) scale(1) rotate(0deg);
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(360deg) scale(1, 1);
+    border-radius: 45% 55% 65% 35% / 40% 50% 50% 60%;
     opacity: 0.85;
   }
 }
 
 @keyframes aurora-harmonic-orbit-2 {
   0% {
-    transform: translate3d(0%, 0%, 0) scale(1.08) rotate(0deg);
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(0deg) scale(0.95, 1.05);
+    border-radius: 60% 40% 35% 65% / 55% 45% 55% 45%;
     opacity: 0.75;
   }
-
   33% {
-    transform: translate3d(-24%, -14%, 0) scale(0.9) rotate(35deg);
+    transform: translate3d(calc(-50% - 16%), calc(-50% - 10%), 0) rotate(-110deg) scale(1.12, 0.88);
+    border-radius: 35% 65% 60% 40% / 40% 60% 40% 60%;
     opacity: 0.95;
   }
-
   66% {
-    transform: translate3d(20%, -22%, 0) scale(1.16) rotate(-25deg);
-    opacity: 0.68;
+    transform: translate3d(calc(-50% + 14%), calc(-50% - 15%), 0) rotate(-220deg) scale(0.9, 1.12);
+    border-radius: 65% 35% 45% 55% / 60% 40% 60% 40%;
+    opacity: 0.7;
   }
-
   100% {
-    transform: translate3d(0%, 0%, 0) scale(1.08) rotate(0deg);
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(-360deg) scale(0.95, 1.05);
+    border-radius: 60% 40% 35% 65% / 55% 45% 55% 45%;
     opacity: 0.75;
+  }
+}
+
+@keyframes aurora-harmonic-orbit-alt-1 {
+  0% {
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(180deg) scale(1.05, 0.95);
+    border-radius: 50% 50% 35% 65% / 45% 55% 45% 55%;
+    opacity: 0.8;
+  }
+  30% {
+    transform: translate3d(calc(-50% - 18%), calc(-50% + 12%), 0) rotate(270deg) scale(0.92, 1.15);
+    border-radius: 65% 35% 60% 40% / 35% 65% 40% 60%;
+    opacity: 1;
+  }
+  65% {
+    transform: translate3d(calc(-50% + 12%), calc(-50% - 14%), 0) rotate(390deg) scale(1.14, 0.9);
+    border-radius: 35% 65% 40% 60% / 60% 35% 65% 40%;
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(540deg) scale(1.05, 0.95);
+    border-radius: 50% 50% 35% 65% / 45% 55% 45% 55%;
+    opacity: 0.8;
+  }
+}
+
+@keyframes aurora-harmonic-orbit-alt-2 {
+  0% {
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(90deg) scale(0.95, 1.05);
+    border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
+    opacity: 0.7;
+  }
+  40% {
+    transform: translate3d(calc(-50% + 16%), calc(-50% + 12%), 0) rotate(210deg) scale(1.15, 0.88);
+    border-radius: 60% 40% 65% 35% / 40% 60% 40% 60%;
+    opacity: 0.92;
+  }
+  75% {
+    transform: translate3d(calc(-50% - 14%), calc(-50% - 16%), 0) rotate(320deg) scale(0.88, 1.18);
+    border-radius: 35% 65% 35% 65% / 65% 35% 65% 35%;
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate3d(calc(-50% + 0px), calc(-50% + 0px), 0) rotate(450deg) scale(0.95, 1.05);
+    border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
+    opacity: 0.7;
   }
 }
 
 .aurora-ambient-card {
+  --aurora-dur-1: 14s;
+  --aurora-dur-2: 20s;
+  --aurora-delay-1: 0s;
+  --aurora-delay-2: 0s;
+  --aurora-anim-1: aurora-harmonic-orbit-1;
+  --aurora-anim-2: aurora-harmonic-orbit-2;
   position: relative;
   overflow: hidden;
-  background-color: #121215;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: #141519;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
   isolation: isolate;
 }
 
+/* Layer 1: Expanded Volumetric Nebula (Pure Monochromatic Lime on Light Carbon) */
 .aurora-ambient-card::before {
   content: '';
   position: absolute;
-  top: -55%;
-  left: -55%;
-  width: 210%;
-  height: 210%;
+  top: 50%;
+  left: 50%;
+  width: max(145%, 850px);
+  height: max(145%, 850px);
+  aspect-ratio: 1 / 1;
   background:
-    radial-gradient(ellipse 45% 40% at 25% 25%, rgba(255, 87, 34, 0.35) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 45% at 75% 70%, rgba(58, 134, 255, 0.32) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 50% at 50% 80%, rgba(112, 117, 255, 0.26) 0%, transparent 65%),
-    radial-gradient(ellipse 35% 35% at 80% 20%, rgba(0, 200, 83, 0.22) 0%, transparent 65%);
-  filter: blur(26px);
-  animation: aurora-harmonic-orbit-1 13s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    radial-gradient(circle 460px at 25% 30%, rgba(187, 244, 81, 0.32) 0%, rgba(163, 230, 53, 0.12) 50%, transparent 75%),
+    radial-gradient(circle 420px at 75% 70%, rgba(163, 230, 53, 0.28) 0%, rgba(132, 204, 22, 0.08) 50%, transparent 75%),
+    radial-gradient(circle 380px at 70% 25%, rgba(217, 249, 157, 0.22) 0%, transparent 68%),
+    radial-gradient(circle 360px at 30% 75%, rgba(132, 204, 22, 0.20) 0%, transparent 70%),
+    radial-gradient(circle 300px at 50% 50%, rgba(187, 244, 81, 0.15) 0%, transparent 65%);
+  filter: blur(56px);
+  animation: var(--aurora-anim-1) var(--aurora-dur-1) var(--aurora-delay-1) cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
   pointer-events: none;
   z-index: -2;
+  will-change: transform, border-radius;
 }
 
+/* Layer 2: Counter-rotating Volumetric Lime Fluid Dispersion with Screen Blend */
 .aurora-ambient-card::after {
   content: '';
   position: absolute;
-  top: -45%;
-  left: -45%;
-  width: 190%;
-  height: 190%;
+  top: 50%;
+  left: 50%;
+  width: max(135%, 780px);
+  height: max(135%, 780px);
+  aspect-ratio: 1 / 1;
   background:
-    radial-gradient(ellipse 35% 45% at 70% 30%, rgba(255, 183, 3, 0.24) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 35% at 25% 75%, rgba(168, 85, 247, 0.28) 0%, transparent 60%);
-  filter: blur(34px);
-  animation: aurora-harmonic-orbit-2 19s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+    radial-gradient(circle 440px at 68% 35%, rgba(187, 244, 81, 0.25) 0%, transparent 70%),
+    radial-gradient(circle 400px at 32% 65%, rgba(163, 230, 53, 0.20) 0%, transparent 70%),
+    radial-gradient(circle 360px at 50% 20%, rgba(217, 249, 157, 0.18) 0%, transparent 65%),
+    radial-gradient(circle 320px at 50% 80%, rgba(132, 204, 22, 0.15) 0%, transparent 65%);
+  filter: blur(64px);
+  mix-blend-mode: screen;
+  animation: var(--aurora-anim-2) var(--aurora-dur-2) var(--aurora-delay-2) cubic-bezier(0.37, 0, 0.63, 1) infinite;
   pointer-events: none;
   z-index: -1;
+  will-change: transform, border-radius;
 }
 
-.aurora-ambient-card>* {
+.aurora-ambient-card > * {
   position: relative;
   z-index: 1;
 }

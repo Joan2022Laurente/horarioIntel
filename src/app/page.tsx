@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PillNavbar } from '@/components/navigation/PillNavbar';
+import { BottomNav } from '@/components/navigation/BottomNav';
 import { TodayView } from '@/components/TodayView';
 import { WeeklySchedule } from '@/components/WeeklySchedule';
 import { CoursesList } from '@/components/CoursesList';
@@ -76,7 +77,7 @@ function MainAppDashboard({
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-6 pb-12">
+      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-6 pb-24 md:pb-12">
         
         {/* Banner de Sincronización en vivo */}
         {isRefreshing && (
@@ -130,6 +131,16 @@ function MainAppDashboard({
         </div>
 
       </main>
+
+      {/* Persistent Bottom Nav Bar (Mobile only) */}
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          if (tab === 'ai') openAi();
+          else setActiveTab(tab);
+        }}
+        onOpenAi={() => openAi()}
+      />
 
       {/* Minimal Sleek Footer */}
       <footer className="bg-[#0a0a0c] py-8 text-center text-xs text-neutral-500 border-t border-[var(--border-subtle)]">

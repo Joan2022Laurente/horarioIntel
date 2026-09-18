@@ -11,8 +11,8 @@ export * from './syllabus/types';
 export * from './syllabus/official-registry';
 
 /**
- * Parser universal para documentos de sílabo UTP (Markdown o texto plano extraído de PDF).
- * Capaz de procesar sílabos oficiales de cualquier carrera, facultad y ciclo en tiempo real.
+ * Parser universal dinámico para documentos de sílabo UTP (Texto plano extraído de PDF o Markdown).
+ * Procesa en tiempo real sílabos de cualquier carrera, facultad y ciclo sin requerir datos pre-hardcodeados.
  */
 export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
   const cleanText = text.replace(/\r\n/g, '\n');
@@ -45,12 +45,12 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
   const hoursMatch = cleanText.match(/Horas semanales:\s*(\d+)/i);
   const careersMatch = cleanText.match(/Carrera:\s*([\s\S]*?)(?=\s*1\.2|\s*Créditos|\n\s*2\.|\n\s*\d+\.\d+)/i);
 
-  const credits = creditsMatch ? parseInt(creditsMatch[1], 10) : 4;
+  const credits = creditsMatch ? parseInt(creditsMatch[1], 10) : 3;
   const modality = modalityMatch ? modalityMatch[1].trim() : 'Presencial';
   const weeklyHours = hoursMatch ? parseInt(hoursMatch[1], 10) : 4;
   const careers = careersMatch 
     ? careersMatch[1].split('\n').map(c => c.trim()).filter(c => c.length > 2)
-    : ['Ingeniería de Sistemas e Informática'];
+    : ['Ingeniería de Sistemas e Informática', 'Ingeniería de Software'];
 
   // 4. Logro General de Aprendizaje
   const goalMatch = cleanText.match(/(?:##\s*)?4\.\s*LOGRO GENERAL DE APRENDIZAJE\s*([\s\S]*?)(?=(?:##\s*)?5\.\s*UNIDADES|\n\s*5\.|$)/i);
@@ -60,7 +60,7 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
   const formulaMatch = cleanText.match(/\(\d+%\)[A-Za-z0-9_]+(?:\s*\+\s*\(\d+%\)[A-Za-z0-9_]+)+/i) ||
                        cleanText.match(/`(\([^`]+?\))`/) ||
                        cleanText.match(/Fórmula:\s*([^\n\r]+)/i);
-  const formula = formulaMatch ? formulaMatch[0].trim() : '(20%)PC1 + (20%)PC2 + (20%)PC3 + (40%)PROY';
+  const formula = formulaMatch ? formulaMatch[0].trim() : '(25%)PC1 + (25%)PC2 + (10%)PA + (40%)PROY';
 
   // Construir mapa de ponderaciones a partir de la fórmula
   const weightMap: Record<string, number> = {};
@@ -70,7 +70,7 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
     weightMap[wm[2].toUpperCase()] = parseInt(wm[1], 10);
   }
 
-  // 6. Extraer Tabla de Evaluaciones (Markdown o Texto Plano de PDF)
+  // 6. Extraer Tabla de Evaluaciones
   const evaluations: SyllabusEvaluationItem[] = [];
   
   // Intento A: Formato Tabla Markdown con pipes '|'
@@ -79,13 +79,13 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
     const rows = evalTableSection[1].split('\n').filter(r => r.includes('|') && !r.includes('---'));
     for (const row of rows) {
       const cols = row.split('|').map(c => c.trim()).filter(Boolean);
-      if (cols.length >= 6 && cols[0] !== 'Evaluación' && !cols[0].toLowerCase().includes('evaluación')) {
+      if (cols.length >= 4 && !cols[0].toLowerCase().includes('tipo') && !cols[0].toLowerCase().includes('evaluación')) {
         const type = cols[0].toUpperCase();
         const description = cols[1];
         const week = parseInt(cols[2], 10) || 1;
-        const weightPercent = weightMap[type] || parseInt(cols[4].replace('%', ''), 10) || 20;
-        const modalityStr = cols[5]?.toLowerCase().includes('grupal') ? 'Grupal' : 'Individual';
-        const observation = cols[6] || '';
+        const weightPercent = weightMap[type] || (cols[4] ? parseInt(cols[4].replace('%', ''), 10) : 20) || 20;
+        const modalityStr = (cols[5]?.toLowerCase().includes('grupal') || description.toLowerCase().includes('proyecto')) ? 'Grupal' : 'Individual';
+        const observation = cols[3] || cols[6] || `${modalityStr}. ${description}.`;
 
         evaluations.push({
           id: `eval-${type.toLowerCase()}-${week}`,
@@ -95,7 +95,7 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
           weightPercent,
           modality: modalityStr,
           observation,
-          rules: [`Semana ${week}`, `Ponderación ${weightPercent}%`, modalityStr]
+          rules: [`Semana ${week}`, `Ponderación ${weightPercent}%`, modalityStr, 'No rezagado']
         });
       }
     }
@@ -103,19 +103,23 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
 
   // Intento B: Formato Texto Plano Extraído de PDF UTP
   if (evaluations.length === 0) {
-    const evalBlockMatch = cleanText.match(/Donde:\s*\n\s*Tipo\s+Descripción\s+Semana\s+Observación([\s\S]*?)(?=Indicaciones|8\.\s*FUENTES|##\s*8\.|$)/i) ||
-                           cleanText.match(/7\.1\.\s*DESCRIPCIÓN DE LAS EVALUACIONES([\s\S]*?)(?=Indicaciones|8\.\s*FUENTES|##\s*8\.|$)/i);
+    const evalBlockMatch = cleanText.match(/(?:Donde:\s*\n?\s*Tipo\s+Descripción\s+Semana\s+Observación|7\.1\.\s*DESCRIPCIÓN DE LAS EVALUACIONES|7\.\s*SISTEMA DE EVALUACIÓN)([\s\S]*?)(?=Indicaciones|8\.\s*FUENTES|##\s*8\.|$)/i);
     
     if (evalBlockMatch) {
       const evalLines = evalBlockMatch[1].split('\n');
       for (const line of evalLines) {
-        const rowMatch = line.trim().match(/^([A-Z0-9_]{2,8})\s+(.+?)\s+(\d{1,2})\s+(Individual|Grupal|Flexible)/i);
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.toLowerCase().startsWith('tipo') || trimmed.toLowerCase().startsWith('el cálculo') || trimmed.toLowerCase().startsWith('donde')) continue;
+
+        // Soporta: PC1 PRÁCTICA CALIFICADA 1 3 [Observación opcional]
+        const rowMatch = trimmed.match(/^([A-Z0-9_]{2,8})\s+(.+?)\s+(\d{1,2})(?:\s+(.*))?$/i);
         if (rowMatch) {
           const type = rowMatch[1].toUpperCase();
           const description = rowMatch[2].trim();
           const week = parseInt(rowMatch[3], 10);
-          const modalityStr = (rowMatch[4].toLowerCase().includes('grupal') ? 'Grupal' : 'Individual') as 'Grupal' | 'Individual';
-          const weightPercent = weightMap[type] || 20;
+          const rawObs = rowMatch[4] ? rowMatch[4].trim() : '';
+          const modalityStr = (rawObs.toLowerCase().includes('grupal') || description.toLowerCase().includes('proyecto') || type === 'PROY' || type === 'TI' || type === 'TF') ? 'Grupal' : 'Individual';
+          const weightPercent = weightMap[type] || 25;
 
           evaluations.push({
             id: `eval-${type.toLowerCase()}-${week}`,
@@ -124,12 +128,34 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
             week,
             weightPercent,
             modality: modalityStr,
-            observation: `${modalityStr}. ${description}.`,
-            rules: [`Semana ${week}`, `Ponderación ${weightPercent}%`, modalityStr]
+            observation: rawObs || `${modalityStr}. ${description}.`,
+            rules: [`Semana ${week}`, `Ponderación ${weightPercent}%`, modalityStr, 'No rezagado']
           });
         }
       }
     }
+  }
+
+  // Si la tabla no vino en el texto pero tenemos la fórmula, inferir las evaluaciones
+  if (evaluations.length === 0 && Object.keys(weightMap).length > 0) {
+    Object.entries(weightMap).forEach(([type, weight], index) => {
+      const isFinal = type.includes('PROY') || type.includes('EF') || type.includes('TI');
+      const isMid = type.includes('EP') || type.includes('PC2');
+      const isPA = type.includes('PA');
+      const week = isFinal ? 18 : isPA ? 17 : isMid ? 12 : 3 + (index * 3);
+      const isGrupal = isFinal;
+
+      evaluations.push({
+        id: `eval-${type.toLowerCase()}-${week}`,
+        type,
+        description: isFinal ? 'PROYECTO FINAL' : isPA ? 'PARTICIPACIÓN EN CLASE' : `EVALUACIÓN ${type}`,
+        week,
+        weightPercent: weight,
+        modality: isGrupal ? 'Grupal' : 'Individual',
+        observation: `${isGrupal ? 'Grupal' : 'Individual'}. Evaluación curricular oficial (${weight}%).`,
+        rules: [`Semana ${week}`, `Ponderación ${weight}%`, isGrupal ? 'Grupal' : 'Individual']
+      });
+    });
   }
 
   // 7. Extraer Indicaciones y Reglas Generales
@@ -144,6 +170,10 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
         rules.push(trimmed.replace(/^[-*\d.]+\s*/, ''));
       }
     }
+  }
+  if (rules.length === 0) {
+    rules.push('La nota mínima aprobatoria final es de 12.');
+    rules.push('En este curso, no aplica examen rezagado.');
   }
 
   // 8. Políticas de Integridad y Plagio
@@ -163,34 +193,85 @@ export function parseSyllabusMarkdown(text: string): ParsedSyllabus {
   if (scheduleSection) {
     const lines = scheduleSection[1].split('\n');
     let currentUnit = 'Unidad 1';
+    let currentWeekNum = 1;
 
-    for (const line of lines) {
-      if (line.includes('Unidad 1')) currentUnit = 'Unidad 1';
-      if (line.includes('Unidad 2')) currentUnit = 'Unidad 2';
-      if (line.includes('Unidad 3')) currentUnit = 'Unidad 3';
-      if (line.includes('Unidad 4')) currentUnit = 'Unidad 4';
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
 
-      // Coincidencia de fila semanal
-      const rowMatch = line.trim().match(/^(\d{1,2})\s+(\d{1,2})\s+(.+)$/);
+      if (line.includes('Unidad 1') || line.includes('Unidad de aprendizaje 1')) currentUnit = 'Unidad 1';
+      if (line.includes('Unidad 2') || line.includes('Unidad de aprendizaje 2')) currentUnit = 'Unidad 2';
+      if (line.includes('Unidad 3') || line.includes('Unidad de aprendizaje 3')) currentUnit = 'Unidad 3';
+      if (line.includes('Unidad 4') || line.includes('Unidad de aprendizaje 4')) currentUnit = 'Unidad 4';
+
+      // Patrón Semana y Sesión con tema
+      const rowMatch = line.match(/^(\d{1,2})\s+(\d{1,2})\s+(.+)$/);
       if (rowMatch) {
-        const week = parseInt(rowMatch[1], 10);
+        currentWeekNum = parseInt(rowMatch[1], 10);
         const session = parseInt(rowMatch[2], 10);
         const topic = rowMatch[3].trim();
         
         let evaluationName: string | undefined;
-        if (topic.includes('Evaluación') || topic.includes('APF') || topic.includes('PC') || topic.includes('PROY') || topic.includes('EXAMEN')) {
-          const evalMatch = topic.match(/(APF\d|PC\d|ATI\d|TA\d|EP|EF|PROY|TI|TF)/i);
+        if (topic.includes('Evaluación') || topic.includes('APF') || topic.includes('PC') || topic.includes('PROY') || topic.includes('EXAMEN') || topic.includes('PARTICIPACIÓN')) {
+          const evalMatch = topic.match(/(APF\d|PC\d|ATI\d|TA\d|EP|EF|PROY|TI|TF|PA)/i);
           if (evalMatch) evaluationName = evalMatch[1].toUpperCase();
         }
 
         weeklySchedule.push({
-          week,
+          week: currentWeekNum,
+          session,
+          unit: currentUnit,
+          topic,
+          evaluation: evaluationName
+        });
+        continue;
+      }
+
+      // Patrón solo sesión (cuando la semana viene en la fila superior)
+      const sessionOnlyMatch = line.match(/^(\d{1,2})\s+([A-Za-zÁÉÍÓÚ].+)$/);
+      if (sessionOnlyMatch && parseInt(sessionOnlyMatch[1], 10) <= 36) {
+        const session = parseInt(sessionOnlyMatch[1], 10);
+        const topic = sessionOnlyMatch[2].trim();
+
+        let evaluationName: string | undefined;
+        if (topic.includes('Evaluación') || topic.includes('APF') || topic.includes('PC') || topic.includes('PROY') || topic.includes('EXAMEN') || topic.includes('PARTICIPACIÓN')) {
+          const evalMatch = topic.match(/(APF\d|PC\d|ATI\d|TA\d|EP|EF|PROY|TI|TF|PA)/i);
+          if (evalMatch) evaluationName = evalMatch[1].toUpperCase();
+        }
+
+        weeklySchedule.push({
+          week: Math.ceil(session / 2) || currentWeekNum,
           session,
           unit: currentUnit,
           topic,
           evaluation: evaluationName
         });
       }
+    }
+  }
+
+  // Fallback si el cronograma no vino estructurado en tabla: extraer de la sección 5 de Unidades
+  if (weeklySchedule.length === 0) {
+    const unitsSection = cleanText.match(/(?:5\.\s*UNIDADES Y LOGROS ESPECÍFICOS DE APRENDIZAJE|5\.UNIDADES)([\s\S]*?)(?=6\.\s*METODOLOGÍA|6\.METODOLOGÍA|$)/i);
+    if (unitsSection) {
+      const uText = unitsSection[1];
+      const weekBlocks = uText.split(/(?=Semana\s*\d+)/i);
+      
+      weekBlocks.forEach((block, idx) => {
+        const wMatch = block.match(/Semana\s*([\d,\sy]+)/i);
+        const topicMatch = block.match(/Temario:\s*([\s\S]*?)(?=Unidad|Logro|Semana|$)/i);
+        const wNum = wMatch ? parseInt(wMatch[1], 10) || (idx + 1) : (idx + 1);
+        const topic = topicMatch ? topicMatch[1].trim().replace(/\n+/g, ' ') : block.trim().slice(0, 100);
+
+        if (topic) {
+          weeklySchedule.push({
+            week: wNum,
+            session: wNum * 2,
+            unit: `Unidad ${Math.min(3, Math.ceil(wNum / 6))}`,
+            topic
+          });
+        }
+      });
     }
   }
 

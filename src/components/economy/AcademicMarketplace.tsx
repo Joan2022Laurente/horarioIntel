@@ -22,6 +22,7 @@ import { useAgent } from '@/context/AgentContext';
 import { fetchAcademicServices } from '@/lib/supabase/marketplace-service';
 import { OrderModal } from './OrderModal';
 import { PublishListingModal } from './PublishListingModal';
+import { ScrollablePillTabs, PillTabItem } from '@/components/ui/ScrollablePillTabs';
 
 interface AcademicMarketplaceProps {
   courses?: ProcessedCourse[];
@@ -208,59 +209,19 @@ export const AcademicMarketplace: React.FC<AcademicMarketplaceProps> = ({
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
           
-          {/* Category Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar text-xs">
-            <button
-              onClick={() => setSelectedCategory('ALL')}
-              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-                selectedCategory === 'ALL' 
-                  ? 'bg-white text-black' 
-                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
-              }`}
-            >
-              Todos
-            </button>
-            <button
-              onClick={() => setSelectedCategory('FOOD')}
-              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-                selectedCategory === 'FOOD' 
-                  ? 'bg-[var(--accent-orange)] text-white' 
-                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
-              }`}
-            >
-              🥟 Comida & Snacks
-            </button>
-            <button
-              onClick={() => setSelectedCategory('ACADEMIC')}
-              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-                selectedCategory === 'ACADEMIC' 
-                  ? 'bg-[var(--accent-yellow)] text-black' 
-                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
-              }`}
-            >
-              🎓 Asesorías & Labs
-            </button>
-            <button
-              onClick={() => setSelectedCategory('TECH_DESIGN')}
-              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-                selectedCategory === 'TECH_DESIGN' 
-                  ? 'bg-[var(--badge-purple-bg)] text-[var(--badge-purple-text)] border border-[var(--badge-purple-border)]' 
-                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
-              }`}
-            >
-              💻 Tech & Freelance
-            </button>
-            <button
-              onClick={() => setSelectedCategory('SECOND_HAND')}
-              className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-                selectedCategory === 'SECOND_HAND' 
-                  ? 'bg-[var(--badge-cyan-bg)] text-[var(--badge-cyan-text)] border border-[var(--badge-cyan-border)]' 
-                  : 'bg-[var(--surface-subtle)] text-neutral-400 hover:text-white'
-              }`}
-            >
-              📦 Segunda Mano
-            </button>
-          </div>
+          {/* Category Tabs con ScrollablePillTabs */}
+          <ScrollablePillTabs<MarketplaceCategory | 'ALL'>
+            tabs={[
+              { value: 'ALL',         label: 'Todos' },
+              { value: 'FOOD',        label: '🥟 Comida & Snacks',   activeColor: 'var(--accent-orange)', activeText: '#fff' },
+              { value: 'ACADEMIC',    label: '🎓 Asesorías & Labs',  activeColor: 'var(--accent-yellow)', activeText: '#000' },
+              { value: 'TECH_DESIGN', label: '💻 Tech & Freelance',  activeColor: 'var(--badge-purple-bg)', activeText: 'var(--badge-purple-text)' },
+              { value: 'SECOND_HAND', label: '📦 Segunda Mano',      activeColor: 'var(--badge-cyan-bg)', activeText: 'var(--badge-cyan-text)' },
+            ]}
+            activeValue={selectedCategory}
+            onSelect={setSelectedCategory}
+            variant="pills"
+          />
 
           {/* Modality Filter */}
           <div className="flex items-center gap-1.5 text-xs self-end sm:self-auto">

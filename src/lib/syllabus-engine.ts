@@ -3,7 +3,8 @@ import {
   SyllabusWeekSyncContext, 
   TaskWithSyllabusContext 
 } from '@/types/utp';
-import { getSyllabusForCourse } from './syllabus-parser';
+import { getSyllabusForCourse, ParsedSyllabus } from './syllabus-parser';
+import { getCachedSyllabus } from './syllabus/client-storage';
 import { VERIFIED_ASSIGNMENT_RUBRICS } from './rubrics/verified-rubrics';
 import { ACTIVE_STUDENT_TASKS } from './tasks/active-tasks';
 
@@ -15,125 +16,52 @@ export { ACTIVE_STUDENT_TASKS } from './tasks/active-tasks';
  * Resuelve y sincroniza el contexto del sílabo oficial para una semana dada en cualquier curso.
  * Este motor permite vincular automáticamente los temas teóricos, unidades y fórmulas a las tareas.
  */
-export function getSyllabusWeekContext(courseNameOrId: string, weekNumber: number): SyllabusWeekSyncContext {
-  const syllabus = getSyllabusForCourse(courseNameOrId);
-  const courseUpper = courseNameOrId.toUpperCase();
+export function getSyllabusWeekContext(
+  courseNameOrId: string, 
+  weekNumber: number,
+  customSyllabus?: ParsedSyllabus
+): SyllabusWeekSyncContext {
+  const syllabus = customSyllabus || getCachedSyllabus(courseNameOrId) || getSyllabusForCourse(courseNameOrId);
 
-  // 1. Detección de Unidad
-  let unitNumber = 1;
-  let unitTitle = 'Unidad 1: Fundamentos y Conceptos Clave';
-  if (weekNumber >= 5 && weekNumber <= 8) {
-    unitNumber = 2;
-    unitTitle = 'Unidad 2: Metodología, Diseño y Aplicación Práctica';
-  } else if (weekNumber >= 9 && weekNumber <= 13) {
-    unitNumber = 3;
-    unitTitle = 'Unidad 3: Procesamiento, Integración y Resultados';
-  } else if (weekNumber >= 14) {
-    unitNumber = 4;
-    unitTitle = 'Unidad 4: Discusión, Conclusiones y Sustentación Final';
-  }
+  // 1. Detección Dinámica de Sesión en el Cronograma Semanal
+  const session = syllabus?.weeklySchedule?.find(s => s.week === weekNumber);
 
-  // 2. Temas específicos por curso y semana
+  // 2. Detección Dinámica de Unidad y Logro de Aprendizaje
+  const parsedUnitNum = session?.unit ? parseInt(session.unit.replace(/\D/g, ''), 10) : NaN;
+  const unitNumber = !isNaN(parsedUnitNum) && parsedUnitNum > 0
+    ? parsedUnitNum
+    : (weekNumber <= 4 ? 1 : weekNumber <= 8 ? 2 : weekNumber <= 13 ? 3 : 4);
+
+  const unitTitle = `Unidad ${unitNumber}: ${session?.unit || 'Temario y Desarrollo Curricular'}`;
+  const learningOutcome = syllabus?.learningGoal || 'Desarrollo de competencias técnicas y conceptuales según cronograma.';
+
+  // 3. Extracción Dinámica de Temas y Actividades
   let sessionTopics: string[] = [];
-  let learningOutcome = 'Desarrollo de competencias técnicas y conceptuales según cronograma.';
-  let activities: string[] = ['Sesión síncrona en vivo', 'Taller práctico de resolución de ejercicios'];
-
-  if (courseUpper.includes('WEB INTEGRADO')) {
-    if (weekNumber <= 5) {
-      unitNumber = 1;
-      unitTitle = 'Unidad 1: API REST (Semanas 1 a 5)';
-      learningOutcome = 'Implementa una API RESTful de back-end mediante el framework Spring Boot considerando el desarrollo guiado por pruebas (TDD).';
-    } else if (weekNumber <= 10) {
-      unitNumber = 2;
-      unitTitle = 'Unidad 2: Back-end con bases de datos (Semanas 6 a 10)';
-      learningOutcome = 'Construye aplicaciones RESTful con bases de datos relacionales en Spring Boot (JPA / Hibernate / JWT).';
-    } else {
-      unitNumber = 3;
-      unitTitle = 'Unidad 3: Integración de proyectos webs (back-end y front-end) (Semanas 11 a 18)';
-      learningOutcome = 'Integra proyectos de Back-end con Front-end (Angular) mediante métodos REST.';
-    }
-
-    if (weekNumber === 4) {
-      sessionTopics = [
-        'Implementación de API REST en Spring Boot',
-        'Herramientas de prueba de API REST (Postman / Swagger)',
-        'Métodos HTTP y sus usos en la práctica'
-      ];
-      activities = ['Exposición docente', 'Pruebas de endpoints REST'];
-    } else if (weekNumber === 5) {
-      sessionTopics = [
-        'Sem. 1: Arquitectura y estructura de Spring Boot (Conceptos y entorno)',
-        'Sem. 2: Endpoints, Controladores e Inyección de Dependencias (@Autowired)',
-        'Sem. 3: Test-driven development (TDD) e integración en Spring',
-        'Sem. 4: Implementación de API RESTful y pruebas de Métodos HTTP',
-        'Sem. 5: Evaluación: AVANCE DE PROYECTO FINAL 1 (APF1 - 20%)'
-      ];
-      activities = [
-        'Entregables oficiales: Informe hasta el capítulo 3 + Presentación PPTx',
-        'Evaluación flexible (2 intentos permitidos, calificado sobre 20 pts)',
-        'Docente: Iván Robles Fernández (Sin matriz de rúbrica en plataforma)'
-      ];
-    }
-  } else if (courseUpper.includes('INVESTIGACI')) {
-    if (weekNumber === 4) {
-      sessionTopics = [
-        'Revisión preliminar de Ficha de Investigación',
-        'Redacción de la Introducción de la RSL',
-        'Pautas y rúbrica para presentación de ATI1 (10%)'
-      ];
-      learningOutcome = 'Define el tema de tesis y redacta la introducción bajo pautas Scopus/WoS.';
-      activities = ['Feedback en clase sobre fichas de investigación', 'Entrega formal de ATI1'];
-    } else if (weekNumber === 5) {
-      sessionTopics = [
-        'Diseño de estrategia de búsqueda sistemática PICO',
-        'Operadores booleanos (AND, OR, NOT) y palabras clave',
-        'Almacenamiento de referencias en Mendeley'
-      ];
-      learningOutcome = 'Estructura ecuaciones de búsqueda especializadas para literatura científica.';
-    }
-  } else if (courseUpper.includes('COMUNICACI')) {
-    if (weekNumber === 5) {
-      sessionTopics = [
-        'Estructura de discursos persuasivos y Storytelling',
-        'Modulación vocal, tono, timbre e inflexión emocional',
-        'Entrenamiento del narrador oral (Actividad práctica PA02)'
-      ];
-      learningOutcome = 'Aplica técnicas de narración oral y modulación vocal para captar la atención de la audiencia.';
-      activities = ['Grabación de video de relato oral', 'Intervención en foro sincrónico'];
-    }
-  } else if (courseUpper.includes('LENGUAJES') || courseUpper.includes('PROGRAMACI')) {
-    if (weekNumber === 5) {
-      sessionTopics = [
-        'Paradigmas Funcional vs Imperativo',
-        'Funciones puras, inmutabilidad y funciones de orden superior (Map/Filter/Reduce)',
-        'Ejercicios preparatorios para Práctica Calificada 1 (PC1 - 20%)'
-      ];
-      learningOutcome = 'Resuelve problemas complejos aplicando composición de funciones e inmutabilidad.';
-      activities = ['Resolución guiada de ejercicios de repaso', 'Pruebas unitarias en consola'];
-    }
-  } else if (courseUpper.includes('CLOUD')) {
-    if (weekNumber === 5) {
-      sessionTopics = [
-        'Redes Virtuales VPC, subredes públicas y privadas en AWS',
-        'Tablas de enrutamiento e Internet Gateways',
-        'Evaluación Práctica Calificada 1 (PC1 - 15%)'
-      ];
-      learningOutcome = 'Aprovisiona infraestructuras de red aisladas y seguras en la nube.';
-      activities = ['Laboratorio práctico en consola AWS', 'Despliegue de instancias EC2'];
-    }
-  } else if (courseUpper.includes('SERVICIO TI') || courseUpper.includes('GESTI')) {
-    if (weekNumber === 5) {
-      sessionTopics = [
-        'Práctica de Gestión de Incidentes bajo ITIL 4',
-        'Flujos de escalamiento y priorización según impacto/urgencia',
-        'Preparación para Práctica Calificada 1 (Semana 6)'
-      ];
-      learningOutcome = 'Diseña flujos de atención y resolución oportuna de interrupciones de servicios.';
-    }
+  if (session?.topics && session.topics.length > 0) {
+    sessionTopics = session.topics;
+  } else if (session?.topic) {
+    sessionTopics = session.topic.split(/;|\n|\.\s+/).map(t => t.trim()).filter(Boolean);
   }
 
-  // 3. Buscar si en esta semana hay evaluación oficial en el sílabo
-  const officialEval = syllabus?.evaluations.find(e => e.week === weekNumber);
+  let activities: string[] = [];
+  if (Array.isArray(session?.activities)) {
+    activities = session.activities;
+  } else if (typeof session?.activities === 'string' && session.activities.trim().length > 0) {
+    activities = [session.activities];
+  } else {
+    activities = ['Sesión síncrona en vivo', 'Taller práctico de resolución de ejercicios'];
+  }
+
+  // 4. Buscar si en esta semana hay evaluación oficial en el sílabo
+  const officialEval = syllabus?.evaluations?.find(e => e.week === weekNumber) || (session?.evaluation ? {
+    id: `eval-w${weekNumber}`,
+    type: session.evaluation,
+    description: `Evaluación ${session.evaluation}`,
+    week: weekNumber,
+    weightPercent: 20,
+    modality: 'Individual' as const,
+    rules: syllabus?.rules
+  } : undefined);
 
   return {
     week: weekNumber,
@@ -144,7 +72,7 @@ export function getSyllabusWeekContext(courseNameOrId: string, weekNumber: numbe
     activities,
     officialEvaluation: officialEval ? {
       id: officialEval.id,
-      courseName: syllabus?.generalInfo.courseName || courseNameOrId,
+      courseName: syllabus?.generalInfo?.courseName || courseNameOrId,
       code: officialEval.type,
       fullName: officialEval.description,
       week: officialEval.week,

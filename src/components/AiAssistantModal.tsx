@@ -44,7 +44,7 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
   interval,
   initialPrompt,
 }) => {
-  const { getLiveContext, executeAction } = useAgent();
+  const { getLiveContext, executeAction, setLastCourseInFocus } = useAgent();
   const [messages, setMessages] = useState<ChatMessage[]>([DEFAULT_WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -107,6 +107,13 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
         // Ejecutar acción si el agente determinó una tool call
         if (resData.data.action) {
           executeAction(resData.data.action);
+          if (resData.data.action.type === 'OPEN_SYLLABUS' && resData.data.action.payload?.courseName) {
+            setLastCourseInFocus(resData.data.action.payload.courseName);
+          }
+        }
+
+        if (resData.data.contextInfo?.courseName) {
+          setLastCourseInFocus(resData.data.contextInfo.courseName);
         }
 
         const assistantMsg: ChatMessage = {

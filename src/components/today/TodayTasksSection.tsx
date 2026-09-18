@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { TaskWithSyllabusContext, AssignmentRubric, CourseAssignment } from '@/types/utp';
 import { TaskSyllabusSyncRow } from '@/components/tasks/TaskSyllabusSyncRow';
 
+import { ScrollablePillTabs, PillTabItem } from '@/components/ui/ScrollablePillTabs';
+
 interface TodayTasksSectionProps {
   tasks: TaskWithSyllabusContext[];
   onOpenRubric: (rubric: AssignmentRubric, taskTitle: string, courseName: string) => void;
@@ -33,7 +35,7 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
       {/* Clean Header with Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-base sm:text-lg font-bold text-white">
+          <h3 className="text-sm sm:text-base font-bold text-white">
             Entregables y Tareas
           </h3>
           <span className="text-xs text-neutral-500 font-medium">
@@ -41,39 +43,18 @@ export const TodayTasksSection: React.FC<TodayTasksSectionProps> = ({
           </span>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-[var(--surface-card)] border border-[var(--border-subtle)] p-1 rounded-xl text-xs">
-          <button
-            onClick={() => setTaskFilter('all')}
-            className={`px-3 py-1 rounded-lg transition font-medium shadow-none ${
-              taskFilter === 'all' 
-                ? 'bg-white text-black font-bold' 
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Todas ({tasks.length})
-          </button>
-          <button
-            onClick={() => setTaskFilter('graded')}
-            className={`px-3 py-1 rounded-lg transition font-medium shadow-none ${
-              taskFilter === 'graded' 
-                ? 'bg-[var(--accent-orange)] text-white font-bold' 
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Calificadas ({gradedCount})
-          </button>
-          <button
-            onClick={() => setTaskFilter('practice')}
-            className={`px-3 py-1 rounded-lg transition font-medium shadow-none ${
-              taskFilter === 'practice' 
-                ? 'bg-[var(--surface-muted)] text-white font-bold' 
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Prácticas ({practiceCount})
-          </button>
-        </div>
+        {/* Filter Pills con ScrollablePillTabs */}
+        <ScrollablePillTabs<'all' | 'graded' | 'practice'>
+          tabs={[
+            { value: 'all',      label: 'Todas',       count: tasks.length },
+            { value: 'graded',   label: 'Calificadas', count: gradedCount, activeColor: 'rgba(255, 87, 34, 0.15)', activeText: '#ff7043' },
+            { value: 'practice', label: 'Prácticas',   count: practiceCount },
+          ]}
+          activeValue={taskFilter}
+          onSelect={setTaskFilter}
+          variant="segmented"
+          size="sm"
+        />
       </div>
 
       {/* Task List */}

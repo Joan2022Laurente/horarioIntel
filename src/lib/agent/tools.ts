@@ -18,7 +18,7 @@ export const AGENT_TOOLS: ToolDefinition[] = [
     type: 'function',
     function: {
       name: 'navigateToTab',
-      description: 'Navega automáticamente a una pestaña de la aplicación si el usuario lo pide o si es relevante para mostrarle la información.',
+      description: 'Navega a una pestaña de la aplicación. USAR ÚNICAMENTE ante órdenes explícitas de navegación como: "ir a horario", "ve a cursos", "abrir comunidad", "ir a mentorías".',
       parameters: {
         type: 'object',
         properties: {
@@ -36,13 +36,13 @@ export const AGENT_TOOLS: ToolDefinition[] = [
     type: 'function',
     function: {
       name: 'openSyllabus',
-      description: 'Abre el modal interactivo del sílabo oficial con rúbricas y fórmulas de un curso específico.',
+      description: 'Abre la ventana modal interactiva del sílabo oficial en pantalla. USAR ÚNICAMENTE ante comandos directos de apertura de interfaz como: "abre el sílabo", "ábreme el sílabo", "mostrar sílabo en pantalla". NUNCA usar esta herramienta para preguntas de estudio, qué aprender, temarios o explicaciones (responde esas preguntas con texto directo).',
       parameters: {
         type: 'object',
         properties: {
           courseName: {
             type: 'string',
-            description: 'Nombre o código de la asignatura a abrir (ej: "Desarrollo Web Integrado", "Gestión del Servicio TI").',
+            description: 'Nombre o código de la asignatura a abrir (ej: "Servicios Cloud", "Desarrollo Web Integrado").',
           },
         },
         required: ['courseName'],
@@ -53,7 +53,7 @@ export const AGENT_TOOLS: ToolDefinition[] = [
     type: 'function',
     function: {
       name: 'openSettings',
-      description: 'Abre el modal de configuración de cuenta y perfil UTP del estudiante.',
+      description: 'Abre el modal de configuración y perfil UTP ante pedidos explícitos ("configuración", "abrir ajustes").',
       parameters: {
         type: 'object',
         properties: {},

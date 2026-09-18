@@ -6,14 +6,10 @@ import {
   Sparkles, 
   Copy, 
   Check, 
-  ExternalLink,
-  Download,
   Loader2,
-  FileCheck2,
   GraduationCap,
   ChevronLeft,
-  ChevronRight,
-  ChevronDown
+  ChevronRight
 } from 'lucide-react';
 import { ParsedSyllabus, parseSyllabusMarkdown } from '@/lib/syllabus-parser';
 import { getCachedSyllabus, saveCachedSyllabus } from '@/lib/syllabus/client-storage';
@@ -61,8 +57,8 @@ const DEFAULT_ENROLLED_COURSES: EnrolledCourseOption[] = [
     pdfUrl: 'https://ms-utp-prd-silbiaback-cd.s3.amazonaws.com/pdfs/approved/complete/2026%20-%20Ciclo%202%20Agosto/virtual/100000SI34_FormacionInvestigacionSistemas.pdf'
   },
   {
-    id: '100000ST62',
-    code: '100000ST62',
+    id: '100000SI97',
+    code: '100000SI97',
     name: 'Servicios Cloud',
     short: 'Servicios Cloud',
     modality: 'Presencial',
@@ -320,19 +316,20 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
           activeTab={activeTab}
           onSelectTab={setActiveTab}
           onClose={onClose}
+          pdfUrl={currentCourseOption?.pdfUrl}
         />
 
-        {/* Barra de Selección de Asignaturas con Navegación y Scroll Robusto */}
+        {/* Barra de Selección de Asignaturas con Navegación Limpia */}
         {activeTab === 'official' && (
-          <div className="relative px-4 py-2.5 bg-[#19191e]">
+          <div className="relative px-4 sm:px-6 py-2 bg-[var(--surface-subtle)] border-b border-[var(--border-subtle)]">
             <div className="flex items-center gap-2">
               {/* Etiqueta Cursos */}
-              <div className="flex items-center gap-1.5 shrink-0 pr-2 select-none">
-                <GraduationCap className="h-4 w-4 text-[#ff5722]" />
+              <div className="flex items-center gap-1.5 shrink-0 pr-1 select-none">
+                <GraduationCap className="h-4 w-4 text-[var(--accent-orange)]" />
                 <span className="text-[11px] font-black uppercase tracking-wider text-neutral-300 hidden sm:inline">
                   Cursos
                 </span>
-                <span className="text-[10px] font-mono font-black px-1.5 py-0.5 rounded-full bg-white/10 text-neutral-300">
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface-card)] text-neutral-400 border border-[var(--border-subtle)]">
                   {enrolledCourses.length}
                 </span>
               </div>
@@ -346,8 +343,8 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 title="Desplazar a la izquierda"
                 className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                   canScrollLeft
-                    ? 'bg-white/10 hover:bg-white/20 text-white cursor-pointer shadow-sm active:scale-90'
-                    : 'bg-white/[0.02] text-neutral-600 cursor-not-allowed opacity-30'
+                    ? 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] text-white cursor-pointer active:scale-90'
+                    : 'bg-transparent text-neutral-600 cursor-not-allowed opacity-30'
                 }`}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -355,19 +352,17 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
 
               {/* Contenedor Carrusel Desplazable con Máscaras de Gradiente */}
               <div className="relative flex-1 min-w-0 overflow-hidden">
-                {/* Gradiente izquierdo cuando hay desborde */}
                 {canScrollLeft && (
-                  <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#19191e] to-transparent pointer-events-none z-10" />
+                  <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[var(--surface-subtle)] to-transparent pointer-events-none z-10" />
                 )}
 
                 {/* Lista de Pastillas (Pills) */}
                 <div
                   ref={scrollContainerRef}
                   onScroll={checkScrollButtons}
-                  className="flex items-center gap-2 overflow-x-auto py-1 scroll-smooth"
+                  className="flex items-center gap-2 overflow-x-auto py-1 scroll-smooth no-scrollbar"
                   style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(255, 255, 255, 0.15) transparent',
+                    scrollbarWidth: 'none',
                   }}
                 >
                   {enrolledCourses.map((course) => {
@@ -378,10 +373,10 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                         ref={isSelected ? selectedBtnRef : null}
                         type="button"
                         onClick={() => triggerSync(course.id)}
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 whitespace-nowrap shadow-none ${
+                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 whitespace-nowrap ${
                           isSelected
                             ? 'bg-[var(--accent-lime)] text-[#0a0a0c]'
-                            : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white'
+                            : 'bg-[var(--surface-card)] border border-[var(--border-subtle)] text-neutral-300 hover:text-white hover:border-[var(--border-strong)]'
                         }`}
                       >
                         <span
@@ -394,7 +389,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                           className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-semibold ${
                             isSelected
                               ? 'bg-[var(--surface-subtle)] text-[#0a0a0c]'
-                              : 'bg-[var(--surface-card)] text-neutral-400'
+                              : 'bg-[var(--surface-subtle)] text-neutral-400'
                           }`}
                         >
                           {course.code}
@@ -404,9 +399,8 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                   })}
                 </div>
 
-                {/* Gradiente derecho cuando hay desborde */}
                 {canScrollRight && (
-                  <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#19191e] to-transparent pointer-events-none z-10" />
+                  <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[var(--surface-subtle)] to-transparent pointer-events-none z-10" />
                 )}
               </div>
 
@@ -419,39 +413,18 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 title="Desplazar a la derecha"
                 className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${
                   canScrollRight
-                    ? 'bg-[var(--surface-subtle)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)] text-white cursor-pointer shadow-none active:scale-90'
+                    ? 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] text-white cursor-pointer active:scale-90'
                     : 'bg-transparent text-neutral-600 cursor-not-allowed opacity-30'
                 }`}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
-
-              {/* Selector Rápido Directo (Dropdown) */}
-              <div className="shrink-0 pl-2 hidden sm:flex items-center">
-                <div className="relative">
-                  <select
-                    value={selectedCourseId}
-                    onChange={(e) => triggerSync(e.target.value)}
-                    aria-label="Selector directo de curso"
-                    title="Ir directo a un curso"
-                    className="appearance-none bg-[var(--surface-input)] hover:bg-[var(--surface-card-hover)] border border-[var(--border-subtle)] text-neutral-200 text-xs font-semibold py-1.5 pl-2.5 pr-7 rounded-xl cursor-pointer focus:outline-none focus:border-[var(--accent-lime)] transition"
-                  >
-                    {enrolledCourses.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-[var(--surface-card)] text-white">
-                        {c.short} ({c.code})
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="h-3.5 w-3.5 text-neutral-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              </div>
             </div>
           </div>
         )}
 
-
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar">
           
           {/* Custom Parser Tab */}
           {activeTab === 'custom' && (
@@ -465,32 +438,32 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
           {/* Pantalla de Carga y Sincronización Automática */}
           {activeTab === 'official' && isSyncing ? (
             <div className="py-16 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in duration-100">
-              <div className="relative flex items-center justify-center h-16 w-16 rounded-3xl bg-[var(--badge-lime-bg)] border border-[var(--badge-lime-border)] shadow-none">
+              <div className="relative flex items-center justify-center h-16 w-16 rounded-3xl bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20 shadow-none">
                 <Loader2 className="h-8 w-8 text-[var(--accent-lime)] animate-spin" />
               </div>
               <div className="space-y-1.5 max-w-md">
                 <h3 className="text-sm font-black text-white">
                   Sincronizando Sílabo Oficial
                 </h3>
-                <p className="text-xs text-[#bbf451] font-mono animate-pulse">
+                <p className="text-xs text-[var(--accent-lime)] font-mono animate-pulse">
                   {syncStep}
                 </p>
-                <p className="text-[11px] text-neutral-500 pt-2">
-                  Extrayendo datos de {currentCourseOption.name}
+                <p className="text-[11px] text-neutral-400 pt-1">
+                  Extrayendo rúbricas de {currentCourseOption.name}
                 </p>
               </div>
             </div>
           ) : currentSyllabus ? (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-5 animate-in fade-in duration-200">
               
               {/* Formula & General Stats Bar */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 
                 {/* Fórmula Oficial */}
-                <div className="md:col-span-2 rounded-2xl bg-[#1b1b22] p-4 space-y-2.5 shadow-md">
+                <div className="md:col-span-2 rounded-2xl bg-[#181820] border border-white/10 p-4 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Award className="h-4 w-4 text-[#ff5722]" />
+                      <Award className="h-4 w-4 text-[var(--accent-orange)]" />
                       <span>Fórmula Oficial de Evaluación</span>
                     </span>
                     <button
@@ -502,22 +475,22 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                     </button>
                   </div>
                   
-                  <div className="rounded-xl bg-[#141417] px-4 py-3 font-mono text-xs sm:text-sm font-bold text-[#bbf451] text-center tracking-wider shadow-inner">
+                  <div className="rounded-xl bg-[#0f0f14] border border-white/10 px-4 py-3 font-mono text-xs sm:text-sm font-bold text-[var(--accent-lime)] text-center tracking-wider">
                     {currentSyllabus.formula}
                   </div>
                 </div>
 
                 {/* Datos Académicos */}
-                <div className="rounded-2xl bg-[#1b1b22] p-4 space-y-2 text-xs shadow-md">
-                  <span className="text-[11px] font-bold text-neutral-400">
+                <div className="rounded-2xl bg-[#181820] border border-white/10 p-4 space-y-2 text-xs">
+                  <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
                     Ficha Curricular
                   </span>
                   <div className="space-y-1.5 text-neutral-300 pt-1">
-                    <div className="flex justify-between pb-1">
+                    <div className="flex justify-between pb-1 border-b border-white/10">
                       <span className="text-neutral-400">Créditos:</span>
                       <span className="font-bold text-white">{currentSyllabus.generalInfo.credits} créditos</span>
                     </div>
-                    <div className="flex justify-between pb-1">
+                    <div className="flex justify-between pb-1 border-b border-white/10">
                       <span className="text-neutral-400">Modalidad:</span>
                       <span className="font-bold text-emerald-400">{currentSyllabus.generalInfo.modality}</span>
                     </div>
@@ -529,35 +502,11 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 </div>
               </div>
 
-              {/* Botón de Descarga PDF Silbia S3 */}
-              {currentCourseOption.pdfUrl && (
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#1b1b22] shadow-md">
-                  <div className="flex items-center gap-2.5">
-                    <FileCheck2 className="h-5 w-5 text-[#bbf451]" />
-                    <div className="text-xs">
-                      <p className="font-bold text-white">Documento Oficial Aprobado por Dirección Académica</p>
-                      <p className="text-neutral-400 text-[11px]">Repositorio S3 Silbia • Periodo {currentSyllabus.generalInfo.semester}</p>
-                    </div>
-                  </div>
-
-                  <a
-                    href={currentCourseOption.pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white px-4 py-1.5 text-xs font-bold transition active:scale-95 shrink-0"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>Descargar PDF Oficial</span>
-                    <ExternalLink className="h-3 w-3 text-neutral-400" />
-                  </a>
-                </div>
-              )}
-
               {/* Logro General */}
               {currentSyllabus.learningGoal && (
-                <div className="rounded-2xl bg-[#1b1b22] p-4 space-y-2 shadow-md">
+                <div className="rounded-2xl bg-[#181820] border border-white/10 p-4 space-y-2">
                   <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-[#ff5722]" />
+                    <Sparkles className="h-4 w-4 text-[var(--accent-orange)]" />
                     <span>Logro General de Aprendizaje</span>
                   </div>
                   <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
@@ -590,20 +539,6 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
             </div>
           )}
 
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 bg-[#19191e] flex items-center justify-between">
-          <span className="text-xs text-neutral-400 flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Fuente: Sistema Silbia UTP & Amazon S3 Backing Store
-          </span>
-          <button
-            onClick={onClose}
-            className="rounded-full bg-white/10 hover:bg-white/15 px-5 py-1.5 text-xs font-bold text-neutral-300 hover:text-white transition"
-          >
-            Cerrar
-          </button>
         </div>
 
       </div>

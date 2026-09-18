@@ -69,7 +69,9 @@ export const StudyBuddyCard: React.FC<StudyBuddyCardProps> = ({
               <h3 className="text-sm font-bold text-white group-hover:text-[var(--accent-lime)] transition-colors truncate">
                 {buddy.name}
               </h3>
-              <ShieldCheck className="h-3.5 w-3.5 text-[var(--accent-emerald)] shrink-0" title="Verificado UTP" />
+              <span title="Verificado UTP" className="inline-flex items-center">
+                <ShieldCheck className="h-3.5 w-3.5 text-[var(--accent-emerald)] shrink-0" />
+              </span>
             </div>
 
             <p className="text-[11px] text-neutral-400 truncate mt-0.5">

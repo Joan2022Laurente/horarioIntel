@@ -4,17 +4,19 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import { AgentAction, AgentIntent, AgentLiveContext, NavigationTab } from '@/types/agent';
 import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
 import { getAllCachedSyllabi } from '@/lib/syllabus/client-storage';
-import { getCurrentAndNextClass } from '@/lib/schedule-parser';
+import { getCurrentAndNextClass, parseEventTitle, formatCourseName } from '@/lib/schedule-parser';
 
 interface AgentContextType {
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
   isAiOpen: boolean;
   aiPrompt: string;
-  openAi: (prompt?: string) => void;
+  openAi: (prompt?: string, courseFocus?: string) => void;
   closeAi: () => void;
   isSyllabusOpen: boolean;
   selectedCourseForSyllabus: string | null;
+  lastCourseInFocus: string | null;
+  setLastCourseInFocus: (courseName: string | null) => void;
   openSyllabus: (courseName: string) => void;
   closeSyllabus: () => void;
   isSettingsOpen: boolean;
@@ -22,7 +24,7 @@ interface AgentContextType {
   closeSettings: () => void;
   executeIntent: (intent: AgentIntent) => void;
   executeAction: (action: AgentAction) => void;
-  askAgent: (query: string) => void;
+  askAgent: (query: string, courseFocus?: string) => void;
   getLiveContext: () => AgentLiveContext;
 }
 
@@ -44,10 +46,14 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
   const [aiPrompt, setAiPrompt] = useState<string>('');
   const [isSyllabusOpen, setIsSyllabusOpen] = useState(false);
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<string | null>(null);
+  const [lastCourseInFocus, setLastCourseInFocus] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const openAi = useCallback((prompt?: string) => {
+  const openAi = useCallback((prompt?: string, courseFocus?: string) => {
     setAiPrompt(prompt || '');
+    if (courseFocus) {
+      setLastCourseInFocus(formatCourseName(courseFocus));
+    }
     setIsAiOpen(true);
   }, []);
 
@@ -56,7 +62,9 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
   }, []);
 
   const openSyllabus = useCallback((courseName: string) => {
-    setSelectedCourseForSyllabus(courseName);
+    const formatted = formatCourseName(courseName);
+    setSelectedCourseForSyllabus(formatted);
+    setLastCourseInFocus(formatted);
     setIsSyllabusOpen(true);
   }, []);
 
@@ -91,6 +99,14 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
     const events = interval.events || [];
     const status = events.length > 0 ? getCurrentAndNextClass(events) : null;
 
+    const currentClean = status?.currentClass
+      ? parseEventTitle(status.currentClass.title).cleanTitle
+      : null;
+
+    const nextClean = status?.nextClass
+      ? parseEventTitle(status.nextClass.title).cleanTitle
+      : null;
+
     return {
       activeTab,
       currentWeek: interval.week_number || 5,
@@ -99,45 +115,53 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
       coursesCount: courses.length,
       currentClass: status?.currentClass
         ? {
-            title: status.currentClass.title,
+            title: currentClean || status.currentClass.title,
             modality: status.currentClass.modality,
             zoomLink: status.currentClass.metadata?.zoomLink,
           }
         : null,
       nextClass: status?.nextClass
         ? {
-            title: status.nextClass.title,
+            title: nextClean || status.nextClass.title,
             minutesToStart: status.minutesToNext,
             modality: status.nextClass.modality,
           }
         : null,
       pendingTasksCount: 0,
-      selectedCourseName: selectedCourseForSyllabus,
+      selectedCourseName: selectedCourseForSyllabus || lastCourseInFocus || currentClean || nextClean || null,
     };
-  }, [activeTab, interval, courses, selectedCourseForSyllabus]);
+  }, [activeTab, interval, courses, selectedCourseForSyllabus, lastCourseInFocus]);
 
   const executeIntent = useCallback((intent: AgentIntent) => {
     let promptQuery = '';
+    let focusCourse: string | undefined = undefined;
+
     switch (intent.type) {
       case 'ANALYZE_COURSE':
+        focusCourse = intent.courseName;
         promptQuery = `Analiza la asignatura ${intent.courseName}, sus fórmulas de nota, fechas clave y qué necesito para sacar 20.`;
         break;
       case 'EXPLAIN_SYLLABUS':
+        focusCourse = intent.courseName;
         promptQuery = `Explica los temas de la semana actual y rúbricas oficiales del curso ${intent.courseName}.`;
         break;
       case 'CHECK_EVALUATION':
+        focusCourse = intent.courseName;
         promptQuery = `¿Qué rúbrica y criterios evalúa la UTP para ${intent.evaluationCode || 'la evaluación'} de ${intent.courseName}?`;
         break;
       case 'FIND_MENTOR':
+        focusCourse = intent.courseName;
         promptQuery = `¿Qué mentores o asesorías 1 a 1 recomiendas para ${intent.courseName || 'mis cursos'}?`;
         break;
       case 'FIND_NETWORKING_BEACON':
+        focusCourse = intent.courseName;
         promptQuery = `¿Hay compañeros con ventanas libres hoy para coordinar grupos de estudio en ${intent.courseName || 'mis cursos'}?`;
         break;
       case 'SUMMARIZE_WEEK':
         promptQuery = `Haz un resumen ejecutivo de las prioridades académicas para la semana ${intent.weekNumber || interval.week_number || 5}.`;
         break;
       case 'PREPARE_CLASS':
+        focusCourse = intent.courseName;
         promptQuery = `¿Qué preguntas clave o temas debo llevar preparados para mi clase de ${intent.courseName}?`;
         break;
       case 'FREE_QUERY':
@@ -145,11 +169,14 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
         break;
     }
 
-    openAi(promptQuery);
+    if (focusCourse) {
+      setLastCourseInFocus(formatCourseName(focusCourse));
+    }
+    openAi(promptQuery, focusCourse);
   }, [interval.week_number, openAi]);
 
-  const askAgent = useCallback((query: string) => {
-    openAi(query);
+  const askAgent = useCallback((query: string, courseFocus?: string) => {
+    openAi(query, courseFocus);
   }, [openAi]);
 
   const value = useMemo(() => ({
@@ -161,6 +188,8 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
     closeAi,
     isSyllabusOpen,
     selectedCourseForSyllabus,
+    lastCourseInFocus,
+    setLastCourseInFocus,
     openSyllabus,
     closeSyllabus,
     isSettingsOpen,
@@ -178,6 +207,7 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
     closeAi,
     isSyllabusOpen,
     selectedCourseForSyllabus,
+    lastCourseInFocus,
     openSyllabus,
     closeSyllabus,
     isSettingsOpen,

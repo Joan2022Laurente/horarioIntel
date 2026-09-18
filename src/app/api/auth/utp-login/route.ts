@@ -7,7 +7,11 @@ export async function POST(req: NextRequest) {
 
     // 1. Si el usuario ingresa Usuario/Código y Contraseña oficial de UTP
     if (username && password && typeof username === 'string' && typeof password === 'string') {
-      const cleanUsername = username.trim().toLowerCase();
+      let cleanUsername = username.trim().toLowerCase();
+      // Si el estudiante ingresó solo los dígitos numéricos sin la 'u' inicial
+      if (/^\d{8,9}$/.test(cleanUsername)) {
+        cleanUsername = `u${cleanUsername}`;
+      }
       
       const formParams = new URLSearchParams({
         client_id: 'pao-web',

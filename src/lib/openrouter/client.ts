@@ -4,6 +4,7 @@ import { ParsedSyllabus } from '@/lib/syllabus/types';
 import { AgentAction, AgentLiveContext } from '@/types/agent';
 import { AGENT_TOOLS, parseToolCallToAction } from '@/lib/agent/tools';
 import { buildCentralizedAgentSystemPrompt } from '@/lib/agent/prompt-builder';
+import { getSyllabusForCourse } from '@/lib/syllabus/official-registry';
 
 export interface OpenRouterChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
@@ -179,6 +180,20 @@ export async function queryOpenRouterWithFallback(
 
         const textContent = choice?.content;
 
+        // Identificar curso relevante para contextInfo y carryover
+        let relevantCourseName: string | undefined = undefined;
+        if (detectedAction?.type === 'OPEN_SYLLABUS' && detectedAction.payload?.courseName) {
+          relevantCourseName = detectedAction.payload.courseName;
+        } else if (context?.courses && context.courses.length > 0) {
+          const lowerText = `${userPrompt} ${textContent || ''}`.toLowerCase();
+          const matched = context.courses.find(c => lowerText.includes(c.name.toLowerCase()));
+          if (matched) {
+            relevantCourseName = matched.name;
+          } else if (context?.liveContext?.selectedCourseName) {
+            relevantCourseName = context.liveContext.selectedCourseName;
+          }
+        }
+
         if (textContent && typeof textContent === 'string' && textContent.trim().length > 0) {
           const cleanedAnswer = cleanAiResponse(textContent);
           const suggestedActions = extractSuggestedActions(userPrompt, cleanedAnswer);
@@ -189,9 +204,39 @@ export async function queryOpenRouterWithFallback(
             keyIndexUsed: keyIdx + 1,
             suggestedActions,
             action: detectedAction,
+            contextInfo: relevantCourseName ? { courseName: relevantCourseName } : undefined,
           };
         } else if (detectedAction) {
           // Si el modelo solo llamó a la herramienta sin texto
+          const isQueryAcademicQuestion = /^(qu[eé]|cu[aá]l|c[oó]mo|d[oó]nde|por\s*qu[eé]|temario|aprender|estudiar|temas|de\s+qu[eé]\s+trata|resumen|qu[eé]\s+entra)/i.test(userPrompt.trim());
+          
+          if (detectedAction.type === 'OPEN_SYLLABUS' && isQueryAcademicQuestion) {
+            const courseTarget = detectedAction.payload.courseName || relevantCourseName;
+            const syllabus = courseTarget ? (context?.syllabiData?.[courseTarget] || getSyllabusForCourse(courseTarget)) : null;
+            const currentWeek = context?.liveContext?.currentWeek || context?.interval?.week_number || 5;
+
+            if (syllabus) {
+              const weekSession = syllabus.weeklySchedule?.find(s => s.week === currentWeek) || syllabus.weeklySchedule?.[0];
+              const topicText = weekSession ? (weekSession.topic || (weekSession.topics ? weekSession.topics.join(', ') : '')) : 'Temas del ciclo';
+              const evalNotice = weekSession?.evaluation ? ` (Semana de evaluación: **${weekSession.evaluation}**)` : '';
+
+              const enrichedAnswer = `Para tu clase de **${syllabus.generalInfo.courseName}** (Semana ${currentWeek}), los puntos clave del sílabo son:\n\n` +
+                `- 📚 **Temario de la sesión:** ${topicText}${evalNotice}\n` +
+                `- 🎯 **Logro de aprendizaje:** ${syllabus.learningGoal || 'Dominio de las competencias del curso'}\n` +
+                `- ⚖️ **Fórmula de evaluación:** \`${syllabus.formula}\`\n\n` +
+                `💡 **Consejo del Copiloto:** Repasa los conceptos teóricos y laboratorios prácticos para asegurar la máxima calificación.`;
+
+              return {
+                answer: enrichedAnswer,
+                modelUsed: currentModel,
+                keyIndexUsed: keyIdx + 1,
+                suggestedActions: ['Ver cronograma completo', 'Fórmulas y reglas', 'Consejos para sacar 20'],
+                action: detectedAction,
+                contextInfo: relevantCourseName ? { courseName: relevantCourseName } : undefined,
+              };
+            }
+          }
+
           const toolDesc = detectedAction.type === 'NAVIGATE_TAB'
             ? `Te estoy llevando a la pestaña de ${detectedAction.payload.tab}.`
             : detectedAction.type === 'OPEN_SYLLABUS'
@@ -204,6 +249,7 @@ export async function queryOpenRouterWithFallback(
             keyIndexUsed: keyIdx + 1,
             suggestedActions: ['Ver detalles', 'Consejos del Copiloto'],
             action: detectedAction,
+            contextInfo: relevantCourseName ? { courseName: relevantCourseName } : undefined,
           };
         }
       } catch (err: unknown) {

@@ -18,6 +18,7 @@ import {
   createCommunityPostInDb, 
   togglePostUpvoteInDb 
 } from '@/lib/supabase/community-service';
+import { ScrollablePillTabs, PillTabItem } from '@/components/ui/ScrollablePillTabs';
 
 interface CommunityFeedProps {
   courses: ProcessedCourse[];
@@ -32,7 +33,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   const handleAsk = onAskAi || askAgent;
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<PostCategory | 'ALL'>('ALL');
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [postTitle, setPostTitle] = useState('');
@@ -211,49 +212,18 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
         </form>
       )}
 
-      {/* Categorías de Filtro */}
-      <div className="flex items-center gap-2 overflow-x-auto py-1 custom-scrollbar text-xs">
-        <button
-          onClick={() => setSelectedCategory('ALL')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedCategory === 'ALL' 
-              ? 'bg-white text-black' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Todos los Posts
-        </button>
-        <button
-          onClick={() => setSelectedCategory('PROJECT_RECRUITMENT')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedCategory === 'PROJECT_RECRUITMENT' 
-              ? 'bg-[var(--accent-emerald)] text-black' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Búsqueda de Grupo
-        </button>
-        <button
-          onClick={() => setSelectedCategory('STUDY_TIPS')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedCategory === 'STUDY_TIPS' 
-              ? 'bg-[var(--accent-yellow)] text-black' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Tips de Estudio & Resúmenes
-        </button>
-        <button
-          onClick={() => setSelectedCategory('ACADEMIC_QUESTION')}
-          className={`px-3.5 py-1.5 rounded-full font-bold transition whitespace-nowrap shadow-none ${
-            selectedCategory === 'ACADEMIC_QUESTION' 
-              ? 'bg-[var(--accent-purple)] text-white' 
-              : 'bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-neutral-400 hover:text-white'
-          }`}
-        >
-          Preguntas & Dudas
-        </button>
-      </div>
+      {/* Categorías de Filtro con ScrollablePillTabs */}
+      <ScrollablePillTabs<PostCategory | 'ALL'>
+        tabs={[
+          { value: 'ALL',                 label: 'Todos los Posts' },
+          { value: 'PROJECT_RECRUITMENT', label: 'Búsqueda de Grupo',           activeColor: 'var(--accent-emerald)', activeText: '#000' },
+          { value: 'STUDY_TIPS',          label: 'Tips de Estudio & Resúmenes', activeColor: 'var(--accent-yellow)',  activeText: '#000' },
+          { value: 'ACADEMIC_QUESTION',   label: 'Preguntas & Dudas',           activeColor: 'var(--accent-purple)',  activeText: '#fff' },
+        ]}
+        activeValue={selectedCategory}
+        onSelect={setSelectedCategory}
+        variant="pills"
+      />
 
       {/* Feed de Posts */}
       {isLoading ? (

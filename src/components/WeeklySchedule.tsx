@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useAuroraStyle } from '@/hooks/useAuroraStyle';
 import { UTPCurrentInterval, UTPEvent, ProcessedCourse } from '@/types/utp';
 import { 
   getEventsByWeek, 
@@ -27,6 +28,96 @@ import {
 } from 'lucide-react';
 
 import { useAgent } from '@/context/AgentContext';
+import { ScrollablePillTabs, PillTabItem } from '@/components/ui/ScrollablePillTabs';
+
+// ─── Sub-component: WeeklyClassCard (Aurora en sesión activa + Glassmorphism) ─
+
+interface WeeklyClassCardProps {
+  evt: UTPEvent;
+  isActiveCard: boolean;
+  isPresencial: boolean;
+  isRemoteZoom: boolean;
+  location: { aula: string; pabellon: string };
+  parsed: { cleanTitle: string; sectionCode: string };
+  seed: number;
+  onSelect: (evt: UTPEvent) => void;
+}
+
+const WeeklyClassCard: React.FC<WeeklyClassCardProps> = ({
+  evt,
+  isActiveCard,
+  isPresencial,
+  isRemoteZoom,
+  location,
+  parsed,
+  seed,
+  onSelect,
+}) => {
+  const auroraStyle = useAuroraStyle(seed);
+
+  return (
+    <div
+      onClick={() => onSelect(evt)}
+      className={`group relative rounded-2xl border p-3.5 transition-all duration-300 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
+        isActiveCard
+          ? 'aurora-ambient-card'
+          : 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border-[var(--border-subtle)] hover:border-neutral-500'
+      }`}
+      style={isActiveCard ? auroraStyle : undefined}
+    >
+      {/* Top: Modalidad y Botón Zoom / Ubicación */}
+      <div className="flex items-center justify-between gap-1">
+        {isPresencial ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-white/90 bg-white/[0.06] border border-white/[0.12] px-2 py-0.5 rounded-full backdrop-blur-md">
+            <MapPin className="h-2.5 w-2.5 text-white/80" />
+            Presencial
+          </span>
+        ) : isRemoteZoom ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-white/90 bg-white/[0.06] border border-white/[0.12] px-2 py-0.5 rounded-full backdrop-blur-md">
+            <Video className="h-2.5 w-2.5 text-white/80" />
+            Zoom
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-white/90 bg-white/[0.06] border border-white/[0.12] px-2 py-0.5 rounded-full backdrop-blur-md">
+            <Radio className="h-2.5 w-2.5 text-white/80" />
+            Virtual
+          </span>
+        )}
+
+        {isRemoteZoom && evt.metadata?.zoomLink ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(evt.metadata?.zoomLink, '_blank');
+            }}
+            title="Unirse directo a Zoom"
+            aria-label="Unirse a Zoom"
+            className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/[0.08] hover:bg-white/[0.18] text-white border border-white/[0.14] backdrop-blur-md transition shrink-0"
+          >
+            <Video className="h-3.5 w-3.5 text-white/90" />
+          </button>
+        ) : (
+          <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors truncate max-w-[80px]">
+            {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
+          </span>
+        )}
+      </div>
+
+      {/* Nombre del Curso */}
+      <h4 className="text-xs font-bold text-white group-hover:text-neutral-100 leading-snug line-clamp-2 transition-colors">
+        {parsed.cleanTitle}
+      </h4>
+
+      {/* Horario */}
+      <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-400 whitespace-nowrap">
+        <Clock className="h-3 w-3 text-neutral-500 shrink-0" />
+        <span className="truncate">{formatScheduleTimeRange(evt.startAt, evt.finishAt)}</span>
+      </div>
+    </div>
+  );
+};
+
+// ─── Main component ──────────────────────────────────────────────────────────
 
 interface WeeklyScheduleProps {
   interval: UTPCurrentInterval;
@@ -139,52 +230,18 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
           )}
         </div>
 
-        {/* Filtros de Modalidad */}
-        <div className="flex items-center gap-1 bg-[var(--surface-card)] border border-[var(--border-subtle)] p-1 rounded-2xl text-xs font-semibold shadow-none">
-          <button
-            onClick={() => setSelectedModality('ALL')}
-            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
-              selectedModality === 'ALL'
-                ? 'bg-white text-black font-extrabold'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Todas
-          </button>
-
-          <button
-            onClick={() => setSelectedModality('P')}
-            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
-              selectedModality === 'P'
-                ? 'bg-[var(--accent-emerald)] text-black font-extrabold'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Presenciales
-          </button>
-
-          <button
-            onClick={() => setSelectedModality('R')}
-            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
-              selectedModality === 'R'
-                ? 'bg-[var(--accent-orange)] text-white font-extrabold'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Zoom
-          </button>
-
-          <button
-            onClick={() => setSelectedModality('VT')}
-            className={`px-3 py-1 rounded-xl transition-all shadow-none ${
-              selectedModality === 'VT'
-                ? 'bg-[var(--accent-purple)] text-white font-extrabold'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Virtuales
-          </button>
-        </div>
+        {/* Filtros de Modalidad con ScrollablePillTabs */}
+        <ScrollablePillTabs
+          tabs={[
+            { value: 'ALL', label: 'Todas' },
+            { value: 'P',   label: 'Presenciales', activeColor: 'var(--accent-emerald)', activeText: '#000' },
+            { value: 'R',   label: 'Zoom',         activeColor: 'var(--accent-orange)',  activeText: '#fff' },
+            { value: 'VT',  label: 'Virtuales',    activeColor: 'var(--accent-purple)',  activeText: '#fff' },
+          ]}
+          activeValue={selectedModality}
+          onSelect={setSelectedModality}
+          variant="segmented"
+        />
 
       </div>
 
@@ -239,65 +296,21 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                       const isNextToday = isToday && !isLiveNow && evt.id === nextOrLiveEvt?.id && now < startDate;
                       const isActiveCard = isLiveNow || isNextToday;
 
+                      // Seed determinista para desincronizar la animación de forma única
+                      const evtSeed = evt.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+
                       return (
-                        <div
+                        <WeeklyClassCard
                           key={evt.id}
-                          onClick={() => setSelectedEventForModal(evt)}
-                          className={`group relative rounded-2xl border p-3.5 transition-all duration-300 space-y-2.5 shadow-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${
-                            isActiveCard
-                              ? 'aurora-ambient-card'
-                              : 'bg-[var(--surface-card)] hover:bg-[var(--surface-card-hover)] border-[var(--border-subtle)] hover:border-neutral-500'
-                          }`}
-                        >
-                          {/* Top: Modalidad y Botón Zoom / Ubicación */}
-                          <div className="flex items-center justify-between gap-1">
-                            {isPresencial ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-emerald-text)] bg-[var(--badge-emerald-bg)] border border-[var(--badge-emerald-border)] px-2 py-0.5 rounded-full">
-                                <MapPin className="h-2.5 w-2.5" />
-                                Presencial
-                              </span>
-                            ) : isRemoteZoom ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-orange-text)] bg-[var(--badge-orange-bg)] border border-[var(--badge-orange-border)] px-2 py-0.5 rounded-full">
-                                <Video className="h-2.5 w-2.5" />
-                                Zoom
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--badge-purple-text)] bg-[var(--badge-purple-bg)] border border-[var(--badge-purple-border)] px-2 py-0.5 rounded-full">
-                                <Radio className="h-2.5 w-2.5" />
-                                Virtual
-                              </span>
-                            )}
-
-                            {isRemoteZoom && evt.metadata?.zoomLink ? (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(evt.metadata?.zoomLink, '_blank');
-                                }}
-                                title="Unirse directo a Zoom"
-                                aria-label="Unirse a Zoom"
-                                className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface-subtle)] hover:bg-white text-neutral-300 hover:text-black border border-[var(--border-subtle)] transition shrink-0"
-                              >
-                                <Video className="h-3.5 w-3.5" />
-                              </button>
-                            ) : (
-                              <span className="text-[10px] font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors truncate max-w-[80px]">
-                                {isPresencial ? location.aula.replace('Aula ', '') : 'Digital'}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Nombre del Curso */}
-                          <h4 className="text-xs font-bold text-white group-hover:text-neutral-100 leading-snug line-clamp-2 transition-colors">
-                            {parsed.cleanTitle}
-                          </h4>
-
-                          {/* Horario Limpio y Ordenado en 1 sola línea */}
-                          <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-400 whitespace-nowrap">
-                            <Clock className="h-3 w-3 text-neutral-500 shrink-0" />
-                            <span className="truncate">{formatScheduleTimeRange(evt.startAt, evt.finishAt)}</span>
-                          </div>
-                        </div>
+                          evt={evt}
+                          isActiveCard={isActiveCard}
+                          isPresencial={isPresencial}
+                          isRemoteZoom={isRemoteZoom}
+                          location={location}
+                          parsed={parsed}
+                          seed={evtSeed}
+                          onSelect={setSelectedEventForModal}
+                        />
                       );
                     });
                   })()

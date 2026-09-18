@@ -3,7 +3,6 @@
 import React from 'react';
 import { StudentProfile, UTPCurrentInterval } from '@/types/utp';
 import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
-import { User, Sparkles, ShieldCheck, ChevronRight, Activity } from 'lucide-react';
 
 export type NavigationTab = 'today' | 'weekly' | 'courses' | 'networking' | 'community' | 'marketplace' | 'ai';
 
@@ -24,127 +23,81 @@ export const PillNavbar: React.FC<PillNavbarProps> = ({
   onOpenSettings,
   onOpenAi,
 }) => {
-  const NAV_TABS: { id: NavigationTab; num: string; label: string; dot?: boolean }[] = [
-    { id: 'today',       num: '01', label: 'HOY' },
-    { id: 'weekly',      num: '02', label: 'HORARIO' },
-    { id: 'courses',     num: '03', label: 'CURSOS' },
-    { id: 'networking',  num: '04', label: 'NETWORKING', dot: true },
-    { id: 'community',   num: '05', label: 'COMUNIDAD' },
-    { id: 'marketplace', num: '06', label: 'SERVICIOS' },
+  const NAV_TABS: { id: NavigationTab; label: string; dot?: boolean }[] = [
+    { id: 'today',       label: 'HOY' },
+    { id: 'weekly',      label: 'HORARIO' },
+    { id: 'courses',     label: 'CURSOS' },
+    { id: 'networking',  label: 'NETWORKING', dot: true },
+    { id: 'community',   label: 'COMUNIDAD' },
+    { id: 'marketplace', label: 'SERVICIOS' },
   ];
 
   const weekNum = interval?.week_number || 1;
   const periodName = interval?.period_name ? interval.period_name.replace('Periodo ', '') : '2026-2';
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#070709]/85 backdrop-blur-2xl transition-all">
-      <div className="w-full px-4 sm:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 w-full bg-[#0a0a0c]/85 backdrop-blur-xl border-b border-white/10 transition-all select-none">
+      <div className="w-full px-6 sm:px-10 lg:px-16 h-16 sm:h-20 flex items-center justify-between gap-6">
         
-        {/* Left Section: Brand & Academic Context */}
-        <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+        {/* Left: Minimalist Dot & Brand */}
+        <div className="flex items-center gap-3.5 shrink-0">
+          <span className="h-2 w-2 rounded-full bg-white shadow-sm shadow-white/50 animate-pulse" />
           <button
             onClick={onOpenSettings}
-            title="Ajustes y perfil de estudiante"
-            className="flex items-center gap-3 text-left group focus:outline-none cursor-pointer"
+            className="flex items-center gap-3 text-left focus:outline-none cursor-pointer group"
           >
-            <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-[var(--accent-lime)] text-[#0a0a0c] font-black text-sm sm:text-base shadow-lg shadow-[var(--accent-lime)]/20 transition-transform group-hover:scale-105 select-none">
-              <span>U</span>
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#070709]" />
-            </div>
-
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm font-black tracking-tight text-white group-hover:text-[var(--accent-lime)] transition leading-tight">
-                  HORARIO.UTP
-                </span>
-                <span className="hidden md:inline-flex text-[9px] uppercase font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-400">
-                  {student.career ? student.career.split(' ')[0] : 'SISTEMAS'}
-                </span>
-              </div>
-              <span className="text-[10px] text-neutral-400 font-mono tracking-wider leading-none mt-0.5">
-                SEM {weekNum} • {periodName}
-              </span>
-            </div>
+            <span className="text-xs sm:text-sm font-black tracking-widest text-white uppercase group-hover:text-[var(--accent-lime)] transition">
+              UTP.HORARIO
+            </span>
+            <span className="text-[10px] text-neutral-500 font-mono tracking-widest uppercase hidden md:inline">
+              [ SEMANA {weekNum} // {periodName} ]
+            </span>
           </button>
         </div>
 
-        {/* Center Section: Editorial Distributed Navigation (Desktop) */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-4 text-xs">
-          {NAV_TABS.map(({ id, num, label, dot }) => {
-            const isActive = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => onTabChange(id)}
-                className={`relative group flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold tracking-wider transition-all cursor-pointer ${
-                  isActive
-                    ? 'text-white bg-white/10 shadow-inner'
-                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className={`font-mono text-[10px] transition-colors ${
-                  isActive ? 'text-[var(--accent-lime)]' : 'text-neutral-600 group-hover:text-neutral-400'
-                }`}>
-                  {num}
-                </span>
-
-                <span className="relative">
-                  {label}
-                  {isActive && (
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-[var(--accent-lime)] rounded-full animate-in fade-in" />
-                  )}
-                </span>
-
-                {dot && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-lime)] animate-pulse" />
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Right Section: Copilot Trigger & Profile Badge */}
-        <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+        {/* Right: Pure Minimalist Navigation (Exact Oryzo Editorial Style) */}
+        <div className="flex items-center gap-8 sm:gap-10 lg:gap-12">
           
-          {/* AI Copilot Button */}
+          <nav className="hidden md:flex items-center gap-7 lg:gap-9 xl:gap-11 text-[11px] sm:text-xs font-bold tracking-widest uppercase">
+            {NAV_TABS.map(({ id, label, dot }) => {
+              const isActive = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => onTabChange(id)}
+                  className={`relative py-1 tracking-widest transition-all cursor-pointer ${
+                    isActive
+                      ? 'text-white border-b border-dashed border-white font-black'
+                      : 'text-neutral-400 hover:text-white border-b border-transparent'
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {label}
+                    {dot && <span className="h-1 w-1 rounded-full bg-[var(--accent-lime)] animate-ping" />}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* Copilot Link */}
+            <button
+              onClick={onOpenAi}
+              className="inline-flex items-center gap-2 py-1 text-neutral-300 hover:text-[var(--accent-lime)] tracking-widest transition-colors cursor-pointer group"
+            >
+              <AsciiMatrixOrb size={13} state="idle" colorMode="monochrome" />
+              <span>COPILOTO</span>
+            </button>
+          </nav>
+
+          {/* Account Indicator */}
           <button
-            onClick={onOpenAi}
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-2xl bg-white/5 hover:bg-[var(--accent-lime)]/10 border border-white/10 hover:border-[var(--accent-lime)]/30 text-xs font-bold text-white hover:text-[var(--accent-lime)] transition-all active:scale-95 group cursor-pointer shadow-sm"
+            onClick={onOpenSettings}
+            className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-neutral-300 hover:text-white uppercase transition-colors cursor-pointer shrink-0 border-l border-white/10 pl-6"
+            title="Ajustes de cuenta"
           >
-            <AsciiMatrixOrb size={16} state="idle" colorMode="monochrome" />
-            <span className="hidden sm:inline font-mono tracking-wider text-[11px]">COPILOTO IA</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-lime)]" />
+            <span>{student.username || 'U23307609'}</span>
           </button>
-
-          <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
-
-          {/* Account / Profile Badge */}
-          {student.token ? (
-            <button
-              onClick={onOpenSettings}
-              title="Cuenta oficial activa • Clic para ajustes"
-              className="flex items-center gap-2 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 text-xs text-white transition active:scale-95 cursor-pointer"
-            >
-              <div className="h-6 w-6 rounded-xl bg-gradient-to-tr from-neutral-800 to-neutral-700 flex items-center justify-center font-bold text-[11px] text-[var(--accent-lime)] border border-white/10">
-                {student.name ? student.name.charAt(0) : 'U'}
-              </div>
-              <div className="hidden xl:flex flex-col text-left">
-                <span className="text-[11px] font-bold text-neutral-200 leading-tight truncate max-w-[120px]">
-                  {student.name ? student.name.split(' ')[0] : 'Estudiante'}
-                </span>
-                <span className="font-mono text-[9px] text-neutral-400 leading-none">
-                  {student.username || 'U23307609'}
-                </span>
-              </div>
-            </button>
-          ) : (
-            <button
-              onClick={onOpenSettings}
-              className="flex items-center gap-1.5 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] px-4 py-2 text-xs font-black text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-95 cursor-pointer"
-            >
-              <User className="h-3.5 w-3.5" />
-              <span>Conectar</span>
-            </button>
-          )}
 
         </div>
 

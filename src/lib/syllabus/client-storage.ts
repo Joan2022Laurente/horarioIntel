@@ -177,13 +177,24 @@ export function saveCachedStudentProfile(profile: StudentProfile): void {
 }
 
 /**
- * Limpia los datos locales en el cierre de sesión
+ * Limpia todos los datos locales en el cierre de sesión o reset general (perfil, calendario y sílabos sincronizados)
  */
 export function clearAllLocalUserData(): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.removeItem(PROFILE_STORAGE_KEY);
     localStorage.removeItem(CALENDAR_STORAGE_KEY);
-  } catch (e) {}
+
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(SYLLABUS_STORAGE_PREFIX)) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+  } catch (e) {
+    console.warn('[client-storage] Error limpiando datos locales:', e);
+  }
 }
 

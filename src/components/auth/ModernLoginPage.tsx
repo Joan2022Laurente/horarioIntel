@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { StudentProfile } from '@/types/utp';
 import { GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
-import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
 import { PrivacyModal } from '@/components/auth/PrivacyModal';
 import { 
   Lock, 
@@ -11,12 +11,10 @@ import {
   Loader2, 
   AlertCircle, 
   CheckCircle2, 
-  Calendar,
-  Layers,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
-  Bot
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 
 interface ModernLoginPageProps {
@@ -77,118 +75,133 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0a0a0c] text-white flex flex-col justify-between overflow-hidden selection:bg-[var(--accent-lime)]/30 selection:text-white">
+    <div className="relative min-h-screen w-full bg-[#0a0a0c] text-white flex flex-col justify-between overflow-x-hidden selection:bg-[var(--accent-lime)]/30 selection:text-white">
       
-      {/* Background Volumetric Ambient Lights */}
-      <div className="absolute -top-32 -left-32 w-[32rem] h-[32rem] bg-[var(--accent-lime)]/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/4 -right-32 w-[34rem] h-[34rem] bg-[#141519]/80 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-32 left-1/3 w-[36rem] h-[36rem] bg-[var(--accent-orange)]/5 rounded-full blur-[140px] pointer-events-none" />
+      {/* 1. Background Image with Subtle Vignette Overlay */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <Image
+          src="/hero-bg.png"
+          alt="UTP Hero Background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center opacity-60 sm:opacity-75 scale-[1.02] filter brightness-[0.82] contrast-[1.05]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-black/30 to-black/60" />
+        <div className="absolute inset-0 bg-radial-vignette opacity-50" />
+      </div>
 
-      {/* Top Bar */}
-      <header className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <AsciiMatrixOrb size={32} state="idle" colorMode="monochrome" />
-          <div className="flex flex-col text-left min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs sm:text-sm font-black tracking-wide text-white whitespace-nowrap">
-                UTP Class Copilot
-              </span>
-              <span className="text-[9px] font-mono font-bold text-[var(--accent-lime)] bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">
-                AI Agent
-              </span>
-            </div>
-            <span className="text-[9px] sm:text-[10px] font-mono text-neutral-400 truncate">
-              Plataforma Académica Inteligente
+      {/* 2. Top Minimalist Editorial Header (Exact Oryzo Style) */}
+      <header className="relative z-20 w-full px-6 sm:px-10 lg:px-16 py-5 sm:py-6 flex items-center justify-between gap-4 select-none">
+        
+        {/* Left: Minimal Dot & Tagline */}
+        <div className="flex items-center gap-3.5">
+          <span className="h-2 w-2 rounded-full bg-white shadow-sm shadow-white animate-pulse" />
+          <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#eae6df] uppercase font-bold">
+            MADE FOR STUDENTS. BUILT FOR UTP.
+          </span>
+        </div>
+
+        {/* Right: Minimal Navigation Links & Model Tag */}
+        <div className="flex items-center gap-6 sm:gap-10">
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-[11px] font-bold tracking-widest uppercase">
+            <span className="text-[#eae6df] border-b border-dashed border-white pb-0.5 cursor-default">
+              ACCESO
             </span>
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="text-neutral-300 hover:text-white transition-colors cursor-pointer"
+            >
+              PRIVACIDAD
+            </button>
+            <a
+              href="/privacidad"
+              className="text-neutral-300 hover:text-white transition-colors cursor-pointer"
+            >
+              POLÍTICAS
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono tracking-widest text-[#eae6df] uppercase border-l border-white/20 pl-4 sm:pl-6">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-lime)]" />
+            <span className="hidden xs:inline">ENGINE v2.4</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.03] backdrop-blur-md border border-white/10 shrink-0 whitespace-nowrap">
-          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-lime)] animate-pulse shrink-0" />
-          <span className="text-[10px] sm:text-xs text-neutral-300 font-mono font-medium whitespace-nowrap">
-            Ciclo 2026
-          </span>
-        </div>
       </header>
 
-      {/* Main Hero & Login Container */}
-      <main className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-10 flex-1 flex items-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          {/* Left Column: Hero & AI Presentation */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left">
-            <div className="space-y-3 sm:space-y-4">
-              <h1 className="text-2xl sm:text-5xl font-black text-white tracking-tight leading-[1.12]">
-                Tu ciclo UTP, potenciado con <span className="text-[var(--accent-lime)]">Inteligencia Artificial</span>.
-              </h1>
+      {/* 3. Hero & Login Body */}
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-4 sm:py-8 flex-1 flex flex-col justify-center">
+        
+        {/* Giant Editorial Title */}
+        <div className="w-full mb-6 sm:mb-10 text-left select-none">
+          <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black text-[#f5f2eb] tracking-tighter uppercase leading-[0.88] drop-shadow-2xl">
+            HORARIO
+          </h1>
+        </div>
 
-              <p className="text-xs sm:text-base text-neutral-400 max-w-xl leading-relaxed">
-                Accede a tus horarios en tiempo real, clases con enlaces directos de Zoom, sílabos oficiales sincronizados y un <strong className="text-neutral-200">Agente IA Académico autónomo</strong> que analiza tus rúbricas, cronograma de entregas y te prepara para sacar 20.
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
+          
+          {/* Left / Center Column: Editorial Description & Bottom Badge */}
+          <div className="lg:col-span-6 space-y-6 sm:space-y-10 text-left">
+            
+            {/* Tagline Paragraph */}
+            <p className="text-sm sm:text-base lg:text-lg text-[#eae6df] font-medium leading-relaxed max-w-lg drop-shadow-md">
+              Diseñado para organizar, conectar y sincronizar tu ciclo universitario. Horario Inteligente hace que cada entrega, clase y rúbrica esté bajo tu control.
+            </p>
+
+            {/* Bottom-Left Editorial Studio Badge (Lusion Style) */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-[#121216]/80 backdrop-blur-2xl border border-white/15 max-w-xs shadow-2xl space-y-3">
+              <div className="text-[11px] font-mono font-black tracking-widest text-neutral-200 uppercase leading-snug">
+                PLATAFORMA ESTUDIANTIL<br />
+                AUTÓNOMA & SEGURA
+              </div>
+              <div className="w-full h-[1px] border-b border-dotted border-white/20" />
+              <p className="text-[10.5px] text-neutral-400 font-sans leading-normal">
+                Sincronización oficial en tiempo real con servidores UTP Class sin almacenamiento de contraseñas.
               </p>
             </div>
 
-            {/* Glassmorphic Feature Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-xl border border-white/10 hover:border-white/20 p-4 space-y-2 transition-all">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-lime)]/10 border border-[var(--accent-lime)]/20 text-[var(--accent-lime)]">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <h2 className="text-xs font-bold text-white">Agente IA Autónomo</h2>
-                <p className="text-[11px] text-neutral-400 leading-normal">
-                  Responde dudas de temario, explica fórmulas y ejecuta acciones en tu horario.
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-xl border border-white/10 hover:border-white/20 p-4 space-y-2 transition-all">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-orange)]/10 border border-[var(--accent-orange)]/20 text-[var(--accent-orange)]">
-                  <Calendar className="h-4 w-4" />
-                </div>
-                <h2 className="text-xs font-bold text-white">Horario en Vivo</h2>
-                <p className="text-[11px] text-neutral-400 leading-normal">
-                  Detección en tiempo real de clases, aulas, docentes y acceso a Zoom en 1 clic.
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-xl border border-white/10 hover:border-white/20 p-4 space-y-2 transition-all">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                  <Layers className="h-4 w-4" />
-                </div>
-                <h2 className="text-xs font-bold text-white">Sílabos Oficiales</h2>
-                <p className="text-[11px] text-neutral-400 leading-normal">
-                  Rúbricas oficiales de 20 puntos, pesos porcentuales y cronograma de 18 semanas.
-                </p>
-              </div>
-            </div>
           </div>
 
-          {/* Right Column: Glassmorphic Login Card */}
-          <div className="lg:col-span-5 w-full">
-            <div className="rounded-3xl bg-white/[0.04] backdrop-blur-2xl border border-white/10 p-5 sm:p-8 shadow-2xl space-y-5">
+          {/* Right Column: High-End Glassmorphic Login Card */}
+          <div className="lg:col-span-6 w-full flex justify-end">
+            <div className="w-full max-w-md rounded-3xl bg-[#0c0c10]/85 backdrop-blur-2xl border border-white/15 p-6 sm:p-8 shadow-2xl shadow-black/90 space-y-5">
               
               <div className="space-y-1 text-left">
-                <h3 className="text-base sm:text-lg font-black text-white">Iniciar Sesión</h3>
-                <p className="text-xs text-neutral-400">Ingresa tus credenciales institucionales de UTP Class</p>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-black tracking-wide text-white uppercase font-mono">
+                    Acceso Institucional
+                  </h2>
+                  <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--accent-lime)]/10 text-[var(--accent-lime)] border border-[var(--accent-lime)]/20">
+                    UTP SSO
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-400">
+                  Ingresa con tus credenciales oficiales de UTP Class
+                </p>
               </div>
 
               {/* Feedback Alerts */}
               {errorMessage && (
-                <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 backdrop-blur-md p-3.5 flex items-start gap-2.5 text-xs text-rose-300 animate-in fade-in duration-200">
+                <div className="rounded-2xl bg-rose-500/15 border border-rose-500/30 backdrop-blur-md p-3.5 flex items-start gap-2.5 text-xs text-rose-300 animate-in fade-in duration-200">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {successMessage && (
-                <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md p-3.5 flex items-start gap-2.5 text-xs text-emerald-300 animate-in fade-in duration-200">
+                <div className="rounded-2xl bg-emerald-500/15 border border-emerald-500/30 backdrop-blur-md p-3.5 flex items-start gap-2.5 text-xs text-emerald-300 animate-in fade-in duration-200">
                   <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" />
                   <span>{successMessage}</span>
                 </div>
               )}
 
-              {/* Form */}
+              {/* Login Form */}
               <form onSubmit={handleLogin} className="space-y-4 text-left">
                 <div>
-                  <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                  <label className="block text-[11px] font-mono tracking-wider font-bold text-neutral-300 mb-1.5 uppercase">
                     Código de Alumno
                   </label>
                   <div className="relative">
@@ -202,13 +215,13 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                       placeholder="u123456789"
                       disabled={isLoading}
                       required
-                      className="w-full rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 pl-10 pr-4 py-3 text-xs text-white placeholder-neutral-500 font-mono focus:border-[var(--accent-lime)] focus:outline-none transition"
+                      className="w-full rounded-2xl bg-black/50 backdrop-blur-md border border-white/10 pl-10 pr-4 py-3 text-xs text-white placeholder-neutral-500 font-mono focus:border-[var(--accent-lime)] focus:ring-1 focus:ring-[var(--accent-lime)] focus:outline-none transition"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                  <label className="block text-[11px] font-mono tracking-wider font-bold text-neutral-300 mb-1.5 uppercase">
                     Contraseña Institucional
                   </label>
                   <div className="relative">
@@ -219,10 +232,10 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Tu contraseña de UTP Class"
+                      placeholder="Tu contraseña de Portal / UTP Class"
                       disabled={isLoading}
                       required
-                      className="w-full rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 pl-10 pr-4 py-3 text-xs text-white placeholder-neutral-500 focus:border-[var(--accent-lime)] focus:outline-none transition"
+                      className="w-full rounded-2xl bg-black/50 backdrop-blur-md border border-white/10 pl-10 pr-4 py-3 text-xs text-white placeholder-neutral-500 focus:border-[var(--accent-lime)] focus:ring-1 focus:ring-[var(--accent-lime)] focus:outline-none transition"
                     />
                   </div>
                 </div>
@@ -230,7 +243,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] py-3.5 text-xs font-black text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent-lime)] hover:bg-[#a8e63b] py-3.5 text-xs font-black text-[#0a0a0c] shadow-lg shadow-[var(--accent-lime)]/20 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer uppercase tracking-wider font-mono"
                 >
                   {isLoading ? (
                     <>
@@ -246,20 +259,20 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                 </button>
               </form>
 
-              {/* Seamless Integrated Privacy & Security Footnote (Option 1 - UTP SSO Direct) */}
-              <div className="pt-2 text-center text-neutral-400 space-y-1.5 select-none">
-                <div className="inline-flex items-center justify-center gap-1.5 text-[11px] text-neutral-200 font-medium">
+              {/* Seamless Integrated Privacy Footnote */}
+              <div className="pt-2 text-center text-neutral-400 space-y-1.5 select-none border-t border-white/5">
+                <div className="inline-flex items-center justify-center gap-1.5 text-[10.5px] text-neutral-200 font-medium">
                   <ShieldCheck className="h-3.5 w-3.5 text-[var(--accent-lime)] shrink-0" />
                   <span>Autenticación Directa UTP SSO & TLS 1.3</span>
                 </div>
                 <p className="text-[10px] text-neutral-400 leading-normal max-w-xs mx-auto">
-                  Tus credenciales se validan directamente con los servidores oficiales de UTP. Tu contraseña nunca se almacena en nuestros servidores.
+                  Tus credenciales se validan en tiempo real contra los servidores oficiales de UTP. Tu clave nunca se almacena.
                 </p>
                 <div className="pt-0.5">
                   <button
                     type="button"
                     onClick={() => setIsPrivacyOpen(true)}
-                    className="inline-flex items-center gap-1 text-[10px] text-[var(--accent-lime)] hover:underline font-medium cursor-pointer transition"
+                    className="inline-flex items-center gap-1 text-[10px] text-[var(--accent-lime)] hover:underline font-mono font-medium cursor-pointer transition"
                   >
                     <span>Conoce nuestras Políticas de Privacidad y Seguridad</span>
                     <ArrowRight className="h-2.5 w-2.5" />
@@ -271,25 +284,25 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
           </div>
 
         </div>
+
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 text-center text-xs text-neutral-400 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <p>Plataforma Académica Estudiantil UTP</p>
-          <span className="text-neutral-600">|</span>
+      {/* 4. Minimalist Bottom Bar */}
+      <footer className="relative z-20 w-full px-6 sm:px-10 lg:px-16 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 select-none border-t border-white/5 bg-[#070709]/60 backdrop-blur-md">
+        <div className="flex items-center gap-4 text-[11px] font-mono">
+          <span>© 2026 UTP.HORARIO</span>
+          <span className="text-neutral-600">/</span>
           <button
             onClick={() => setIsPrivacyOpen(true)}
-            className="hover:text-white underline underline-offset-4 cursor-pointer transition text-[11px]"
+            className="hover:text-white underline underline-offset-4 cursor-pointer transition"
           >
             Políticas de Privacidad
           </button>
         </div>
-        <div className="flex items-center gap-4 text-neutral-400">
-          <span className="flex items-center gap-1.5 font-mono text-[11px]">
-            <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
-            Autonomous AI Engine
-          </span>
+
+        <div className="flex items-center gap-2 text-[11px] font-mono text-neutral-300">
+          <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
+          <span>AUTONOMOUS ACADEMIC ENGINE</span>
         </div>
       </footer>
 

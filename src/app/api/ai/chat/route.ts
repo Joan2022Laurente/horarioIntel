@@ -6,6 +6,7 @@ import { getProcessedCourses } from '@/lib/schedule-parser';
 import { UTPCalendarResponse } from '@/types/utp';
 import { ParsedSyllabus } from '@/lib/syllabus/types';
 import { AgentLiveContext } from '@/types/agent';
+import { checkAndConsumeServerDailyQuota } from '@/lib/rate-limit/daily-limiter';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,27 @@ export async function POST(req: NextRequest) {
     const interval = rawData.data?.current_interval;
     const syllabiData = (body.syllabiData || {}) as Record<string, ParsedSyllabus>;
     const liveContext = body.liveContext as AgentLiveContext | undefined;
+    const userIdentifier: string =
+      body.userId ||
+      body.studentCode ||
+      body.studentProfile?.userId ||
+      body.studentProfile?.email ||
+      req.headers.get('x-user-id') ||
+      'anonymous_user';
+
+    // 0. Verificación estricta de Cuota Diaria (6 consultas / día salvo cuenta ilimitada)
+    const quota = checkAndConsumeServerDailyQuota(userIdentifier);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          rateLimitReached: true,
+          error: 'Has alcanzado el límite de 6 consultas diarias durante la fase de pruebas. Tu cuota se reiniciará automáticamente a las 00:00.',
+          quota: quota.status,
+        },
+        { status: 429 }
+      );
+    }
 
     if (!interval) {
       return NextResponse.json(

@@ -86,8 +86,8 @@ export async function POST(req: NextRequest) {
           student_code: studentCode,
           full_name: studentName,
           email: studentEmail,
-          career: 'Ingeniería de Software',
-          campus: 'Campus Digital',
+          career: 'Ingeniería de Sistemas e Informática',
+          campus: 'Lima Centro',
           updated_at: new Date().toISOString(),
         }, { onConflict: 'student_code' });
         console.log(`[UTP Auth] Alumno registrado con éxito en Supabase: ${studentCode} (${studentName})`);

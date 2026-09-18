@@ -33,11 +33,13 @@ import { ScrollablePillTabs, PillTabItem } from '@/components/ui/ScrollablePillT
 interface CampusNetworkingViewProps {
   courses: ProcessedCourse[];
   interval: UTPCurrentInterval;
+  student?: StudentProfile;
 }
 
 export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
   courses,
   interval: _interval,
+  student,
 }) => {
   const { executeIntent, askAgent } = useAgent();
   const [activeTab, setActiveTab] = useState<'buddies' | 'beacons'>('buddies');
@@ -97,11 +99,16 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
     e.preventDefault();
     if (!beaconLocation.trim() || !beaconObjective.trim()) return;
 
+    const studentName = student?.name || 'Estudiante UTP';
+    const studentCode = student?.username || 'U23307609';
+    const studentCareer = student?.career || 'Ingeniería de Sistemas e Informática';
+    const studentCampus = student?.campus || 'Lima Centro';
+
     setIsSubmittingBeacon(true);
     const created = await createBeaconInDb({
-      hostName: 'Joan Laurente',
-      hostCode: 'U20202020',
-      hostCareer: 'Ingeniería de Software',
+      hostName: studentName,
+      hostCode: studentCode,
+      hostCareer: studentCareer,
       courseId: beaconCourse,
       courseName: beaconCourse,
       locationName: beaconLocation.trim(),
@@ -117,11 +124,11 @@ export const CampusNetworkingView: React.FC<CampusNetworkingViewProps> = ({
         host_id: 'me',
         host: {
           id: 'me',
-          student_code: 'U20202020',
-          full_name: 'Joan Laurente (Tú)',
-          email: 'yo@utp.edu.pe',
-          career: 'Ingeniería de Software',
-          campus: 'Campus San Juan',
+          student_code: studentCode,
+          full_name: `${studentName} (Tú)`,
+          email: student?.email || 'yo@utp.edu.pe',
+          career: studentCareer,
+          campus: studentCampus,
           cycle: 7,
           reputation_score: 100,
           created_at: '',

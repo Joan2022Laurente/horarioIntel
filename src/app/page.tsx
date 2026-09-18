@@ -114,6 +114,7 @@ function MainAppDashboard({
             <CampusNetworkingView
               courses={processedCourses}
               interval={currentInterval}
+              student={student}
             />
           )}
 

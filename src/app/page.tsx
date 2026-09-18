@@ -65,7 +65,7 @@ function MainAppDashboard({
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white flex flex-col selection:bg-[#ff5722]/30 selection:text-white">
       
-      {/* Floating Pill Navbar */}
+      {/* Top Full-Width Editorial Navbar */}
       <PillNavbar
         student={student}
         interval={currentInterval}
@@ -79,7 +79,7 @@ function MainAppDashboard({
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-6 pb-24 md:pb-12">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-8 lg:px-12 py-6 pb-24 md:pb-16">
         
         {/* Banner de Sincronización en vivo */}
         {isRefreshing && (

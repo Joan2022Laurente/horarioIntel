@@ -16,7 +16,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { StudyBeaconRow, StudyBuddyMatch } from '@/types/matching';
-import { ProcessedCourse, UTPCurrentInterval } from '@/types/utp';
+import { ProcessedCourse, UTPCurrentInterval, StudentProfile } from '@/types/utp';
 import { useAgent } from '@/context/AgentContext';
 import { 
   fetchActiveBeacons, 

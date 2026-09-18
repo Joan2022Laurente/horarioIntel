@@ -45,6 +45,7 @@ next-env.d.ts
 fetch_tarea.js
 peticiones*
 hall*.json
+halldatos*
 resume_response.json
 *.har
 silabo_web.pdf

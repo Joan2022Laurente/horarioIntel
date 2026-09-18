@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { StudentProfile } from '@/types/utp';
 import { GUEST_STUDENT_PROFILE } from '@/lib/mock-data';
 import { AsciiMatrixOrb } from '@/components/ai/AsciiMatrixOrb';
+import { PrivacyModal } from '@/components/auth/PrivacyModal';
 import { 
   Lock, 
   User, 
@@ -28,6 +29,7 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -244,15 +246,25 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
                 </button>
               </form>
 
-              {/* Seamless Integrated Privacy & Security Footnote (Zero Card-ception) */}
-              <div className="pt-2 text-center text-neutral-400 space-y-1 select-none">
-                <div className="inline-flex items-center justify-center gap-1.5 text-[11px] text-neutral-300 font-medium">
+              {/* Seamless Integrated Privacy & Security Footnote (Option 1 - UTP SSO Direct) */}
+              <div className="pt-2 text-center text-neutral-400 space-y-1.5 select-none">
+                <div className="inline-flex items-center justify-center gap-1.5 text-[11px] text-neutral-200 font-medium">
                   <ShieldCheck className="h-3.5 w-3.5 text-[var(--accent-lime)] shrink-0" />
-                  <span>Cifrado local seguro AES-256 & SSL</span>
+                  <span>Autenticación Directa UTP SSO & TLS 1.3</span>
                 </div>
-                <p className="text-[10px] text-neutral-500 leading-normal max-w-xs mx-auto">
-                  Tus credenciales se procesan en tu navegador sin almacenar contraseñas en texto plano.
+                <p className="text-[10px] text-neutral-400 leading-normal max-w-xs mx-auto">
+                  Tus credenciales se validan directamente con los servidores oficiales de UTP. Tu contraseña nunca se almacena en nuestros servidores.
                 </p>
+                <div className="pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsPrivacyOpen(true)}
+                    className="inline-flex items-center gap-1 text-[10px] text-[var(--accent-lime)] hover:underline font-medium cursor-pointer transition"
+                  >
+                    <span>Conoce nuestras Políticas de Privacidad y Seguridad</span>
+                    <ArrowRight className="h-2.5 w-2.5" />
+                  </button>
+                </div>
               </div>
 
             </div>
@@ -262,8 +274,17 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
       </main>
 
       {/* Minimal Footer */}
-      <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 text-center text-xs text-neutral-400 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <p>Plataforma Académica Estudiantil UTP</p>
+      <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 text-center text-xs text-neutral-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <p>Plataforma Académica Estudiantil UTP</p>
+          <span className="text-neutral-600">|</span>
+          <button
+            onClick={() => setIsPrivacyOpen(true)}
+            className="hover:text-white underline underline-offset-4 cursor-pointer transition text-[11px]"
+          >
+            Políticas de Privacidad
+          </button>
+        </div>
         <div className="flex items-center gap-4 text-neutral-400">
           <span className="flex items-center gap-1.5 font-mono text-[11px]">
             <Sparkles className="h-3.5 w-3.5 text-[var(--accent-lime)]" />
@@ -271,6 +292,12 @@ export const ModernLoginPage: React.FC<ModernLoginPageProps> = ({
           </span>
         </div>
       </footer>
+
+      {/* Privacy and Transparency Modal */}
+      <PrivacyModal 
+        isOpen={isPrivacyOpen} 
+        onClose={() => setIsPrivacyOpen(false)} 
+      />
 
     </div>
   );

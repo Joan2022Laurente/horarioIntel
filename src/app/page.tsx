@@ -35,6 +35,7 @@ interface MainAppDashboardProps {
   processedCourses: ProcessedCourse[];
   isRefreshing: boolean;
   onSaveProfile: (newProfile: StudentProfile) => void;
+  onRefreshSchedule: () => Promise<void> | void;
 }
 
 function MainAppDashboard({
@@ -43,6 +44,7 @@ function MainAppDashboard({
   processedCourses,
   isRefreshing,
   onSaveProfile,
+  onRefreshSchedule,
 }: MainAppDashboardProps) {
   const {
     activeTab,
@@ -181,6 +183,7 @@ function MainAppDashboard({
         onClose={closeSettings}
         currentStudent={student}
         onSaveProfile={onSaveProfile}
+        onRefreshSchedule={onRefreshSchedule}
       />
 
       {/* Syllabus Modal */}
@@ -286,6 +289,7 @@ export default function HomePage() {
         processedCourses={processedCourses}
         isRefreshing={isRefreshing}
         onSaveProfile={handleSaveProfile}
+        onRefreshSchedule={() => refreshCalendar(student)}
       />
     </AgentProvider>
   );

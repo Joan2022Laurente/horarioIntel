@@ -105,6 +105,8 @@ export async function POST(req: NextRequest) {
           userId: studentUserId,
           tenantId: 'a5f469d2-3c0e-5c68-8d32-5265923a8e40',
           role: 'STUDENT',
+          career: 'Ingeniería de Sistemas e Informática',
+          campus: 'Lima Centro',
           token: accessToken,
           refreshToken: tokenData.refresh_token,
           expiresIn: tokenData.expires_in,
